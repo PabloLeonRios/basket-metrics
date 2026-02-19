@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
 
     // Lógica para el primer usuario como Admin
     const userCount = await User.countDocuments();
-    const role = userCount === 0 ? 'admin' : 'entrenador';
-    const isActive = userCount === 0; // El primer usuario es activo, el resto no.
+    const role = 'entrenador';
+    const isActive = false;
 
     const newUser = new User({
       name,
