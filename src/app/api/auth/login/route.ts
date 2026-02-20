@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       name: user.name,
       role: user.role,
-      team: user.team,
+      team: user.team ? user.team.toObject() : undefined,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()

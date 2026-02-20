@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Obtener todos los usuarios de la base de datos
     // Excluimos la contraseña del resultado por seguridad
-    const users = await User.find({}).select('-password');
+    const users = await User.find({}).select('-password').populate('team');
 
     return NextResponse.json({ success: true, data: users }, { status: 200 });
   } catch (error) {
