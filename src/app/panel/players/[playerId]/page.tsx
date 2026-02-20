@@ -1,6 +1,5 @@
 // src/app/panel/players/[playerId]/page.tsx
 import PlayerProfile from '@/components/players/PlayerProfile';
-import User from '@/lib/models/User';
 import Player from '@/lib/models/Player';
 import dbConnect from '@/lib/dbConnect';
 
@@ -10,7 +9,7 @@ async function getPlayerName(playerId: string) {
     await dbConnect();
     const player = await Player.findById(playerId).select('name');
     return player?.name || 'Jugador';
-  } catch (error) {
+  } catch {
     return 'Jugador';
   }
 }

@@ -81,15 +81,13 @@ export async function proxy(request: NextRequest) {
       if (
         pathname.startsWith('/panel') &&
         payload.role !== 'entrenador' &&
-        payload.role !== 'jugador'
+        payload.role !== 'jugador' &&
+        payload.role !== 'admin' // Permitimos a los admins en /panel para que accedan a /panel/admin
       ) {
-        // Si un admin intenta entrar a /panel, lo enviamos a /admin
-        if (payload.role === 'admin') {
-          return NextResponse.redirect(new URL('/admin', request.url));
-        }
+        // Si no es ninguno de los roles válidos para /panel, lo enviamos al login
         return NextResponse.redirect(new URL('/login', request.url));
       }
-    } catch (e) {
+    } catch {
       // Si el token es inválido, redirigir al login
       if (pathname.startsWith('/api')) {
         return NextResponse.json(
@@ -109,9 +107,7 @@ export async function proxy(request: NextRequest) {
  */
 export const config = {
   matcher: [
-    '/admin/:path*',
     '/panel/:path*',
-    '/api/admin/:path*',
     '/api/auth/login',
     '/api/auth/register',
   ],

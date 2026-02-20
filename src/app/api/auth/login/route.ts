@@ -30,9 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar al usuario, pedir la contraseña y hacer un cast al tipo local
-    const user = (await User.findOne({ email }).select(
-      '+password',
-    )) as UserWithPassword;
+    const user = (await User.findOne({ email }).select('+password').populate('team')) as UserWithPassword;
 
     if (!user || !user.password) {
       return NextResponse.json(
@@ -61,10 +59,11 @@ export async function POST(request: NextRequest) {
 
     // --- Crear el JWT ---
     const token = await new jose.SignJWT({
-      id: user._id,
+      id: user._id.toString(),
       email: user.email,
       name: user.name,
       role: user.role,
+      team: user.team,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()

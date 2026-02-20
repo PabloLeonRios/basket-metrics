@@ -33,8 +33,7 @@ export async function POST(request: NextRequest) {
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Lógica para el primer usuario como Admin
-    const userCount = await User.countDocuments();
+    // Lógica para el primer usuario como Admin - por ahora desactivada
     const role = 'entrenador';
     const isActive = false;
 

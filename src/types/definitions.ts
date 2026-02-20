@@ -7,8 +7,15 @@ export interface IUser {
   email: string;
   role: 'entrenador' | 'jugador' | 'admin';
   isActive: boolean;
+  team?: ITeam;
   createdAt: string;
   updatedAt: string;
+}
+
+// --- TEAM ---
+export interface ITeam {
+  _id: string;
+  name: string;
 }
 
 // --- PLAYER ---

@@ -2,14 +2,15 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Player from '@/lib/models/Player';
-import { getAuth } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   await dbConnect();
   try {
-    const { payload } = await getAuth(request);
+    const token = request.cookies.get('token')?.value;
+    const verified = await verifyAuth(token);
 
-    if (!payload || !payload.id) {
+    if (!verified.success || !verified.payload) {
       return NextResponse.json(
         { success: false, message: 'No autorizado' },
         { status: 401 },
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar el perfil de Jugador que corresponde al ID de Usuario del token
-    const playerProfile = await Player.findOne({ user: payload.id }).select(
+    const playerProfile = await Player.findOne({ user: verified.payload.id }).select(
       '_id',
     );
 

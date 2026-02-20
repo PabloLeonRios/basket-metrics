@@ -13,10 +13,10 @@ if (!MONGODB_URI) {
  * Caché de conexión global. Esto evita crear una nueva conexión en cada recarga en caliente
  * en el entorno de desarrollo.
  */
-let cached = (global as any).mongoose;
+let cached = global.mongoose;
 
 if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
 async function dbConnect() {

@@ -23,7 +23,6 @@ export default function PlayerManager() {
   const [name, setName] = useState('');
   const [dorsal, setDorsal] = useState('');
   const [position, setPosition] = useState('');
-  const [team, setTeam] = useState('');
 
   useEffect(() => {
     async function fetchPlayers() {
@@ -55,7 +54,7 @@ export default function PlayerManager() {
         name,
         dorsal: Number(dorsal),
         position,
-        team,
+        team: user.team?.name, // Autocompletado del equipo del entrenador
         coach: user.id,
       };
       const response = await fetch('/api/players', {
@@ -65,7 +64,8 @@ export default function PlayerManager() {
       });
 
       if (!response.ok) {
-        throw new Error('No se pudo crear el jugador.');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'No se pudo crear el jugador.');
       }
 
       const { data: newPlayer } = await response.json();
@@ -75,7 +75,6 @@ export default function PlayerManager() {
       setName('');
       setDorsal('');
       setPosition('');
-      setTeam('');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al crear el jugador.');
     }
@@ -135,23 +134,23 @@ export default function PlayerManager() {
             </div>
             <div>
               <label htmlFor="team" className={labelStyles}>
-                Equipo (Opcional)
+                Equipo
               </label>
               <input
                 type="text"
                 id="team"
-                value={team}
-                onChange={(e) => setTeam(e.target.value)}
-                className={inputStyles}
-                placeholder="Ej: Bulls"
+                value={user?.team?.name || 'Sin equipo asignado'}
+                className={`${inputStyles} bg-gray-200 dark:bg-gray-700 cursor-not-allowed`}
+                disabled
               />
             </div>
           </div>
           <button
             type="submit"
-            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
+            disabled={!user?.team}
+            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Guardar Jugador
+            {user?.team ? 'Guardar Jugador' : 'Asigna un equipo a tu perfil'}
           </button>
         </form>
       </div>

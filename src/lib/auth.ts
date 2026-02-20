@@ -1,27 +1,39 @@
+
 // src/lib/auth.ts
-import { NextRequest } from 'next/server';
 import * as jose from 'jose';
+import { JWT_SECRET } from '@/lib/constants';
+import { AuthUser } from '@/hooks/useAuth';
 
-/**
- * Verifica el token JWT de la solicitud y devuelve el payload si es válido.
- * @param request La solicitud entrante de Next.js.
- * @returns El payload del token o null si no es válido.
- */
-export async function getAuth(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+interface VerifyAuthResult {
+    success: boolean;
+    payload?: AuthUser;
+    message?: string;
+}
 
-  if (!token) {
-    return { payload: null, error: 'No token found' };
-  }
-
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    if (!secret) {
-      throw new Error('JWT_SECRET is not configured.');
+export async function verifyAuth(token: string | undefined): Promise<VerifyAuthResult> {
+    if (!token) {
+        return { success: false, message: 'No autorizado: Sin token.' };
     }
-    const { payload } = await jose.jwtVerify(token, secret);
-    return { payload, error: null };
-  } catch (e) {
-    return { payload: null, error: 'Invalid token' };
-  }
+
+    try {
+        if (!JWT_SECRET) {
+            throw new Error('La clave secreta JWT_SECRET no está configurada.');
+        }
+
+        const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+
+        // Aseguramos que el payload tiene la estructura esperada de AuthUser
+        const authPayload: AuthUser = {
+            id: payload.id as string,
+            name: payload.name as string,
+            email: payload.email as string,
+            role: payload.role as string,
+        };
+        
+        return { success: true, payload: authPayload };
+
+    } catch {
+        // Esto captura errores de verificación (token expirado, firma inválida, etc.)
+        return { success: false, message: 'No autorizado: Token inválido o expirado.' };
+    }
 }

@@ -1,8 +1,7 @@
 // src/app/api/auth/logout/route.ts
-import { NextResponse, NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Para cerrar sesión, creamos una respuesta y eliminamos la cookie en ella.
     const response = NextResponse.json(

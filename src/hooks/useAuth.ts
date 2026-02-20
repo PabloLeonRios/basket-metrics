@@ -2,12 +2,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ITeam } from '@/types/definitions';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: string;
+  team?: ITeam;
 }
 
 export function useAuth() {
@@ -27,6 +29,7 @@ export function useAuth() {
             name: data.name,
             email: data.email,
             role: data.role,
+            team: data.team,
           });
         } else {
           setUser(null);
