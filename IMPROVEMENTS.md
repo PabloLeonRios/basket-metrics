@@ -1,74 +1,29 @@
-### Propuestas de Mejora para Basket-Metrics
+# Propuestas de Mejora para Basket Metrics (Fase 2)
 
-Este documento resume las áreas de mejora identificadas durante la revisión del código del proyecto `basket-metrics`.
+## 1. Experiencia de Usuario (UX)
 
-#### 1. Refactorización del Código de Autenticación
+- **Notificaciones "Toast":** Reemplazar los `alert()` nativos por notificaciones no intrusivas (toasts).
+  - _Herramienta sugerida:_ `sonner` o `react-hot-toast`.
+  - _Beneficio:_ Feedback visual moderno sin interrumpir el flujo del usuario.
+- **Feedback de Carga (Skeletons):** Implementar "Skeleton Screens" en lugar de textos simples "Cargando..." para mejorar la percepción de velocidad.
+  - _Beneficio:_ Reduce la fatiga visual y da sensación de progreso inmediato.
 
-**Observación:** Tanto en el `middleware` como en las rutas de la API de autenticación, la clave secreta del JWT (`JWT_SECRET`) se lee desde `process.env` en cada petición.
+## 2. Funcionalidades para Entrenadores
 
-**Propuesta:**
+- **Exportación de Reportes (PDF/CSV):**
+  - Permitir descargar fichas de jugadores y estadísticas de partidos en formato PDF para compartir.
+  - Exportar datos crudos a CSV para análisis en Excel.
+  - _Herramienta sugerida:_ `jspdf` o `react-pdf`.
+- **Comparador de Jugadores:**
+  - Nueva vista `/panel/compare` donde se puedan seleccionar 2 o más jugadores y ver sus estadísticas (TS%, eFG%, etc.) en un gráfico de radar o barras lado a lado.
+  - _Herramienta sugerida:_ `recharts` (ya usado en el proyecto, extender su uso).
 
-- Mover la lectura de la clave secreta a una constante a nivel de módulo para mejorar la eficiencia.
-- Utilizar constantes para "magic strings" como nombres de roles (`'admin'`), nombres de cookies (`'token'`) y tiempos de expiración (`'24h'`).
+## 3. Seguridad y Robustez
 
-**Ejemplo (en `src/lib/constants.ts`):**
+- **Gestión de Errores Global:** Implementar un `ErrorBoundary` en React para capturar fallos inesperados en la UI sin romper toda la aplicación.
+- **Validación de Variables de Entorno:** Utilizar `zod` para validar que todas las variables de entorno necesarias (DB, JWT, etc.) existan al iniciar la aplicación, fallando rápido y con mensajes claros.
 
-```typescript
-export const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-export const COOKIE_NAME = 'token';
-export const ROLES = {
-  ADMIN: 'admin',
-  COACH: 'coach',
-  PLAYER: 'player',
-};
-```
+## 4. Gestión de Equipos y Usuarios
 
-#### 2. Actualización del Middleware
-
-**Observación:** El archivo `src/middleware.ts` utiliza una convención de nomenclatura obsoleta y una configuración de `matcher` compleja.
-
-**Propuesta:**
-
-- Renombrar `src/middleware.ts` a `src/proxy.ts` o un nombre similar para seguir las nuevas convenciones de Next.js (como se sugiere en la advertencia de `next build`).
-- Simplificar el `matcher` en la configuración del middleware para que sea más legible y mantenible, especificando explícitamente las rutas a proteger.
-
-**Ejemplo de `matcher` simplificado:**
-
-```typescript
-export const config = {
-  matcher: ['/panel/:path*', '/admin/:path*'],
-};
-```
-
-#### 3. Logging Estructurado
-
-**Observación:** El manejo de errores actual se basa en `console.error`, lo cual es útil para el desarrollo pero insuficiente para producción.
-
-**Propuesta:**
-
-- Integrar una biblioteca de logging estructurado (como `pino`, `winston`, o un servicio de logging como Sentry o LogRocket). Esto permitirá un monitoreo y depuración más efectivos en producción.
-
-#### 4. Mejorar la Experiencia del Desarrollador (DX)
-
-**Observación:** La configuración actual de ESLint y Prettier podría mejorarse para asegurar un estilo de código consistente en todo el proyecto.
-
-**Propuesta:**
-
-- Añadir un script `format` en `package.json` para ejecutar Prettier.
-- Configurar un hook de pre-commit (usando `husky` y `lint-staged`) para ejecutar automáticamente el linter y el formateador antes de cada commit.
-
-#### 5. Mejoras en la Interfaz de Usuario (UI/UX)
-
-**Observación:** La aplicación es funcional, pero se podrían añadir algunas mejoras para enriquecer la experiencia del usuario.
-
-**Propuesta:**
-
-- **Feedback Visual:** Añadir indicadores de carga (spinners o skeletons) mientras se obtienen los datos del servidor.
-- **Notificaciones:** Implementar un sistema de notificaciones (toasts) para informar al usuario sobre el resultado de las acciones (por ejemplo, "Jugador añadido correctamente" o "Error al guardar los datos").
-- **Panel de Administración:** El panel de administración podría mejorarse con más estadísticas y herramientas de gestión.
-
-#### 6. Propuesta de Nuevas Funcionalidades
-
-- **Estadísticas Avanzadas:** Añadir más estadísticas avanzadas, como el "Player Efficiency Rating (PER)" o gráficos de tiro.
-- **Comparación de Jugadores:** Implementar una función para comparar las estadísticas de dos o más jugadores.
-- **Exportación de Datos:** Permitir a los entrenadores exportar los datos de los partidos y las estadísticas en formato CSV o PDF.
+- **Múltiples Equipos:** Permitir que un entrenador gestione más de un equipo.
+- **Roles Granulares:** Añadir rol de "Asistente" con permisos de lectura/escritura limitados (e.g., puede anotar en el tracker pero no borrar partidos).

@@ -72,7 +72,11 @@ export default function AdminUserManagementPage() {
         throw new Error(data.message || 'No se pudo actualizar el usuario.');
 
       // Actualizar el estado localmente para reflejar el cambio en la UI
-      setUsers(users.map((u) => (u._id === userId ? data.data : u)));
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => (u._id === userId ? data.data : u)),
+      );
+
+      // Toast notification instead of alert (placeholder for future Toast implementation)
       alert(successMessage);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al actualizar.');
