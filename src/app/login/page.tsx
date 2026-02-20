@@ -32,7 +32,7 @@ export default function LoginPage() {
 
       // Redirigir según el rol
       if (data.data.role === 'admin') {
-        router.push('/admin');
+        router.push('/panel/admin/users');
       } else {
         router.push('/panel');
       }
