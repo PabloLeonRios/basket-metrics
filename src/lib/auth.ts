@@ -26,6 +26,7 @@ export async function verifyAuth(
       name: payload.name as string,
       email: payload.email as string,
       role: payload.role as string,
+      team: payload.team as AuthUser['team'],
     };
 
     return { success: true, payload: authPayload };
