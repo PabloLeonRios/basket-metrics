@@ -5,15 +5,9 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import { verifyAuth } from '@/lib/auth';
 
-interface RouteContext {
-    params: {
-      userId: string;
-    };
-}
-
-export async function PUT(request: NextRequest, { params }: RouteContext) {
+export async function PUT(request: NextRequest, context: { params: { userId: string } }) {
   await dbConnect();
-  const { userId } = params;
+  const { userId } = context.params;
   
   try {
     const token = request.cookies.get('token')?.value;
