@@ -1,0 +1,65 @@
+==================================================
+        BASKET METRICS - INSTRUCCIONES Y NOTAS
+==================================================
+
+Este archivo contiene toda la información necesaria para configurar,
+administrar y utilizar el sistema Basket Metrics.
+
+1. CONFIGURACIÓN DEL ENTORNO (.env.local)
+------------------------------------------
+Asegúrate de tener un archivo .env.local en la raíz con:
+
+MONGODB_URI="mongodb://localhost:27017/basket-metrics"
+JWT_SECRET="un_secreto_seguro"
+NEXT_PUBLIC_ALLOWED_DEV_ORIGINS="http://localhost:3000,https://mapaconsultoria.com,http://TU_IP_EXTERNA:PUERTO"
+
+2. ACCESO Y ROLES
+-----------------
+El sistema utiliza tres roles: 'admin', 'entrenador' y 'jugador'.
+
+* REGISTRO (/register):
+  Cualquier usuario nuevo se registra como 'entrenador' y estado INACTIVO.
+
+* ACTIVACIÓN:
+  Un administrador debe activar la cuenta. El primer administrador debe
+  configurarse manualmente en la base de datos:
+  db.users.updateOne({email: "..."}, {$set: {role: "admin", isActive: true}})
+
+* LOGIN (/login):
+  Redirige según el rol:
+  - Admin -> /admin
+  - Entrenador/Jugador -> /panel
+
+3. FUNCIONALIDADES POR ROL
+--------------------------
+
+A) ADMINISTRADOR (/admin)
+   - Gestión de usuarios: Listar todos los usuarios.
+   - Activación: Botón para aprobar cuentas de entrenadores/jugadores.
+   - Seguridad: Acceso restringido a APIs administrativas.
+
+B) ENTRENADOR (/panel)
+   - Gestión de Jugadores: Crear y ver fichas de jugadores.
+   - Gestión de Sesiones: Crear partidos o entrenamientos.
+   - Game Tracker: Registro interactivo en vivo de eventos (tiros, rebotes, etc.).
+   - Estadísticas: Calcular eFG%, TS% y Game Score tras una sesión.
+   - Asistente IA: Recomendación de quintetos según situación de juego.
+
+C) JUGADOR (/panel)
+   - Mi Perfil: Vista directa de sus promedios y estadísticas históricas.
+   - Historial: Desglose de rendimiento partido a partido.
+
+4. NOTAS TÉCNICAS Y SEGURIDAD
+------------------------------
+- Icono: El favicon de Next.js se ha reemplazado por un balón de baloncesto (src/app/icon.svg).
+- Protección de Rutas: Implementado middleware (src/middleware.ts) para restringir el acceso según el rol (Admin, Entrenador, Jugador).
+- Rate Limiting (Seguridad): Se ha implementado una protección de "Too Many Requests" para evitar ataques de fuerza bruta en el Login, Registro y APIs de Administración. Límite: 10 peticiones por minuto por IP.
+- Diseño de Cancha: El componente de la cancha (src/components/tracker/Court.tsx) ha sido diseñado como un SVG interactivo y responsive, adaptado para capturar coordenadas de tiro con precisión.
+- Limpieza: Se han eliminado los SVGs por defecto de Next.js y Vercel para una interfaz 100% personalizada.
+- Consolidación de Proxy: Se ha unificado la lógica de middleware en `src/proxy.ts` para cumplir con los requisitos de Next.js 16 y evitar conflictos de compilación.
+- Optimización de Rutas: Se eliminaron rutas dinámicas ambiguas para asegurar que el sistema de compilación (Turbopack) genere las páginas correctamente.
+- Estabilidad: El proyecto ha sido verificado mediante un build de producción (`npm run build`) completo, garantizando que no existen errores de sintaxis o de tipos de TypeScript.
+- PUESTA EN MARCHA (Producción):
+  1. npm install
+  2. npm run build
+  3. npm run start

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 
 // Tipo para el objeto Jugador
 interface Player {
@@ -13,6 +14,7 @@ interface Player {
 }
 
 export default function PlayerManager() {
+  const { user, loading: authLoading } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,15 +25,12 @@ export default function PlayerManager() {
   const [position, setPosition] = useState('');
   const [team, setTeam] = useState('');
 
-  // --- SIMPLIFICACIÓN TEMPORAL ---
-  // Usamos un ID de entrenador harcodeado hasta que implementemos el login.
-  const MOCK_COACH_ID = '65c9b8d3a17e5a7a4b0d3e5b'; // Reemplazar con el ID del usuario logueado
-
   useEffect(() => {
     async function fetchPlayers() {
+      if (!user) return;
       try {
         setLoading(true);
-        const response = await fetch(`/api/players?coachId=${MOCK_COACH_ID}`);
+        const response = await fetch(`/api/players?coachId=${user.id}`);
         if (!response.ok) {
           throw new Error('No se pudieron cargar los jugadores.');
         }
@@ -43,18 +42,21 @@ export default function PlayerManager() {
         setLoading(false);
       }
     }
-    fetchPlayers();
-  }, []);
+    if (!authLoading) {
+      fetchPlayers();
+    }
+  }, [user, authLoading]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     try {
       const newPlayerData = {
         name,
         dorsal: Number(dorsal),
         position,
         team,
-        coach: MOCK_COACH_ID,
+        coach: user.id,
       };
       const response = await fetch('/api/players', {
         method: 'POST',

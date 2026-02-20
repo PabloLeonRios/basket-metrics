@@ -6,6 +6,7 @@ import {
   GameSituation,
   PlayerProfile,
 } from '@/lib/recommender/lineupRecommender';
+import { useAuth } from '@/hooks/useAuth';
 
 // Tipos locales
 interface Player {
@@ -21,6 +22,7 @@ const situations: { value: GameSituation; label: string }[] = [
 ];
 
 export default function Assistant() {
+  const { user, loading: authLoading } = useAuth();
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<string>>(
     new Set(),
@@ -30,12 +32,11 @@ export default function Assistant() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const MOCK_COACH_ID = '65c9b8d3a17e5a7a4b0d3e5b'; // Reemplazar con Auth
-
   useEffect(() => {
     async function fetchPlayers() {
+      if (!user) return;
       try {
-        const response = await fetch(`/api/players?coachId=${MOCK_COACH_ID}`);
+        const response = await fetch(`/api/players?coachId=${user.id}`);
         if (!response.ok)
           throw new Error('No se pudieron cargar los jugadores.');
         const { data } = await response.json();
@@ -44,8 +45,10 @@ export default function Assistant() {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       }
     }
-    fetchPlayers();
-  }, []);
+    if (!authLoading) {
+      fetchPlayers();
+    }
+  }, [user, authLoading]);
 
   const handlePlayerToggle = (playerId: string) => {
     setSelectedPlayerIds((prev) => {

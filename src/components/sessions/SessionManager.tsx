@@ -3,8 +3,10 @@
 import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { IPlayer, ISession, sessionTypes } from '@/types/definitions';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SessionManager() {
+  const { user, loading: authLoading } = useAuth();
   const [sessions, setSessions] = useState<ISession[]>([]);
   const [allPlayers, setAllPlayers] = useState<IPlayer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +28,14 @@ export default function SessionManager() {
   const [teamBPlayers, setTeamBPlayers] = useState<Set<string>>(new Set());
   // --- END FORM STATE ---
 
-  const MOCK_COACH_ID = '65c9b8d3a17e5a7a4b0d3e5b'; // Reemplazar con Auth
-
   useEffect(() => {
     async function fetchData() {
+      if (!user) return;
       try {
         setLoading(true);
         const [playersRes, sessionsRes] = await Promise.all([
-          fetch(`/api/players?coachId=${MOCK_COACH_ID}`),
-          fetch(`/api/sessions?coachId=${MOCK_COACH_ID}`),
+          fetch(`/api/players?coachId=${user.id}`),
+          fetch(`/api/sessions?coachId=${user.id}`),
         ]);
 
         if (!playersRes.ok || !sessionsRes.ok) {
@@ -52,8 +53,10 @@ export default function SessionManager() {
         setLoading(false);
       }
     }
-    fetchData();
-  }, []);
+    if (!authLoading) {
+      fetchData();
+    }
+  }, [user, authLoading]);
 
   const handlePlayerToggle = (team: 'A' | 'B', playerId: string) => {
     const isPartido = sessionType === 'Partido';
@@ -89,6 +92,7 @@ export default function SessionManager() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!user) return;
 
     const teams = [{ name: teamAName, players: Array.from(teamAPlayers) }];
     if (sessionType === 'Partido') {
@@ -97,7 +101,7 @@ export default function SessionManager() {
 
     const newSessionData = {
       name: sessionName,
-      coach: MOCK_COACH_ID,
+      coach: user.id,
       sessionType,
       teams,
       date: new Date().toISOString(),
@@ -283,20 +287,30 @@ export default function SessionManager() {
                   Ir al Tracker
                 </Link>
                 {session.sessionType === 'Partido' && (
-                  <button
-                    onClick={() => handleCalculateStats(session._id)}
-                    disabled={
-                      calculationStatus[session._id] === 'calculating' ||
-                      calculationStatus[session._id] === 'done'
-                    }
-                    className="text-center bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 w-full disabled:bg-gray-400"
-                  >
-                    {calculationStatus[session._id] === 'calculating'
-                      ? 'Calculando...'
-                      : calculationStatus[session._id] === 'done'
-                        ? 'Calculado'
-                        : 'Calcular Stats'}
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleCalculateStats(session._id)}
+                      disabled={
+                        calculationStatus[session._id] === 'calculating' ||
+                        calculationStatus[session._id] === 'done'
+                      }
+                      className="text-center bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 w-full disabled:bg-gray-400"
+                    >
+                      {calculationStatus[session._id] === 'calculating'
+                        ? 'Calculando...'
+                        : calculationStatus[session._id] === 'done'
+                          ? 'Recalcular Stats'
+                          : 'Calcular Stats'}
+                    </button>
+                    {calculationStatus[session._id] === 'done' && (
+                      <Link
+                        href={`/panel/dashboard/${session._id}`}
+                        className="text-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 w-full"
+                      >
+                        Ver Resultados
+                      </Link>
+                    )}
+                  </>
                 )}
               </div>
             </div>

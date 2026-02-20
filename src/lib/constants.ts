@@ -10,8 +10,8 @@ export const COOKIE_NAME = 'token';
 
 export const ROLES = {
   ADMIN: 'admin',
-  COACH: 'coach',
-  PLAYER: 'player',
+  COACH: 'entrenador',
+  PLAYER: 'jugador',
 } as const; // 'as const' para que TypeScript infiera los valores como literales
 
 export const EXPIRATION_TIME = '24h';
