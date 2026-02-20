@@ -7,8 +7,14 @@ export async function GET(request: NextRequest) {
   const verified = await verifyAuth(token);
 
   if (verified.success) {
-    return NextResponse.json({ success: true, data: verified.payload }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: verified.payload },
+      { status: 200 },
+    );
   } else {
-    return NextResponse.json({ success: false, message: verified.message }, { status: 401 });
+    return NextResponse.json(
+      { success: false, message: verified.message },
+      { status: 401 },
+    );
   }
 }

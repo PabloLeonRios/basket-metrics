@@ -6,12 +6,8 @@ import { IUser } from '@/types/definitions';
 import { Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 import * as jose from 'jose';
-import {
-  JWT_SECRET,
-  COOKIE_NAME,
-  EXPIRATION_TIME,
-  MAX_AGE_COOKIE,
-} from '@/lib/constants';
+import { COOKIE_NAME, EXPIRATION_TIME, MAX_AGE_COOKIE } from '@/lib/constants';
+import { JWT_SECRET } from '@/lib/auth-secret';
 
 // Tipo local para informar a TypeScript que esperamos la contraseña aquí
 type UserWithPassword = IUser & Document & { password?: string };
@@ -30,7 +26,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar al usuario, pedir la contraseña y hacer un cast al tipo local
-    const user = (await User.findOne({ email }).select('+password').populate('team')) as UserWithPassword;
+    const user = (await User.findOne({ email })
+      .select('+password')
+      .populate('team')) as UserWithPassword;
 
     if (!user || !user.password) {
       return NextResponse.json(

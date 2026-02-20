@@ -101,7 +101,10 @@ export default function PanelPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
         <p className="text-red-500 font-bold">Error al cargar el perfil.</p>
-        <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+        <Link
+          href="/login"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
           Ir al Login
         </Link>
       </div>
@@ -114,7 +117,9 @@ export default function PanelPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-orange-600">Basket Metrics</span>
+              <span className="text-2xl font-bold text-orange-600">
+                Basket Metrics
+              </span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -135,17 +140,23 @@ export default function PanelPage() {
         {/* Renderizar el dashboard correspondiente */}
         {user.role === 'entrenador' ? (
           <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Panel de Entrenador</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
+              Panel de Entrenador
+            </h1>
             <CoachDashboard />
           </div>
         ) : user.role === 'jugador' && playerId ? (
           <div className="space-y-6">
-             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Mi Perfil de Jugador</h1>
-             <PlayerProfile playerId={playerId} />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
+              Mi Perfil de Jugador
+            </h1>
+            <PlayerProfile playerId={playerId} />
           </div>
         ) : (
           <div className="text-center p-12 bg-white dark:bg-gray-900 rounded-2xl shadow-sm">
-            <p className="text-xl text-gray-600 dark:text-gray-400">Rol de usuario no reconocido o perfil no encontrado.</p>
+            <p className="text-xl text-gray-600 dark:text-gray-400">
+              Rol de usuario no reconocido o perfil no encontrado.
+            </p>
           </div>
         )}
       </main>

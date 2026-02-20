@@ -10,7 +10,8 @@ export default function Home() {
             Basket <span className="text-orange-500">Metrics</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Analítica avanzada para entrenadores y jugadores de baloncesto. Toma decisiones basadas en datos.
+            Analítica avanzada para entrenadores y jugadores de baloncesto. Toma
+            decisiones basadas en datos.
           </p>
         </div>
 
@@ -32,21 +33,28 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16">
           <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
             <h3 className="text-xl font-bold mb-2">Game Tracker</h3>
-            <p className="text-gray-600 dark:text-gray-400">Registra eventos en vivo con nuestro tracker interactivo.</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Registra eventos en vivo con nuestro tracker interactivo.
+            </p>
           </div>
           <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
             <h3 className="text-xl font-bold mb-2">Analítica Avanzada</h3>
-            <p className="text-gray-600 dark:text-gray-400">Visualiza TS%, eFG% y Game Score de tus jugadores.</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Visualiza TS%, eFG% y Game Score de tus jugadores.
+            </p>
           </div>
           <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
             <h3 className="text-xl font-bold mb-2">Asistente IA</h3>
-            <p className="text-gray-600 dark:text-gray-400">Obtén recomendaciones inteligentes para tus quintetos.</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Obtén recomendaciones inteligentes para tus quintetos.
+            </p>
           </div>
         </div>
       </main>
 
       <footer className="absolute bottom-8 text-gray-500 text-sm">
-        © {new Date().getFullYear()} Basket Metrics. Todos los derechos reservados.
+        © {new Date().getFullYear()} Basket Metrics. Todos los derechos
+        reservados.
       </footer>
     </div>
   );

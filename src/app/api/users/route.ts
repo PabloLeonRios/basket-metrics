@@ -1,4 +1,3 @@
-
 // src/app/api/users/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
@@ -19,8 +18,11 @@ export async function GET(request: NextRequest) {
 
     if (verified.payload.role !== 'admin') {
       return NextResponse.json(
-        { success: false, message: 'Acceso denegado: Se requiere rol de Administrador.' },
-        { status: 403 }
+        {
+          success: false,
+          message: 'Acceso denegado: Se requiere rol de Administrador.',
+        },
+        { status: 403 },
       );
     }
 
@@ -29,12 +31,16 @@ export async function GET(request: NextRequest) {
     const users = await User.find({}).select('-password');
 
     return NextResponse.json({ success: true, data: users }, { status: 200 });
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
-      { success: false, message: 'Error en el servidor al obtener los usuarios.', error: errorMessage },
-      { status: 500 }
+      {
+        success: false,
+        message: 'Error en el servidor al obtener los usuarios.',
+        error: errorMessage,
+      },
+      { status: 500 },
     );
   }
 }

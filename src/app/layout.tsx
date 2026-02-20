@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Basket Metrics - Analítica Avanzada',
-  description: 'Aplicación para entrenadores de baloncesto con analítica avanzada de partidos y jugadores.',
+  description:
+    'Aplicación para entrenadores de baloncesto con analítica avanzada de partidos y jugadores.',
   icons: {
     icon: '/icon.svg',
   },

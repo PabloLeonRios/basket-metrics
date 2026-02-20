@@ -98,7 +98,7 @@ export async function calculateStatsForSession(
           ...playerStats,
           ...advancedStats,
         },
-        { upsert: true, new: true },
+        { upsert: true, returnDocument: 'after' },
       );
       console.log(`Stats guardadas para el jugador: ${playerId}`);
     }
@@ -138,7 +138,7 @@ async function calculateAndSaveTeamStats(
       ortg: ortgTeam1,
       drtg: ortgTeam2,
     },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   );
   await TeamGameStats.findOneAndUpdate(
     { session: session._id, teamName: team2.name },
@@ -149,7 +149,7 @@ async function calculateAndSaveTeamStats(
       ortg: ortgTeam2,
       drtg: ortgTeam1,
     },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: 'after' },
   );
   console.log(`Stats de equipo guardadas para ${team1.name} y ${team2.name}`);
 }
