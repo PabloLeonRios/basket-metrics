@@ -5,6 +5,7 @@ import Player from '@/lib/models/Player';
 import User from '@/lib/models/User';
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcrypt';
+import { ROLES } from '@/lib/constants';
 
 // GET: Obtener todos los jugadores de un entrenador
 export async function GET(request: NextRequest) {
@@ -35,6 +36,19 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Helper para timeout
+const withTimeout = <T>(promise: Promise<T>, timeoutMs: number = 10000, operationName: string): Promise<T> => {
+  let timeoutHandle: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(() => reject(new Error(`Operation '${operationName}' timed out after ${timeoutMs}ms`)), timeoutMs);
+  });
+
+  return Promise.race([
+    promise.finally(() => clearTimeout(timeoutHandle)),
+    timeoutPromise
+  ]);
+};
+
 // POST: Crear un nuevo jugador
 export async function POST(request: NextRequest) {
   console.log('--- PLAYER CREATION REQUEST START ---');
@@ -60,7 +74,8 @@ export async function POST(request: NextRequest) {
     console.log('Step 2 Complete: Password hashed.');
     
     console.log('Step 3: Finding coach user...');
-    const coachUser = await User.findById(coach).select('team');
+    // Usamos lean() para evitar problemas con documentos de Mongoose y ser más eficientes
+    const coachUser = await User.findById(coach).select('team').lean();
     if (!coachUser) {
         console.error('Coach not found!');
         return NextResponse.json({ success: false, message: 'Entrenador no encontrado.' }, { status: 404 });
@@ -70,18 +85,19 @@ export async function POST(request: NextRequest) {
     console.log('Step 4: Creating placeholder user object...');
     const randomString = Math.random().toString(36).substring(2, 10);
     const placeholderEmail = `player.${randomString}.${Date.now()}@basketmetrics.local`;
+
     const newUser = new User({
       name,
       email: placeholderEmail,
       password: hashedPassword,
-      role: 'jugador',
+      role: ROLES.PLAYER,
       isActive: false, // El jugador se crea como inactivo por defecto
-      team: coachUser.team, // Asignar el equipo del entrenador
+      team: coachUser.team, // Asignar el equipo del entrenador (puede ser undefined si el coach no tiene equipo)
     });
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user...');
-    await newUser.save();
+    await withTimeout(newUser.save(), 10000, 'Save New User');
     console.log('Step 5 Complete: New user saved.');
 
     console.log('Step 6: Creating new player object...');
@@ -96,7 +112,7 @@ export async function POST(request: NextRequest) {
     console.log('Step 6 Complete: Player object created.');
 
     console.log('Step 7: Saving new player...');
-    await newPlayer.save();
+    await withTimeout(newPlayer.save(), 10000, 'Save New Player');
     console.log('Step 7 Complete: New player saved.');
 
     console.log('--- PLAYER CREATION REQUEST SUCCESS ---');
