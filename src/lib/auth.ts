@@ -1,6 +1,6 @@
 // src/lib/auth.ts
 import * as jose from 'jose';
-import { JWT_SECRET } from '@/lib/auth-secret';
+import { getJwtSecretKey } from '@/lib/auth-secret';
 import { AuthUser } from '@/hooks/useAuth';
 
 interface VerifyAuthResult {
@@ -17,7 +17,8 @@ export async function verifyAuth(
   }
 
   try {
-    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+    const secret = getJwtSecretKey();
+    const { payload } = await jose.jwtVerify(token, secret);
 
     // Aseguramos que el payload tiene la estructura esperada de AuthUser
     const authPayload: AuthUser = {

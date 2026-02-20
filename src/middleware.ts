@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import * as jose from 'jose';
 import { rateLimit } from '@/lib/rateLimit';
-import { JWT_SECRET } from '@/lib/auth-secret';
+import { getJwtSecretKey } from '@/lib/auth-secret';
 import { COOKIE_NAME, ROLES } from '@/lib/constants';
 
 export async function middleware(request: NextRequest) {
@@ -51,7 +51,8 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+      const secret = getJwtSecretKey();
+      const { payload } = await jose.jwtVerify(token, secret);
 
       // 3. Admin Route Logic
       if (isAdminRoute || isApiAdminRoute) {

@@ -7,7 +7,7 @@ import { Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 import * as jose from 'jose';
 import { COOKIE_NAME, EXPIRATION_TIME, MAX_AGE_COOKIE } from '@/lib/constants';
-import { JWT_SECRET } from '@/lib/auth-secret';
+import { getJwtSecretKey } from '@/lib/auth-secret';
 
 // Tipo local para informar a TypeScript que esperamos la contraseña aquí
 type UserWithPassword = IUser & Document & { password?: string };
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Crear el JWT ---
+    const secret = getJwtSecretKey();
     const token = await new jose.SignJWT({
       id: user._id.toString(),
       email: user.email,
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime(EXPIRATION_TIME)
-      .sign(JWT_SECRET);
+      .sign(secret);
 
     const userResponse = user.toObject();
     delete userResponse.password;
