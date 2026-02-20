@@ -50,28 +50,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // --- Simplificación Temporal ---
-    // En un futuro, aquí iría un sistema de invitación por email.
-    // Por ahora, creamos un usuario placeholder para el jugador.
-    const placeholderEmail = `${name.replace(/\s+/g, '.').toLowerCase()}.${Date.now()}@basketmetrics.local`;
+    // 1. Hashear la contraseña y preparar los datos del nuevo usuario
+    const bcrypt = require('bcrypt');
     const placeholderPassword = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
+    
+    // 2. Obtener el equipo del entrenador para asignarlo al nuevo jugador
+    const coachUser = await User.findById(coach).select('team');
+    if (!coachUser) {
+        return NextResponse.json({ success: false, message: 'Entrenador no encontrado.' }, { status: 404 });
+    }
 
+    // 3. Crear un usuario placeholder para el jugador
+    const placeholderEmail = `${name.replace(/\s+/g, '.').toLowerCase()}.${Date.now()}@basketmetrics.local`;
     const newUser = new User({
       name,
       email: placeholderEmail,
-      password: placeholderPassword, // En el futuro hashearíamos esto con bcrypt
+      password: hashedPassword,
       role: 'jugador',
+      isActive: true, // El jugador es activado automáticamente
+      team: coachUser.team, // Asignar el equipo del entrenador
     });
     await newUser.save();
-    // --- Fin de la Simplificación ---
 
+    // 4. Crear el perfil del jugador
     const newPlayer = new Player({
       user: newUser._id,
       coach,
       name,
       dorsal,
       position,
-      team,
+      team, // Este es el nombre del equipo (String), que viene del autocompletado
     });
 
     await newPlayer.save();
@@ -95,7 +104,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Error en el servidor',
+          message: 'Error en el servidor al crear el jugador.',
           error: error.message,
         },
         { status: 500 },
