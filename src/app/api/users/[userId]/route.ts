@@ -6,10 +6,10 @@ import { verifyAuth } from '@/lib/auth';
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { userId: string } },
+  { params }: { params: Promise<{ userId: string }> },
 ) {
   await dbConnect();
-  const { userId } = context.params;
+  const { userId } = await params;
 
   try {
     const token = request.cookies.get('token')?.value;
@@ -73,7 +73,7 @@ export async function PUT(
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      new: true,
+      returnDocument: 'after',
       select: '-password',
     }).populate('team');
 

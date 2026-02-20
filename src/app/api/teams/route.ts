@@ -122,7 +122,7 @@ export async function PUT(request: NextRequest) {
     const updatedTeam = await Team.findByIdAndUpdate(
       teamId,
       { name },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     );
 
     if (!updatedTeam) {

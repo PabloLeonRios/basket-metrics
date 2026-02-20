@@ -8,10 +8,10 @@ import { verifyAuth } from '@/lib/auth';
 // PUT: Actualizar un equipo
 export async function PUT(
   request: NextRequest,
-  context: { params: { teamId: string } },
+  { params }: { params: Promise<{ teamId: string }> },
 ) {
   await dbConnect();
-  const { teamId } = context.params;
+  const { teamId } = await params;
 
   try {
     const token = request.cookies.get('token')?.value;
@@ -40,7 +40,7 @@ export async function PUT(
     const updatedTeam = await Team.findByIdAndUpdate(
       teamId,
       { name },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     );
 
     if (!updatedTeam) {
@@ -81,10 +81,10 @@ export async function PUT(
 // DELETE: Eliminar un equipo
 export async function DELETE(
   request: NextRequest,
-  context: { params: { teamId: string } },
+  { params }: { params: Promise<{ teamId: string }> },
 ) {
   await dbConnect();
-  const { teamId } = context.params;
+  const { teamId } = await params;
 
   try {
     const token = request.cookies.get('token')?.value;
