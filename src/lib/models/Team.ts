@@ -1,4 +1,3 @@
-
 // src/lib/models/Team.ts
 import mongoose, { Schema, Document, models, Model } from 'mongoose';
 import { ITeam } from '@/types/definitions';
@@ -19,6 +18,7 @@ const TeamSchema: Schema = new Schema(
   },
 );
 
-const Team: Model<TeamDocument> = models.Team || mongoose.model<TeamDocument>('Team', TeamSchema);
+const Team: Model<TeamDocument> =
+  models.Team || mongoose.model<TeamDocument>('Team', TeamSchema);
 
 export default Team;

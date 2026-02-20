@@ -4,6 +4,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ROLES } from '@/lib/constants';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -31,7 +32,7 @@ export default function LoginPage() {
       }
 
       // Redirigir según el rol
-      if (data.data.role === 'admin') {
+      if (data.data.role === ROLES.ADMIN) {
         router.push('/panel/admin/users');
       } else {
         router.push('/panel');

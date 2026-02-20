@@ -82,20 +82,20 @@ export default function PanelLayout({ children }: PropsWithChildren) {
               </div>
             )}
             {user?.role === 'admin' && (
-                <div className="hidden md:flex items-center gap-4">
-                    <Link
-                        href="/panel/admin/users"
-                        className={`font-semibold ${pathname.startsWith('/panel/admin/users') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}
-                    >
-                        Usuarios
-                    </Link>
-                    <Link
-                        href="/panel/admin/teams"
-                        className={`font-semibold ${pathname.startsWith('/panel/admin/teams') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}
-                    >
-                        Equipos
-                    </Link>
-                </div>
+              <div className="hidden md:flex items-center gap-4">
+                <Link
+                  href="/panel/admin/users"
+                  className={`font-semibold ${pathname.startsWith('/panel/admin/users') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}
+                >
+                  Usuarios
+                </Link>
+                <Link
+                  href="/panel/admin/teams"
+                  className={`font-semibold ${pathname.startsWith('/panel/admin/teams') ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}
+                >
+                  Equipos
+                </Link>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-4">
