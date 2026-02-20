@@ -62,13 +62,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Crear un usuario placeholder para el jugador
-    const placeholderEmail = `${name.replace(/\s+/g, '.').toLowerCase()}.${Date.now()}@basketmetrics.local`;
+    const randomString = Math.random().toString(36).substring(2, 10);
+    const placeholderEmail = `player.${randomString}.${Date.now()}@basketmetrics.local`;
     const newUser = new User({
       name,
       email: placeholderEmail,
       password: hashedPassword,
       role: 'jugador',
-      isActive: true, // El jugador es activado automáticamente
+      isActive: false, // El jugador se crea como inactivo por defecto
       team: coachUser.team, // Asignar el equipo del entrenador
     });
     await newUser.save();
