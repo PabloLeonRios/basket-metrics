@@ -80,11 +80,12 @@ export async function middleware(request: NextRequest) {
       // 4. Panel Route Logic
       if (isPanelRoute) {
         const allowedRoles = [ROLES.COACH, ROLES.PLAYER, ROLES.ADMIN];
-        if (!allowedRoles.includes(payload.role as any)) {
+        const userRole = payload.role as typeof ROLES[keyof typeof ROLES];
+        if (!allowedRoles.includes(userRole)) {
           return NextResponse.redirect(new URL('/login', request.url));
         }
       }
-    } catch (error) {
+    } catch {
       if (pathname.startsWith('/api')) {
         return NextResponse.json(
           { success: false, message: 'No autorizado: Token inválido.' },

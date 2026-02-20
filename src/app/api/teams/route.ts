@@ -1,4 +1,5 @@
 // src/app/api/teams/route.ts
+import mongoose from 'mongoose';
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Team from '@/lib/models/Team';
@@ -194,7 +195,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await User.updateMany({ team: teamId }, { $unset: { team: '' } });
+    await User.updateMany({ team: new mongoose.Types.ObjectId(teamId) }, { $unset: { team: '' } });
 
     return NextResponse.json(
       { success: true, message: 'Equipo eliminado correctamente.' },

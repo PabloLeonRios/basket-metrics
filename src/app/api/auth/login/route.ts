@@ -9,8 +9,11 @@ import * as jose from 'jose';
 import { COOKIE_NAME, EXPIRATION_TIME, MAX_AGE_COOKIE } from '@/lib/constants';
 import { getJwtSecretKey } from '@/lib/auth-secret';
 
+import { ITeam } from '@/types/definitions';
+
 // Tipo local para informar a TypeScript que esperamos la contraseña aquí
 type UserWithPassword = IUser & Document & { password?: string };
+type PopulatedTeam = ITeam & { toObject: () => ITeam };
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       name: user.name,
       role: user.role,
-      team: user.team ? user.team.toObject() : undefined,
+      team: user.team ? (user.team as PopulatedTeam).toObject() : undefined,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
