@@ -4,6 +4,7 @@ import dbConnect from '@/lib/dbConnect';
 import Player from '@/lib/models/Player';
 import User from '@/lib/models/User';
 import { NextRequest } from 'next/server';
+import bcrypt from 'bcrypt';
 
 // GET: Obtener todos los jugadores de un entrenador
 export async function GET(request: NextRequest) {
@@ -51,7 +52,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Hashear la contraseña y preparar los datos del nuevo usuario
-    const bcrypt = require('bcrypt');
     const placeholderPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
     
