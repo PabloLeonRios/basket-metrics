@@ -36,6 +36,10 @@ const SessionSchema: Schema = new Schema(
         ],
       },
     ],
+    finishedAt: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,

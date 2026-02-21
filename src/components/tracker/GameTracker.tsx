@@ -1,21 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react'; // Importar useCallback
 import Court from './Court'; // Importamos el nuevo componente
+import GameLog from './GameLog'; // Importar GameLog
+import FloatingStats from './FloatingStats'; // Importar FloatingStats
+import { toast } from 'react-toastify'; // Importar toast
+import { IGameEvent, IPlayer, ISession } from '@/types/definitions'; // Importar IGameEvent, IPlayer y ISession
 
 // --- Tipos de Datos ---
-interface Player {
-  _id: string;
+// Las interfaces Player y Team ahora se importan como IPlayer y ISession
+// La interfaz SessionData ahora es ISession, pero necesitamos adaptarla para incluir 'teams' con IPlayer
+interface TeamData { // Renombrada para evitar conflicto
   name: string;
+  players: IPlayer[]; // Usar IPlayer importado
 }
-interface Team {
-  name: string;
-  players: Player[];
-}
-interface SessionData {
-  _id: string;
-  name: string;
-  teams: Team[];
+interface TrackerSessionData extends ISession { // Renombrado para evitar conflicto con ISession importada
+  teams: TeamData[];
 }
 interface SelectedPlayer {
   id: string;
@@ -25,12 +25,13 @@ interface SelectedPlayer {
 
 export default function GameTracker({ sessionId }: { sessionId: string }) {
   // --- Estados del Componente ---
-  const [session, setSession] = useState<SessionData | null>(null);
+  const [session, setSession] = useState<TrackerSessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<SelectedPlayer | null>(
     null,
   );
+  const [gameEvents, setGameEvents] = useState<IGameEvent[]>([]); // Estado para los eventos de juego
 
   // Estados para el modal de tiro
   const [showShotModal, setShowShotModal] = useState(false);
@@ -39,14 +40,33 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     y: number;
   } | null>(null);
 
+  // Crear un mapa de playerId a nombre de jugador para mostrar en el log
+  const playerIdToName = useMemo(() => {
+    const map: { [key: string]: string } = {};
+    if (session) {
+      session.teams.forEach((team) => {
+        team.players.forEach((player) => {
+          map[player._id] = player.name;
+        });
+      });
+    }
+    return map;
+  }, [session]);
+
   // --- Carga de Datos ---
   useEffect(() => {
-    async function fetchSession() {
+    async function fetchSessionData() {
       try {
-        const response = await fetch(`/api/sessions/${sessionId}`);
-        if (!response.ok) throw new Error('No se pudo cargar la sesión.');
-        const { data } = await response.json();
-        setSession(data);
+        const sessionResponse = await fetch(`/api/sessions/${sessionId}`);
+        if (!sessionResponse.ok) throw new Error('No se pudo cargar la sesión.');
+        const { data: sessionData } = await sessionResponse.json();
+        setSession(sessionData);
+
+        const eventsResponse = await fetch(`/api/game-events?sessionId=${sessionId}`);
+        if (!eventsResponse.ok) throw new Error('No se pudieron cargar los eventos de juego.');
+        const { data: eventsData } = await eventsResponse.json();
+        setGameEvents(eventsData);
+
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Ocurrió un error desconocido.',
@@ -55,16 +75,22 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         setLoading(false);
       }
     }
-    fetchSession();
+    fetchSessionData();
   }, [sessionId]);
 
   // --- Lógica de Eventos ---
 
   const logEvent = async (type: string, details: Record<string, unknown>) => {
     if (!selectedPlayer) {
-      alert('Por favor, selecciona un jugador primero.');
+      toast.error('Por favor, selecciona un jugador primero.');
       return;
     }
+    // Si la sesión ya finalizó, no permitir más eventos
+    if (session?.finishedAt) {
+      toast.warn('La sesión ya ha finalizado. No se pueden registrar más eventos.');
+      return;
+    }
+
     console.log('Logging event:', { type, details });
     try {
       const response = await fetch('/api/game-events', {
@@ -79,20 +105,27 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         }),
       });
       if (!response.ok) throw new Error('Error al registrar el evento.');
-      // Opcional: mostrar feedback al usuario
+      const newEvent = await response.json(); // Obtener el evento creado del backend
+      setGameEvents((prevEvents) => [...prevEvents, newEvent.data]); // Actualizar el estado de eventos
+      toast.success('Evento registrado!'); // Feedback de éxito
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error desconocido.');
+      toast.error(err instanceof Error ? err.message : 'Error desconocido.');
     }
   };
 
-  const handleCourtClick = (x: number, y: number) => {
+  const handleCourtClick = useCallback((x: number, y: number) => {
     if (!selectedPlayer) {
-      alert('Selecciona un jugador antes de registrar un tiro.');
+      toast.error('Selecciona un jugador antes de registrar un tiro.');
+      return;
+    }
+    // Si la sesión ya finalizó, no permitir tiros
+    if (session?.finishedAt) {
+      toast.warn('La sesión ya ha finalizado. No se pueden registrar tiros.');
       return;
     }
     setShotCoordinates({ x, y });
     setShowShotModal(true);
-  };
+  }, [selectedPlayer, session]); // Dependencias del useCallback
 
   const handleShot = (made: boolean) => {
     if (!shotCoordinates) return;
@@ -118,6 +151,50 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     logEvent(type, details);
   };
 
+  const handleUndo = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/game-events/${eventId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al deshacer el evento.');
+      }
+      // Eliminar el evento del estado local
+      setGameEvents((prevEvents) => prevEvents.filter((event) => event._id !== eventId));
+      toast.info('Evento deshecho.');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error desconocido al deshacer.');
+    }
+  };
+
+  const handleFinalizeSession = async () => {
+    if (!session) return;
+    if (session.finishedAt) {
+      toast.info('Esta sesión ya ha sido finalizada.');
+      return;
+    }
+
+    if (!confirm('¿Estás seguro de que quieres finalizar esta sesión? Esta acción es irreversible y no se podrán registrar más eventos.')) {
+        return;
+    }
+
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ finishedAt: new Date().toISOString() }),
+      });
+      if (!response.ok) throw new Error('Error al finalizar la sesión.');
+      const updatedSession = await response.json();
+      setSession(updatedSession.data); // Actualizar el estado con la sesión finalizada
+      toast.success('Sesión finalizada exitosamente!');
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : 'Error desconocido al finalizar la sesión.',
+      );
+    }
+  };
+
   // --- Renderizado ---
 
   if (loading) return <div>Cargando tracker...</div>;
@@ -127,10 +204,12 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const actionButtonStyles =
     'w-full p-3 rounded-lg text-white font-bold text-lg shadow-md transition-transform transform hover:scale-105';
 
+  const isSessionFinished = !!session.finishedAt;
+
   return (
-    <div className="flex flex-col md:flex-row gap-4">
+    <div className="flex flex-col lg:flex-row gap-4"> {/* Ajustar a 3 columnas en lg */}
       {/* Columna de Jugadores */}
-      <div className="w-full md:w-1/3 lg:w-1/4 space-y-4">
+      <div className="w-full lg:w-1/4 space-y-4">
         {session.teams.map((team) => (
           <div key={team.name}>
             <h3 className="font-bold text-xl mb-2">{team.name}</h3>
@@ -145,7 +224,8 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                         teamName: team.name,
                       })
                     }
-                    className={`w-full text-left p-2 rounded-md ${selectedPlayer?.id === player._id ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
+                    className={`w-full text-left p-2 rounded-md ${selectedPlayer?.id === player._id ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'} ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isSessionFinished}
                   >
                     {player.name}
                   </button>
@@ -154,10 +234,17 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             </ul>
           </div>
         ))}
+        <button
+          onClick={handleFinalizeSession}
+          disabled={isSessionFinished}
+          className={`${actionButtonStyles} ${isSessionFinished ? 'bg-gray-500 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} mt-4`}
+        >
+          {isSessionFinished ? 'Sesión Finalizada' : 'Finalizar Sesión'}
+        </button>
       </div>
 
       {/* Columna Principal (Cancha y Acciones) */}
-      <div className="w-full md:w-2/3 lg:w-3/4">
+      <div className="w-full lg:w-2/4"> {/* Ajustar el ancho de la columna principal */}
         <div className="mb-4 text-center">
           <h2 className="text-2xl">
             Registrando para:{' '}
@@ -174,47 +261,65 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
           <button
             onClick={() => handleAction('rebote', { type: 'ofensivo' })}
-            className={`${actionButtonStyles} bg-green-500`}
+            className={`${actionButtonStyles} bg-green-500 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Reb. Ofensivo
           </button>
           <button
             onClick={() => handleAction('rebote', { type: 'defensivo' })}
-            className={`${actionButtonStyles} bg-green-700`}
+            className={`${actionButtonStyles} bg-green-700 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Reb. Defensivo
           </button>
           <button
             onClick={() => handleAction('asistencia')}
-            className={`${actionButtonStyles} bg-sky-500`}
+            className={`${actionButtonStyles} bg-sky-500 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Asistencia
           </button>
           <button
             onClick={() => handleAction('robo')}
-            className={`${actionButtonStyles} bg-yellow-500`}
+            className={`${actionButtonStyles} bg-yellow-500 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Robo
           </button>
           <button
             onClick={() => handleAction('perdida')}
-            className={`${actionButtonStyles} bg-red-500`}
+            className={`${actionButtonStyles} bg-red-500 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Pérdida
           </button>
           <button
             onClick={() => handleAction('falta')}
-            className={`${actionButtonStyles} bg-purple-500`}
+            className={`${actionButtonStyles} bg-purple-500 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Falta
           </button>
           <button
             onClick={() => handleAction('tapón')}
-            className={`${actionButtonStyles} bg-slate-700`}
+            className={`${actionButtonStyles} bg-slate-700 ${isSessionFinished ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSessionFinished}
           >
             Tapón
           </button>
         </div>
+      </div>
+
+      {/* Columna para el Log de Eventos */}
+      <div className="w-full lg:w-1/4">
+        <GameLog 
+          sessionId={sessionId} 
+          events={gameEvents} 
+          playerIdToName={playerIdToName}
+          onUndo={handleUndo}
+          isSessionFinished={isSessionFinished}
+        />
       </div>
 
       {/* Modal de Tiro */}
@@ -247,6 +352,8 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           </div>
         </div>
       )}
+
+      <FloatingStats events={gameEvents} />
     </div>
   );
 }

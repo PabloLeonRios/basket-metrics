@@ -1,11 +1,12 @@
 // src/app/panel/dashboard/[sessionId]/page.tsx
 import Dashboard from '@/components/dashboard/Dashboard';
 
-export default function DashboardPage({
+export default async function DashboardPage({
   params,
 }: {
   params: { sessionId: string };
 }) {
+  const { sessionId } = await params;
   return (
     <div>
       <header className="mb-6">
@@ -17,7 +18,7 @@ export default function DashboardPage({
         </p>
       </header>
 
-      <Dashboard sessionId={params.sessionId} />
+      <Dashboard sessionId={sessionId} />
     </div>
   );
 }

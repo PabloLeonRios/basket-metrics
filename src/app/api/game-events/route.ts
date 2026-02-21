@@ -3,6 +3,31 @@ import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import GameEvent from '@/lib/models/GameEvent';
 
+export async function GET(request: NextRequest) {
+  await dbConnect();
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('sessionId');
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { success: false, message: 'Se requiere el ID de la sesión.' },
+        { status: 400 },
+      );
+    }
+
+    const events = await GameEvent.find({ session: sessionId }).sort({ createdAt: 1 });
+    return NextResponse.json({ success: true, data: events }, { status: 200 });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error desconocido';
+    return NextResponse.json(
+      { success: false, message: 'Error en el servidor', error: errorMessage },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   await dbConnect();
 

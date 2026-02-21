@@ -40,7 +40,7 @@ export type SessionType = (typeof sessionTypes)[number];
 
 interface ITeamInSession {
   name: string;
-  players: string[]; // Referencias a jugadores
+  players: (string | IPlayer)[]; // Puede ser un array de IDs (strings) o de objetos IPlayer poblados
 }
 
 export interface ISession {
@@ -50,6 +50,7 @@ export interface ISession {
   date: string;
   sessionType: SessionType;
   teams: ITeamInSession[];
+  finishedAt?: string; // Nuevo campo para la fecha de finalización de la sesión
 }
 
 // --- GAME EVENT ---
@@ -67,6 +68,7 @@ export interface IGameEvent {
     | 'falta'
     | 'tapón';
   details: Record<string, unknown>;
+  createdAt?: string; // Campo para la fecha de creación del evento
 }
 
 // --- STATS ---

@@ -1,5 +1,6 @@
 // src/components/tracker/Court.tsx
 'use client';
+import { memo } from 'react';
 
 interface CourtProps {
   onClick: (x: number, y: number) => void;
@@ -7,7 +8,7 @@ interface CourtProps {
 
 // Un componente simple que renderiza una media cancha de baloncesto SVG.
 // El viewBox define el sistema de coordenadas (0,0) en la esquina superior izquierda.
-export default function Court({ onClick }: CourtProps) {
+const Court = memo(function Court({ onClick }: CourtProps) {
   const handleCourtClick = (e: React.MouseEvent<SVGSVGElement>) => {
     const svg = e.currentTarget;
     const pt = svg.createSVGPoint();
@@ -91,4 +92,6 @@ export default function Court({ onClick }: CourtProps) {
       </svg>
     </div>
   );
-}
+});
+
+export default Court;
