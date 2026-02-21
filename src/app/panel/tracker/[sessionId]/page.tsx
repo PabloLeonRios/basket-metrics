@@ -3,12 +3,12 @@ import GameTracker from '@/components/tracker/GameTracker';
 
 // Esta página es un Server Component. Su única función es obtener el sessionId
 // de la URL y pasárselo al componente cliente que manejará toda la interactividad.
-export default function TrackerPage({
+export default async function TrackerPage({
   params,
 }: {
   params: { sessionId: string };
 }) {
-  const { sessionId } = params;
+  const { sessionId } = await params;
 
   return (
     <div className="container mx-auto p-4">
