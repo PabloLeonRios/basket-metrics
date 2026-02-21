@@ -88,7 +88,12 @@ export async function POST(request: NextRequest) {
 
     console.log('Step 5: Saving new user...');
     console.log('Before newUser.save()...');
-    await newUser.save();
+    await Promise.race([
+      newUser.save(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Save user operation timed out after 10 seconds')), 10000),
+      ),
+    ]);
     console.log('After newUser.save(). Step 5 Complete: New user saved.');
 
     console.log('Step 6: Creating new player object...');

@@ -29,7 +29,6 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-  console.log('Connecting to MongoDB with URI:', MONGODB_URI ? MONGODB_URI.substring(0, 20) + '...' : 'URI not set');
   cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
       return mongoose;
     });
