@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useMemo } from 'react';
 import Link from 'next/link';
 import { IPlayer, ISession, sessionTypes } from '@/types/definitions';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,16 +14,13 @@ export default function SessionManager() {
   const [calculationStatus, setCalculationStatus] = useState<{
     [sessionId: string]: 'idle' | 'calculating' | 'done' | 'error';
   }>({});
+  const [activeTab, setActiveTab] = useState<'open' | 'closed'>('open');
 
   // --- FORM STATE ---
   const [sessionName, setSessionName] = useState('');
   const [sessionType, setSessionType] = useState<string>(sessionTypes[0]);
-
-  // State for Team A (or the single group)
   const [teamAName, setTeamAName] = useState('Equipo A');
   const [teamAPlayers, setTeamAPlayers] = useState<Set<string>>(new Set());
-
-  // State for Team B (only for 'Partido')
   const [teamBName, setTeamBName] = useState('Equipo B');
   const [teamBPlayers, setTeamBPlayers] = useState<Set<string>>(new Set());
   // --- END FORM STATE ---
@@ -58,6 +55,19 @@ export default function SessionManager() {
     }
   }, [user, authLoading]);
 
+  const { openSessions, closedSessions } = useMemo(() => {
+    const open: ISession[] = [];
+    const closed: ISession[] = [];
+    sessions.forEach(session => {
+      if (session.finishedAt) {
+        closed.push(session);
+      } else {
+        open.push(session);
+      }
+    });
+    return { openSessions: open, closedSessions: closed };
+  }, [sessions]);
+
   const handlePlayerToggle = (team: 'A' | 'B', playerId: string) => {
     const isPartido = sessionType === 'Partido';
     if (team === 'A') {
@@ -67,7 +77,6 @@ export default function SessionManager() {
         else newSet.add(playerId);
         return newSet;
       });
-      // Si es partido y el jugador estaba en el otro equipo, quitarlo
       if (isPartido)
         setTeamBPlayers((prev) => {
           const newSet = new Set(prev);
@@ -81,7 +90,6 @@ export default function SessionManager() {
         else newSet.add(playerId);
         return newSet;
       });
-      // Si el jugador estaba en el otro equipo, quitarlo
       setTeamAPlayers((prev) => {
         const newSet = new Set(prev);
         newSet.delete(playerId);
@@ -148,6 +156,8 @@ export default function SessionManager() {
 
   if (loading) return <p>Cargando datos...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
+  
+  const sessionsToDisplay = activeTab === 'open' ? openSessions : closedSessions;
 
   return (
     <div className="space-y-8">
@@ -264,10 +274,24 @@ export default function SessionManager() {
 
       {/* Lista de Sesiones */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold">Sesiones Creadas</h2>
-        {sessions.length === 0 && <p>Aún no has creado ninguna sesión.</p>}
+        <div className="flex items-center border-b border-gray-200 dark:border-gray-700">
+            <button 
+                onClick={() => setActiveTab('open')}
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+                Abiertas ({openSessions.length})
+            </button>
+            <button 
+                onClick={() => setActiveTab('closed')}
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+                Cerradas ({closedSessions.length})
+            </button>
+        </div>
+
+        {sessionsToDisplay.length === 0 && <p>No hay sesiones en esta categoría.</p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sessions.map((session) => (
+          {sessionsToDisplay.map((session) => (
             <div
               key={session._id}
               className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col"
@@ -278,36 +302,45 @@ export default function SessionManager() {
                   {session.sessionType} -{' '}
                   {new Date(session.date).toLocaleDateString()}
                 </p>
+                 {session.finishedAt && (
+                   <p className="text-xs text-green-600 font-semibold">Finalizada: {new Date(session.finishedAt).toLocaleDateString()}</p>
+                 )}
               </div>
               <div className="mt-4 flex flex-col gap-2">
-                <Link
-                  href={`/panel/tracker/${session._id}`}
-                  className="text-center bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 w-full"
-                >
-                  Ir al Tracker
-                </Link>
+                {activeTab === 'open' && (
+                  <>
+                    <Link
+                      href={`/panel/tracker/${session._id}`}
+                      className="text-center bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 w-full"
+                    >
+                      Ir al Tracker
+                    </Link>
+                    <Link
+                      href={`/panel/sessions/${session._id}/edit`}
+                      className="text-center bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 w-full"
+                    >
+                      Editar
+                    </Link>
+                  </>
+                )}
+
                 {(session.sessionType === 'Partido' || session.sessionType === 'Lanzamiento') && (
                   <>
                     <button
                       onClick={() => handleCalculateStats(session._id)}
-                      disabled={
-                        calculationStatus[session._id] === 'calculating' ||
-                        calculationStatus[session._id] === 'done'
-                      }
+                      disabled={calculationStatus[session._id] === 'calculating' || calculationStatus[session._id] === 'done'}
                       className="text-center bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 w-full disabled:bg-gray-400"
                     >
                       {calculationStatus[session._id] === 'calculating'
                         ? 'Calculando...'
-                        : calculationStatus[session._id] === 'done'
-                          ? 'Recalcular Stats'
-                          : 'Calcular Stats'}
+                        : 'Calcular/Recalcular Stats'}
                     </button>
                     {calculationStatus[session._id] === 'done' && (
                       <Link
                         href={`/panel/dashboard/${session._id}`}
                         className="text-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 w-full"
                       >
-                        Ver Resultados
+                        Resumen
                       </Link>
                     )}
                   </>
