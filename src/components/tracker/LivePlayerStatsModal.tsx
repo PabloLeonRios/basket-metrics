@@ -18,7 +18,7 @@ export default function LivePlayerStatsModal({
 }: LivePlayerStatsModalProps) {
   // Calcular las estadísticas del jugador para la sesión actual
   const stats = useMemo(() => {
-    let points = 0, fga = 0, fgm = 0, '3pa' = 0, '3pm' = 0, fta = 0, ftm = 0;
+    let points = 0, fga = 0, fgm = 0, threePa = 0, threePm = 0, fta = 0, ftm = 0;
     let orb = 0, drb = 0, ast = 0, stl = 0, blk = 0, tov = 0, pf = 0;
 
     playerEvents.forEach((event) => {
@@ -32,8 +32,8 @@ export default function LivePlayerStatsModal({
             fga++;
             if (made) fgm++;
             if (value === 3) {
-              '3pa'++;
-              if (made) '3pm'++;
+              threePa++;
+              if (made) threePm++;
             }
           }
           if(made) points += value as number;
@@ -59,13 +59,13 @@ export default function LivePlayerStatsModal({
       }
     });
     
-    const eFG = fga > 0 ? (fgm + 0.5 * ('3pm')) / fga : 0;
+    const eFG = fga > 0 ? (fgm + 0.5 * (threePm)) / fga : 0;
     const tsAttempts = fga + 0.44 * fta;
     const TS = tsAttempts > 0 ? points / (2 * tsAttempts) : 0;
 
 
     return {
-      points, fga, fgm, '3pa', '3pm', fta, ftm,
+      points, fga, fgm, '3pa': threePa, '3pm': threePm, fta, ftm,
       reb: orb + drb, ast, stl, blk, tov, pf,
       eFG, TS,
     };

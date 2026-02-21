@@ -286,7 +286,7 @@ export default function SessionManager() {
                 >
                   Ir al Tracker
                 </Link>
-                {session.sessionType === 'Partido' && (
+                {(session.sessionType === 'Partido' || session.sessionType === 'Lanzamiento') && (
                   <>
                     <button
                       onClick={() => handleCalculateStats(session._id)}
