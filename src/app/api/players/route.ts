@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user...');
-    await newUser.save();
+    await newUser.save({ writeConcern: { w: 0 } });
     console.log('Step 5 Complete: New user saved.');
 
     console.log('Step 6: Creating new player object...');
