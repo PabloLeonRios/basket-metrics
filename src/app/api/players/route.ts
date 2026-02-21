@@ -80,9 +80,12 @@ export async function POST(request: NextRequest) {
     });
     console.log('Step 4 Complete: User object created.');
 
-    console.log('Step 5: Saving new user...');
-    await newUser.save({ writeConcern: { w: 0 } });
-    console.log('Step 5 Complete: New user saved.');
+    console.log('Step 5: Saving new user (direct insert with driver)...');
+    const newUserPlain = newUser.toObject();
+    delete newUserPlain._id; // Let MongoDB generate _id
+    const result = await User.collection.insertOne(newUserPlain);
+    newUser._id = result.insertedId; // Assign the newly generated _id back to the Mongoose document for subsequent use
+    console.log('Step 5 Complete: New user saved (direct insert). Inserted ID:', result.insertedId);
 
     console.log('Step 6: Creating new player object...');
     const newPlayer = new Player({
