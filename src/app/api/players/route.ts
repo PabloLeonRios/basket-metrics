@@ -38,9 +38,7 @@ export async function GET(request: NextRequest) {
 // POST: Crear un nuevo jugador
 export async function POST(request: NextRequest) {
   console.log('--- PLAYER CREATION REQUEST START ---');
-  console.log('Calling dbConnect...');
   await dbConnect();
-  console.log('dbConnect successful.');
   try {
     const { name, dorsal, position, team, coach } = await request.json();
     console.log('Step 1: Payload received:', { name, team, coach });
@@ -58,14 +56,11 @@ export async function POST(request: NextRequest) {
 
     console.log('Step 2: Hashing password...');
     const placeholderPassword = Math.random().toString(36).slice(-8);
-    console.log('Before bcrypt.hash...');
     const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
-    console.log('After bcrypt.hash. Step 2 Complete: Password hashed.');
+    console.log('Step 2 Complete: Password hashed.');
     
     console.log('Step 3: Finding coach user...');
-    console.log('Before User.findById(coach)...');
     const coachUser = await User.findById(coach).select('team');
-    console.log('After User.findById(coach).');
     if (!coachUser) {
         console.error('Coach not found!');
         return NextResponse.json({ success: false, message: 'Entrenador no encontrado.' }, { status: 404 });
@@ -75,7 +70,6 @@ export async function POST(request: NextRequest) {
     console.log('Step 4: Creating placeholder user object...');
     const randomString = Math.random().toString(36).substring(2, 10);
     const placeholderEmail = `player.${randomString}.${Date.now()}@basketmetrics.local`;
-    console.log('Before new User({...})...');
     const newUser = new User({
       name,
       email: placeholderEmail,
@@ -84,18 +78,11 @@ export async function POST(request: NextRequest) {
       isActive: false, // El jugador se crea como inactivo por defecto
       team: coachUser.team, // Asignar el equipo del entrenador
     });
-    console.log('Player User object before save:', newUser);
-    console.log('After new User({...}). Step 4 Complete: User object created.');
+    console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user...');
-    console.log('Before newUser.save()...');
-    await Promise.race([
-      newUser.save(),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Save user operation timed out after 10 seconds')), 10000),
-      ),
-    ]);
-    console.log('After newUser.save(). Step 5 Complete: New user saved.');
+    await newUser.save();
+    console.log('Step 5 Complete: New user saved.');
 
     console.log('Step 6: Creating new player object...');
     const newPlayer = new Player({
