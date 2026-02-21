@@ -8,15 +8,21 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
+    const playerId = searchParams.get('playerId');
 
-    if (!sessionId) {
+    const filter: { [key: string]: string } = {};
+    if (sessionId) {
+      filter.session = sessionId;
+    } else if (playerId) {
+      filter.player = playerId;
+    } else {
       return NextResponse.json(
-        { success: false, message: 'Se requiere el ID de la sesión.' },
+        { success: false, message: 'Se requiere el ID de la sesión o del jugador.' },
         { status: 400 },
       );
     }
 
-    const events = await GameEvent.find({ session: sessionId }).sort({ createdAt: 1 });
+    const events = await GameEvent.find(filter).sort({ createdAt: 1 });
     return NextResponse.json({ success: true, data: events }, { status: 200 });
   } catch (error) {
     const errorMessage =

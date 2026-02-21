@@ -2,6 +2,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
+import Team from '@/lib/models/Team'; // Importar Team para que Mongoose lo registre para el populate
 import { IUser } from '@/types/definitions';
 import { Document } from 'mongoose';
 import bcrypt from 'bcrypt';
