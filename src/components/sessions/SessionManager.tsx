@@ -298,16 +298,16 @@ export default function SessionManager() {
             >
               <div className="flex-grow">
                 <p className="font-bold text-lg">{session.name}</p>
-                <p className="text-sm text-gray-500">
-                  {session.sessionType} -{' '}
-                  {new Date(session.date).toLocaleDateString()}
-                </p>
-                 {session.finishedAt && (
-                   <p className="text-xs text-green-600 font-semibold">Finalizada: {new Date(session.finishedAt).toLocaleDateString()}</p>
-                 )}
+                <div className="text-sm text-gray-500">
+                  <p>{session.sessionType}</p>
+                  <p>Inicio: {new Date(session.date).toLocaleString()}</p>
+                  {session.finishedAt && (
+                    <p className="text-green-600">Fin: {new Date(session.finishedAt).toLocaleString()}</p>
+                  )}
+                </div>
               </div>
               <div className="mt-4 flex flex-col gap-2">
-                {activeTab === 'open' && (
+                {activeTab === 'open' ? (
                   <>
                     <Link
                       href={`/panel/tracker/${session._id}`}
@@ -322,7 +322,7 @@ export default function SessionManager() {
                       Editar
                     </Link>
                   </>
-                )}
+                ) : null}
 
                 {(session.sessionType === 'Partido' || session.sessionType === 'Lanzamiento') && (
                   <>
@@ -335,7 +335,7 @@ export default function SessionManager() {
                         ? 'Calculando...'
                         : 'Calcular/Recalcular Stats'}
                     </button>
-                    {calculationStatus[session._id] === 'done' && (
+                    {(calculationStatus[session._id] === 'done' || session.finishedAt) && (
                       <Link
                         href={`/panel/dashboard/${session._id}`}
                         className="text-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 w-full"

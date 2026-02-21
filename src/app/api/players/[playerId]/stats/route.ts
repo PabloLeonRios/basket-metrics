@@ -23,7 +23,7 @@ export async function GET(
     // 1. Obtener todas las estadísticas partido a partido del jugador
     const gameByGameStats = await PlayerGameStats.find({
       player: playerId,
-    }).populate('session', 'name date');
+    }).populate('session', 'name date finishedAt');
 
     // 2. Usar el Pipeline de Agregación para calcular los promedios de carrera del jugador
     const playerCareerAveragesArr = await PlayerGameStats.aggregate([

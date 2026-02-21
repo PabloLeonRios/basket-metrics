@@ -13,7 +13,7 @@ interface CareerAverages {
 }
 interface GameStats {
   _id: string;
-  session: { name: string; date: string };
+  session: { name: string; date: string; finishedAt?: string };
   points: number;
   eFG: number;
   TS: number;
@@ -169,7 +169,9 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
               {games.map((game) => (
                 <tr key={game._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {game.session.name}
+                    <p className="font-semibold text-gray-900 dark:text-white">{game.session.name}</p>
+                    <p>Inicio: {new Date(game.session.date).toLocaleString()}</p>
+                    {game.session.finishedAt && <p>Fin: {new Date(game.session.finishedAt).toLocaleString()}</p>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600 dark:text-blue-400">
                     {game.gameScore.toFixed(1)}
