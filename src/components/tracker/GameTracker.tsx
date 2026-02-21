@@ -11,6 +11,7 @@ import { IGameEvent, IPlayer, ISession } from '@/types/definitions'; // Importar
 // Las interfaces Player y Team ahora se importan como IPlayer y ISession
 // La interfaz SessionData ahora es ISession, pero necesitamos adaptarla para incluir 'teams' con IPlayer
 interface TeamData { // Renombrada para evitar conflicto
+  _id: string; // Añadir _id para usar como key estable
   name: string;
   players: IPlayer[]; // Usar IPlayer importado
 }
@@ -211,7 +212,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
       {/* Columna de Jugadores */}
       <div className="w-full lg:w-1/4 space-y-4">
         {session.teams.map((team) => (
-          <div key={team.name}>
+          <div key={team._id}> {/* Usar team._id como key */}
             <h3 className="font-bold text-xl mb-2">{team.name}</h3>
             <ul className="space-y-1">
               {team.players.map((player) => (

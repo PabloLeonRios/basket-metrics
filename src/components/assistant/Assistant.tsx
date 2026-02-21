@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import {
   GameSituation,
   PlayerProfile,
+  CareerAverages,
 } from '@/lib/recommender/lineupRecommender';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -21,6 +22,18 @@ const situations: { value: GameSituation; label: string }[] = [
   { value: 'NEEDS_DEFENSE', label: 'Necesito Defensa y Rebote' },
 ];
 
+// Componente para el Tooltip
+const StatTooltip = ({ stats }: { stats: CareerAverages | null }) => {
+    if (!stats) return null;
+    return (
+      <div className="absolute bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+        <p>PTS: {stats.avgPoints.toFixed(1)}</p>
+        <p>AST: {stats.avgAst.toFixed(1)}</p>
+        <p>REB: {(stats.avgOrb + stats.avgDrb).toFixed(1)}</p>
+      </div>
+    );
+};
+
 export default function Assistant() {
   const { user, loading: authLoading } = useAuth();
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
@@ -31,6 +44,10 @@ export default function Assistant() {
   const [recommendation, setRecommendation] = useState<PlayerProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Estados para el modal de detalles
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalPlayerProfile, setModalPlayerProfile] = useState<PlayerProfile | null>(null);
 
   useEffect(() => {
     async function fetchPlayers() {
@@ -87,6 +104,11 @@ export default function Assistant() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleProfileClick = (profile: PlayerProfile) => {
+    setModalPlayerProfile(profile);
+    setIsModalOpen(true);
   };
 
   return (
@@ -150,8 +172,10 @@ export default function Assistant() {
             {recommendation.map((profile) => (
               <div
                 key={profile.playerId}
-                className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg border-l-4 border-green-500"
+                onClick={() => handleProfileClick(profile)}
+                className="group relative bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg border-l-4 border-green-500 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
               >
+                <StatTooltip stats={profile.careerAverages} />
                 <p className="text-lg font-bold">{profile.name}</p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   {Array.from(profile.tags).map((tag) => (
@@ -168,6 +192,43 @@ export default function Assistant() {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalles del Jugador */}
+      {isModalOpen && modalPlayerProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setIsModalOpen(false)}>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold mb-4">{modalPlayerProfile.name}</h3>
+            <div className="mb-4">
+              <h4 className="font-semibold text-lg mb-2">Perfil del Jugador:</h4>
+              <div className="flex flex-wrap gap-2">
+                {Array.from(modalPlayerProfile.tags).map((tag) => (
+                  <span key={tag} className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium rounded-full">{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold text-lg mb-2">Estadísticas de Carrera (Promedios):</h4>
+              {modalPlayerProfile.careerAverages ? (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  <p><strong>Puntos:</strong> {modalPlayerProfile.careerAverages.avgPoints.toFixed(1)}</p>
+                  <p><strong>Asistencias:</strong> {modalPlayerProfile.careerAverages.avgAst.toFixed(1)}</p>
+                  <p><strong>Reb. Ofensivos:</strong> {modalPlayerProfile.careerAverages.avgOrb.toFixed(1)}</p>
+                  <p><strong>Reb. Defensivos:</strong> {modalPlayerProfile.careerAverages.avgDrb.toFixed(1)}</p>
+                  <p><strong>Robos:</strong> {modalPlayerProfile.careerAverages.avgStl.toFixed(1)}</p>
+                  <p><strong>Pérdidas:</strong> {modalPlayerProfile.careerAverages.avgTov.toFixed(1)}</p>
+                  <p><strong>3P Hechos:</strong> {modalPlayerProfile.careerAverages.avg3pm.toFixed(1)}</p>
+                  <p><strong>3P Intentados:</strong> {modalPlayerProfile.careerAverages.avg3pa.toFixed(1)}</p>
+                </div>
+              ) : (
+                <p className="text-gray-500">No hay suficientes estadísticas para mostrar.</p>
+              )}
+            </div>
+            <button onClick={() => setIsModalOpen(false)} className="mt-6 w-full py-2 bg-gray-200 dark:bg-gray-700 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

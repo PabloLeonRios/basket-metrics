@@ -16,6 +16,7 @@ export interface PlayerProfile {
   playerId: string;
   name: string;
   tags: Set<PlayerProfileTag>;
+  careerAverages: CareerAverages | null; // Añadir estadísticas de carrera
 }
 
 // Situaciones de partido que el entrenador puede elegir
@@ -26,7 +27,7 @@ export type GameSituation =
   | 'BALANCED';
 
 // Interfaz para el objeto de jugador con sus promedios
-interface CareerAverages {
+export interface CareerAverages {
   avgPoints: number;
   avgAst: number;
   avgOrb: number;
@@ -59,7 +60,7 @@ export function generatePlayerProfiles(
     const tags = new Set<PlayerProfileTag>();
 
     if (!stats) {
-      return { playerId: p._id, name: p.name, tags };
+      return { playerId: p._id, name: p.name, tags, careerAverages: null };
     }
 
     // Lógica de perfilado basada en umbrales (estos valores son ejemplos y se pueden ajustar)
@@ -80,6 +81,7 @@ export function generatePlayerProfiles(
       playerId: p._id,
       name: p.name, // Asumimos que el nombre del jugador está en el objeto
       tags,
+      careerAverages: p.careerAverages, // Pasar las estadísticas completas
     };
   });
 }

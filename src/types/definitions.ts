@@ -39,6 +39,7 @@ export const sessionTypes = [
 export type SessionType = (typeof sessionTypes)[number];
 
 interface ITeamInSession {
+  _id: string; // Los subdocumentos de Mongoose tienen _id por defecto
   name: string;
   players: (string | IPlayer)[]; // Puede ser un array de IDs (strings) o de objetos IPlayer poblados
 }

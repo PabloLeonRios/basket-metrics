@@ -4,11 +4,12 @@ import { memo } from 'react';
 
 interface CourtProps {
   onClick: (x: number, y: number) => void;
+  shotCoordinates?: { x: number; y: number } | null; // Coordenadas del tiro pendiente
 }
 
 // Un componente simple que renderiza una media cancha de baloncesto SVG.
 // El viewBox define el sistema de coordenadas (0,0) en la esquina superior izquierda.
-const Court = memo(function Court({ onClick }: CourtProps) {
+const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
   const handleCourtClick = (e: React.MouseEvent<SVGSVGElement>) => {
     const svg = e.currentTarget;
     const pt = svg.createSVGPoint();
@@ -89,6 +90,17 @@ const Court = memo(function Court({ onClick }: CourtProps) {
           stroke="black"
           strokeWidth="0.5"
         />
+        {/* Marcador de Tiro Pendiente */}
+        {shotCoordinates && (
+          <circle
+            cx={shotCoordinates.x}
+            cy={shotCoordinates.y}
+            r="1.5"
+            fill="red"
+            stroke="white"
+            strokeWidth="0.5"
+          />
+        )}
       </svg>
     </div>
   );
