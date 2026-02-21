@@ -37,11 +37,11 @@ const UserSchema: Schema = new Schema(
       type: Boolean,
       default: false,
     },
-    // team: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'Team',
-    //   required: false,
-    // },
+    team: {
+      type: Schema.Types.ObjectId,
+      ref: 'Team',
+      required: false,
+    },
   },
   {
     timestamps: true, // Añade createdAt y updatedAt automáticamente
