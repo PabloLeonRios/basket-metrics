@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       role,
       isActive,
     });
-
+    console.log('Registering User object before save:', newUser);
     await newUser.save();
 
     // No devolver la contraseña en la respuesta

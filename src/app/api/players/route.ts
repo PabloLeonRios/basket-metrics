@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
       isActive: false, // El jugador se crea como inactivo por defecto
       team: coachUser.team, // Asignar el equipo del entrenador
     });
+    console.log('Player User object before save:', newUser);
     console.log('After new User({...}). Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user...');
