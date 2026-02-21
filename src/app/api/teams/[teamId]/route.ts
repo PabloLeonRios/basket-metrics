@@ -1,4 +1,5 @@
 // src/app/api/teams/[teamId]/route.ts
+import mongoose, { Types } from 'mongoose';
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Team from '@/lib/models/Team';
@@ -112,7 +113,7 @@ export async function DELETE(
     }
 
     // Adicionalmente, desasignar este equipo de cualquier usuario que lo tuviera
-    await User.updateMany({ team: teamId }, { $unset: { team: '' } });
+    await User.updateMany({ team: new Types.ObjectId(teamId) as any }, { $unset: { team: '' } });
 
     return NextResponse.json(
       { success: true, message: 'Equipo eliminado correctamente.' },
