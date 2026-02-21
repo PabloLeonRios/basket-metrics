@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         console.error('Coach not found!');
         return NextResponse.json({ success: false, message: 'Entrenador no encontrado.' }, { status: 404 });
     }
-    console.log('Step 3 Complete: Coach found.');
+    console.log('Step 3 Complete: Coach found. Coach Team:', coachUser.team);
 
     console.log('Step 4: Creating placeholder user object...');
     const randomString = Math.random().toString(36).substring(2, 10);
