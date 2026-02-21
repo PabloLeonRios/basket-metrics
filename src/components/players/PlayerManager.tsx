@@ -3,19 +3,11 @@
 import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-
-// Tipo para el objeto Jugador
-interface Player {
-  _id: string;
-  name: string;
-  dorsal?: number;
-  position?: string;
-  team?: string;
-}
+import { IPlayer } from '@/types/definitions'; // Importar IPlayer
 
 export default function PlayerManager() {
   const { user, loading: authLoading } = useAuth();
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<IPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -2,14 +2,16 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import PlayerGameStats from '@/lib/models/PlayerGameStats';
+import Player from '@/lib/models/Player'; // Importar Player
 import mongoose from 'mongoose';
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ playerId: string }> },
+) {
   await dbConnect();
   try {
-    const pathname = request.nextUrl.pathname;
-    const parts = pathname.split('/');
-    const playerId = parts[parts.length - 2]; // la URL es /api/players/[playerId]/stats
+    const { playerId } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(playerId)) {
       return NextResponse.json(
@@ -18,13 +20,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 1. Obtener todas las estadísticas partido a partido
+    // 1. Obtener todas las estadísticas partido a partido del jugador
     const gameByGameStats = await PlayerGameStats.find({
       player: playerId,
     }).populate('session', 'name date');
 
-    // 2. Usar el Pipeline de Agregación para calcular los promedios de carrera
-    const careerAverages = await PlayerGameStats.aggregate([
+    // 2. Usar el Pipeline de Agregación para calcular los promedios de carrera del jugador
+    const playerCareerAveragesArr = await PlayerGameStats.aggregate([
       { $match: { player: new mongoose.Types.ObjectId(playerId) } },
       {
         $group: {
@@ -48,13 +50,52 @@ export async function GET(request: NextRequest) {
         },
       },
     ]);
+    const playerCareerAverages = playerCareerAveragesArr[0] || null;
+
+    // --- CÁLCULO DEL VALOR GLOBAL ---
+    let globalValue = null;
+
+    if (playerCareerAverages) {
+      // 3. Encontrar al jugador para obtener su equipo
+      const player = await Player.findById(playerId).select('team');
+      if (player && player.team) {
+        // 4. Encontrar a todos los jugadores del mismo equipo
+        const teamPlayers = await Player.find({ team: player.team }).select('_id');
+        const teamPlayerIds = teamPlayers.map(p => p._id);
+
+        // 5. Calcular el GameScore promedio para todo el equipo
+        const teamAverages = await PlayerGameStats.aggregate([
+          { $match: { player: { $in: teamPlayerIds } } },
+          {
+            $group: {
+              _id: null,
+              teamAvgGameScore: { $avg: '$gameScore' },
+            },
+          },
+        ]);
+
+        if (teamAverages.length > 0 && teamAverages[0].teamAvgGameScore > 0) {
+          const teamAvgGameScore = teamAverages[0].teamAvgGameScore;
+          const playerAvgGameScore = playerCareerAverages.avgGameScore;
+          
+          // Fórmula de normalización: 50 es la media. Un jugador promedio tendrá 50.
+          // El valor se escala para que esté en un rango visible.
+          let calculatedValue = (playerAvgGameScore / teamAvgGameScore) * 50;
+          
+          // Limitar el valor entre 1 y 99 para mantenerlo en un rango razonable.
+          calculatedValue = Math.max(1, Math.min(calculatedValue, 99));
+          globalValue = Math.round(calculatedValue);
+        }
+      }
+    }
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          careerAverages: careerAverages[0] || null,
+          careerAverages: playerCareerAverages,
           gameByGameStats: gameByGameStats,
+          globalValue: globalValue, // Devolver el valor global
         },
       },
       { status: 200 },

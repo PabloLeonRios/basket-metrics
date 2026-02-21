@@ -19,7 +19,8 @@ export default async function PlayerProfilePage({
 }: {
   params: { playerId: string };
 }) {
-  const playerName = await getPlayerName(params.playerId);
+  const { playerId } = await params;
+  const playerName = await getPlayerName(playerId);
 
   return (
     <div>
@@ -32,7 +33,7 @@ export default async function PlayerProfilePage({
         </p>
       </header>
 
-      <PlayerProfile playerId={params.playerId} />
+      <PlayerProfile playerId={playerId} />
     </div>
   );
 }

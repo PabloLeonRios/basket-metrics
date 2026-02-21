@@ -24,7 +24,11 @@ export async function GET(request: NextRequest) {
     }
 
     const players = await Player.find({ coach: coachId });
-    return NextResponse.json({ success: true, data: players }, { status: 200 });
+
+    // Forzar la serialización para asegurar que _id sea un string
+    const serializedPlayers = JSON.parse(JSON.stringify(players));
+
+    return NextResponse.json({ success: true, data: serializedPlayers }, { status: 200 });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error desconocido';

@@ -30,11 +30,13 @@ interface GameStats {
 export default function PlayerProfile({ playerId }: { playerId: string }) {
   const [averages, setAverages] = useState<CareerAverages | null>(null);
   const [games, setGames] = useState<GameStats[]>([]);
+  const [globalValue, setGlobalValue] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStats() {
+      if (!playerId) return;
       try {
         setLoading(true);
         const response = await fetch(`/api/players/${playerId}/stats`);
@@ -46,6 +48,7 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
         const { data } = await response.json();
         setAverages(data.careerAverages);
         setGames(data.gameByGameStats);
+        setGlobalValue(data.globalValue); // Guardar el valor global
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
@@ -58,11 +61,13 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
   const StatCard = ({
     title,
     value,
+    className = ''
   }: {
     title: string;
     value: string | number;
+    className?: string;
   }) => (
-    <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md text-center">
+    <div className={`bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md text-center ${className}`}>
       <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
       <p className="text-3xl font-bold text-gray-900 dark:text-gray-50">
         {value}
@@ -76,7 +81,12 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
   return (
     <div className="space-y-8">
       {/* Tarjetas de Promedios */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <StatCard 
+          title="Valor Global" 
+          value={globalValue || '--'} 
+          className="bg-blue-100 dark:bg-blue-900"
+        />
         <StatCard title="Partidos Jugados" value={averages?.totalGames || 0} />
         <StatCard
           title="Puntos Por Partido"

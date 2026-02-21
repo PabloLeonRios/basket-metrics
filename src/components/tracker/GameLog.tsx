@@ -1,21 +1,45 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { IGameEvent } from '@/types/definitions'; // Asumiendo que IGameEvent está en definitions.ts
+import { IGameEvent } from '@/types/definitions';
 
 interface GameLogProps {
   sessionId: string;
   events: IGameEvent[];
-  playerIdToName: { [key: string]: string }; // Mapa para resolver ID de jugador a nombre
-  onUndo: (eventId: string) => void; // Función para deshacer un evento
-  isSessionFinished: boolean; // Para deshabilitar los botones si la sesión ha terminado
+  playerIdToName: { [key: string]: string };
+  onUndo: (eventId: string) => void;
+  isSessionFinished: boolean;
 }
+
+// Función para formatear los detalles del evento
+const formatEventDetails = (event: IGameEvent): string => {
+  const { type, details } = event;
+  switch (type) {
+    case 'tiro':
+      const { made, value } = details;
+      const shotType = value === 1 ? 'Tiro Libre' : `Tiro de ${value}`;
+      return `${shotType} ${made ? 'Anotado' : 'Fallado'}`;
+    case 'rebote':
+      return `Rebote ${details.type === 'ofensivo' ? 'Ofensivo' : 'Defensivo'}`;
+    case 'asistencia':
+      return 'Asistencia';
+    case 'robo':
+      return 'Robo';
+    case 'perdida':
+      return 'Pérdida';
+    case 'falta':
+      return 'Falta';
+    case 'tapón':
+      return 'Tapón';
+    default:
+      return type;
+  }
+};
 
 export default function GameLog({ events, playerIdToName, onUndo, isSessionFinished }: GameLogProps) {
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Scroll automático al final del log cuando se añaden nuevos eventos
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [events]);
 
@@ -31,19 +55,11 @@ export default function GameLog({ events, playerIdToName, onUndo, isSessionFinis
               <div className="flex justify-between items-start">
                 <div>
                   <p>
-                    <strong>Jugador:</strong>{' '}
-                    {playerIdToName[event.player] || event.player} {/* Mostrar nombre o ID */}
+                    <strong>{playerIdToName[event.player] || 'Jugador desconocido'}:</strong>{' '}
+                    <span className="text-blue-600 dark:text-blue-400">{formatEventDetails(event)}</span>
                   </p>
-                  <p><strong>Acción:</strong> {event.type}</p>
-                  {event.details && Object.keys(event.details).length > 0 && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {Object.entries(event.details)
-                        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-                        .join(', ')}
-                    </p>
-                  )}
                   <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(event.createdAt as string).toLocaleTimeString()} {/* Asumiendo que createdAt existe */}
+                    {new Date(event.createdAt as string).toLocaleTimeString()}
                   </p>
                 </div>
                 <button
@@ -56,7 +72,7 @@ export default function GameLog({ events, playerIdToName, onUndo, isSessionFinis
               </div>
             </li>
           ))}
-          <div ref={logEndRef} /> {/* Elemento para el scroll automático */}
+          <div ref={logEndRef} />
         </ul>
       )}
     </div>
