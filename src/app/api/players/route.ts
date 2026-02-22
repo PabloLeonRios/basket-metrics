@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '9');
     const search = searchParams.get('search');
-    const isActive = searchParams.get('isActive') === 'true';
+    const status = searchParams.get('status'); // 'inactive' or default to active
 
     if (!coachId) {
       return NextResponse.json(
@@ -26,11 +26,12 @@ export async function GET(request: NextRequest) {
         { status: 400 },
       );
     }
-
+    
+    // Build the query object
     const query: any = {
       $and: [
         { coach: coachId },
-        { isActive: isActive }
+        { isActive: status !== 'inactive' }
       ]
     };
 

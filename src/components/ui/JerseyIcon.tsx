@@ -14,14 +14,16 @@ const JerseyIcon: React.FC<JerseyIconProps> = ({ number, className }) => {
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full"
       >
-        {/* Jersey Body */}
+        {/* Improved Jersey Body */}
         <path
-          d="M20,30 Q25,25 30,30 L30,70 Q50,80 70,70 L70,30 Q75,25 80,30 L90,20 L60,10 L40,10 L10,20 Z"
+          d="M15 25 L30 35 L30 75 Q50 85 70 75 L70 35 L85 25 L75 10 L25 10 Z"
           className="fill-current text-gray-200 dark:text-gray-700"
+          stroke="#9CA3AF"
+          strokeWidth="2"
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold text-gray-600 dark:text-gray-300">
+        <span className="text-xl font-bold text-gray-600 dark:text-gray-300">
           {number || '?'}
         </span>
       </div>

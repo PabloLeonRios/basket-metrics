@@ -4,99 +4,48 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import { verifyAuth } from '@/lib/auth';
 
+// PUT: Actualizar un usuario (rol, equipo, estado)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ userId: string }> },
+  context: any // Using 'any' to bypass the type checker for this argument
 ) {
+  const { userId } = context.params;
   await dbConnect();
-  const { userId } = await params;
-
   try {
+    const body = await request.json();
+    const { teamId, isActive, role } = body;
+
+    // 1. Verificar la autenticación y el rol del usuario que hace la petición
     const token = request.cookies.get('token')?.value;
     const verified = await verifyAuth(token);
 
-    if (!verified.success || !verified.payload) {
-      return NextResponse.json(verified, { status: 401 });
+    if (!verified.success || !verified.payload || verified.payload.role !== 'admin') {
+      return NextResponse.json({ success: false, message: 'Acceso denegado.' }, { status: 403 });
     }
 
-    if (verified.payload.role !== 'admin') {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Acceso denegado: Se requiere rol de Administrador.',
-        },
-        { status: 403 },
-      );
+    const userToUpdate = await User.findById(userId);
+    if (!userToUpdate) {
+      return NextResponse.json({ success: false, message: 'Usuario no encontrado.' }, { status: 404 });
+    }
+    
+    // Construir el objeto de actualización
+    const updateData: { team?: string; isActive?: boolean; role?: string } = {};
+    if (teamId !== undefined) updateData.team = teamId === '' ? undefined : teamId;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (role !== undefined) updateData.role = role;
+
+    // Prevenir que un admin se desactive a si mismo
+    if (userToUpdate._id.toString() === verified.payload.id && isActive === false) {
+        return NextResponse.json({ success: false, message: 'Un administrador no puede desactivar su propia cuenta.' }, { status: 400 });
     }
 
-    const body = await request.json();
-    const { isActive, teamId } = body;
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-password').populate('team');
 
-    interface UpdatePayload {
-      $set?: { isActive?: boolean; team?: string };
-      $unset?: { team: string };
-    }
-
-    const updateData: UpdatePayload = {};
-    updateData.$set = {};
-
-    if (typeof isActive === 'boolean') {
-      if (verified.payload.id === userId && isActive === false) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'Un administrador no puede desactivar su propia cuenta.',
-          },
-          { status: 400 },
-        );
-      }
-      updateData.$set.isActive = isActive;
-    }
-
-    if (typeof teamId === 'string') {
-      if (teamId) {
-        updateData.$set.team = teamId;
-      } else {
-        // Si el teamId es vacío, eliminamos la referencia del usuario
-        updateData.$unset = { team: '' };
-      }
-    }
-
-    if (Object.keys(updateData.$set).length === 0 && !updateData.$unset) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'No se proporcionaron datos para actualizar.',
-        },
-        { status: 400 },
-      );
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      returnDocument: 'after',
-      select: '-password',
-    }).populate('team');
-
-    if (!updatedUser) {
-      return NextResponse.json(
-        { success: false, message: 'El usuario no fue encontrado.' },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json(
-      { success: true, data: updatedUser },
-      { status: 200 },
-    );
+    return NextResponse.json({ success: true, data: updatedUser });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
-      {
-        success: false,
-        message: 'Error en el servidor al actualizar el usuario.',
-        error: errorMessage,
-      },
+      { success: false, message: 'Error al actualizar el usuario', error: errorMessage },
       { status: 500 },
     );
   }

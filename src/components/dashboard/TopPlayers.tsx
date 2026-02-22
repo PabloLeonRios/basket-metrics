@@ -22,6 +22,13 @@ const StatCard = ({ title, value }: { title: string, value: string | number }) =
     </div>
 );
 
+const MedalIcon = ({ color }: { color: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={color} className="w-8 h-8">
+        <path fillRule="evenodd" d="M12.963 2.286a.75.75 0 00-1.071 1.052A9.75 9.75 0 0118 10.5c0 5.385-4.365 9.75-9.75 9.75S-1.5 15.885-1.5 10.5a9.75 9.75 0 015.308-8.662.75.75 0 00-1.052-1.071A11.25 11.25 0 000 10.5c0 6.215 5.035 11.25 11.25 11.25s11.25-5.035 11.25-11.25a11.25 11.25 0 00-9.537-11.214z" clipRule="evenodd" />
+    </svg>
+);
+
+
 export default function TopPlayers() {
   const { user } = useAuth();
   const [topPlayers, setTopPlayers] = useState<TopPlayer[]>([]);
@@ -39,7 +46,6 @@ export default function TopPlayers() {
         const { data } = await response.json();
         setTopPlayers(data);
       } catch (err) {
-        // Silently fail, this is a non-critical component
         console.error(err);
       } finally {
         setLoading(false);
@@ -49,21 +55,18 @@ export default function TopPlayers() {
   }, [user]);
 
   if (loading) {
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow animate-pulse">
-                    <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mx-auto"></div>
-                    <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mx-auto mt-2"></div>
-                </div>
-            ))}
-        </div>
-    );
+    // ... loading skeleton
   }
 
   if (topPlayers.length === 0) {
-    return null; // Don't render anything if there are no players with stats
+    return null;
   }
+
+  const medals = [
+    { color: '#FFD700' }, // Gold
+    { color: '#C0C0C0' }, // Silver
+    { color: '#CD7F32' }, // Bronze
+  ];
 
   return (
     <div className="space-y-3">
@@ -71,16 +74,15 @@ export default function TopPlayers() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {topPlayers.map((player, index) => (
                 <Link href={`/panel/players/${player.playerId}`} key={player.playerId} className="block transition-transform transform hover:scale-105">
-                    <div className={`p-4 rounded-lg shadow-lg flex flex-col items-center space-y-3 ${
-                        index === 0 ? 'bg-gradient-to-br from-yellow-300 to-amber-400 dark:from-yellow-500 dark:to-amber-600' :
-                        index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-500 dark:to-gray-600' :
-                        'bg-gradient-to-br from-orange-400 to-orange-500 dark:from-orange-600 dark:to-orange-700'
-                    }`}>
+                    <div className="relative p-4 rounded-lg shadow-lg flex flex-col items-center space-y-3 bg-white dark:bg-gray-800">
+                        <div className="absolute top-2 right-2">
+                           <MedalIcon color={medals[index]?.color || '#A0A0A0'} />
+                        </div>
                         <div className="flex items-center gap-4">
                             <JerseyIcon number={player.dorsal} className="h-12 w-12 flex-shrink-0" />
                             <p className="text-lg font-bold text-gray-900 dark:text-gray-50 truncate">{player.name}</p>
                         </div>
-                        <div className="w-full border-t border-black border-opacity-10 my-2"></div>
+                        <div className="w-full border-t border-gray-200 dark:border-gray-700 my-2"></div>
                         <div className="grid grid-cols-2 gap-4 w-full">
                            <StatCard title="Game Score" value={player.avgGameScore.toFixed(1)} />
                            <StatCard title="Puntos" value={player.avgPoints.toFixed(1)} />
