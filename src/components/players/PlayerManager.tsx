@@ -47,7 +47,7 @@ export default function PlayerManager() {
   
   useEffect(() => {
     async function fetchPlayers() {
-      if (!user) return;
+      if (!user?._id) return; // Ensure user._id is available
       try {
         setLoading(true);
         let url = `/api/players?coachId=${user._id}&page=${currentPage}&limit=${playersPerPage}`;
@@ -71,10 +71,10 @@ export default function PlayerManager() {
         setLoading(false);
       }
     }
-    if (!authLoading) {
+    if (user?._id) { // Only fetch if user._id is available
       fetchPlayers();
     }
-  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive]);
+  }, [user, currentPage, playersPerPage, debouncedSearchTerm, showInactive]); // Removed authLoading from dependencies
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

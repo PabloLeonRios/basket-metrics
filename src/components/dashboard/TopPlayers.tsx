@@ -29,7 +29,7 @@ export default function TopPlayers() {
 
   useEffect(() => {
     async function fetchTopPlayers() {
-      if (!user) return;
+      if (!user?._id) return; // Ensure user._id is available before fetching
       try {
         setLoading(true);
         const response = await fetch(`/api/stats/top-players?coachId=${user._id}`);
@@ -44,7 +44,9 @@ export default function TopPlayers() {
         setLoading(false);
       }
     }
-    fetchTopPlayers();
+    if (user?._id) { // Only fetch if user._id is available
+      fetchTopPlayers();
+    }
   }, [user]);
 
   if (loading) {

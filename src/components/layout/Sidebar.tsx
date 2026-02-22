@@ -73,7 +73,7 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
                       className={classNames(
                         isActiveParent
                           ? 'bg-gray-100 dark:bg-gray-800 text-blue-600'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800',
+                          : 'text-gray-900 dark:text-gray-50 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800', // Changed text color
                         'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                       )}
                     >
@@ -85,7 +85,7 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
                         <>
                           <Disclosure.Button
                             className={classNames(
-                              isActiveParent ? 'bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800',
+                              isActiveParent ? 'bg-gray-100 dark:bg-gray-800' : 'text-gray-900 dark:text-gray-50 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800', // Changed text color
                               'flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold'
                             )}
                           >
@@ -115,7 +115,7 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
                                   <Link
                                     href={subItem.href}
                                     className={classNames(
-                                      isSubCurrent ? 'bg-gray-200 dark:bg-gray-700 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700',
+                                      isSubCurrent ? 'bg-gray-200 dark:bg-gray-700 text-blue-600' : 'text-gray-900 dark:text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-700', // Changed text color
                                       'block rounded-md py-2 pr-2 pl-9 text-sm leading-6'
                                     )}
                                   >
