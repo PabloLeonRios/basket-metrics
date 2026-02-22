@@ -141,23 +141,31 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {games.map((game) => (
-                  <tr key={game._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      <p className="font-semibold text-gray-900 dark:text-white">{game.session.name}</p>
-                      <p>Inicio: {new Date(game.session.date).toLocaleString()}</p>
-                      {game.session.finishedAt && <p>Fin: {new Date(game.session.finishedAt).toLocaleString()}</p>}
+                {games.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                      No hay partidos finalizados con estadísticas calculadas.
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600 dark:text-blue-400">{game.gameScore.toFixed(1)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{game.points}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.ast}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.orb + game.drb}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.stl}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.blk}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.tov}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.pf}</td>
                   </tr>
-                ))}
+                ) : (
+                  games.map((game) => (
+                    <tr key={game._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <p className="font-semibold text-gray-900 dark:text-white">{game.session.name}</p>
+                        <p>Inicio: {new Date(game.session.date).toLocaleString()}</p>
+                        {game.session.finishedAt && <p>Fin: {new Date(game.session.finishedAt).toLocaleString()}</p>}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600 dark:text-blue-400">{game.gameScore.toFixed(1)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{game.points}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.ast}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.orb + game.drb}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.stl}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.blk}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.tov}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{game.pf}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

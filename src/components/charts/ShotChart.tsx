@@ -2,6 +2,7 @@
 'use client';
 
 import { memo } from 'react';
+import Image from 'next/image';
 
 interface Shot {
   x: number;
@@ -18,21 +19,19 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
   return (
     <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md">
       {title && <h3 className="text-lg font-bold mb-2 text-center">{title}</h3>}
-      <div className="w-full max-w-md mx-auto aspect-[100/94]">
+      <div className="w-full max-w-md mx-auto aspect-[100/94] relative">
+        <Image
+          src="/prueba.png"
+          alt="Media cancha de baloncesto"
+          layout="fill"
+          objectFit="cover"
+          className="rounded-lg"
+        />
         <svg
           viewBox="0 0 100 94"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full bg-orange-200 dark:bg-orange-800 rounded-lg"
+          className="w-full h-full absolute top-0 left-0" // SVG overlay
         >
-          {/* Court lines */}
-          <rect x="31" y="47" width="38" height="38" fill="none" stroke="black" strokeWidth="0.5" />
-          <circle cx="50" cy="47" r="8" fill="none" stroke="black" strokeWidth="0.5" strokeDasharray="2,1.5" />
-          <path d="M6 47 A 44 44 0 0 1 94 47" fill="none" stroke="black" strokeWidth="0.5" />
-          <line x1="6" y1="47" x2="6" y2="85.25" stroke="black" strokeWidth="0.5" />
-          <line x1="94" y1="47" x2="94" y2="85.25" stroke="black" strokeWidth="0.5" />
-          <rect x="44" y="41" width="12" height="0.5" fill="none" stroke="black" strokeWidth="0.5" />
-          <circle cx="50" cy="47" r="3" fill="none" stroke="black" strokeWidth="0.5" />
-
           {/* Render shots */}
           {shots.map((shot, index) => (
             <circle

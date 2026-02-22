@@ -279,20 +279,18 @@ export default function SessionManager() {
       {/* Lista de Sesiones */}
       <div className="space-y-4">
         <div className="flex items-center border-b border-gray-200 dark:border-gray-700">
-            <Button // Using Button component for tabs
+            <button 
                 onClick={() => { setActiveTab('open'); setCurrentPage(1); }}
-                className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'} border-none rounded-none`} // Styling for tab buttons
-                variant="secondary" // Using secondary as a base, with classNames for overrides
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
             >
-                Abiertas ({activeTab === 'open' ? totalSessions : '...'}) {/* Display total for active tab */}
-            </Button>
-            <Button // Using Button component for tabs
+                Abiertas ({activeTab === 'open' ? totalSessions : '...'})
+            </button>
+            <button 
                 onClick={() => { setActiveTab('closed'); setCurrentPage(1); }}
-                className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'} border-none rounded-none`} // Styling for tab buttons
-                variant="secondary" // Using secondary as a base, with classNames for overrides
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
             >
-                Cerradas ({activeTab === 'closed' ? totalSessions : '...'}) {/* Display total for active tab */}
-            </Button>
+                Cerradas ({activeTab === 'closed' ? totalSessions : '...'})
+            </button>
         </div>
 
         {sessions.length === 0 && totalSessions === 0 && <p>No hay sesiones en esta categoría.</p>} {/* Use sessions.length */}
@@ -300,7 +298,7 @@ export default function SessionManager() {
           {sessions.map((session) => ( // Use sessions directly
             <div
               key={session._id}
-              className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex items-center space-x-4 h-full flex-col md:flex-row transition-transform transform hover:scale-105 hover:shadow-lg" // Added flex-col md:flex-row for better layout on smaller screens
+              className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col h-full transition-transform transform hover:scale-105 hover:shadow-lg" // Fixed layout
             >
               <div className="flex-grow">
                 <p className="font-bold text-lg">{session.name}</p>
@@ -312,7 +310,7 @@ export default function SessionManager() {
                   )}
                 </div>
               </div>
-              <div className="mt-4 flex flex-col gap-2 w-full md:w-auto"> {/* Added w-full md:w-auto */}
+              <div className="mt-4 flex flex-col gap-2 w-full"> {/* Fixed layout */}
                 {activeTab === 'open' ? ( // activeTab 'open' logic
                   <>
                     <Link
