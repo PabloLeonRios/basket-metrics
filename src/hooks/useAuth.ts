@@ -4,12 +4,16 @@
 import { useState, useEffect } from 'react';
 import { ITeam } from '@/types/definitions';
 
+// Updated AuthUser to match IUser more closely for Sidebar compatibility
 export interface AuthUser {
-  id: string;
+  _id: string; // Renamed from 'id' to '_id'
   name: string;
   email: string;
-  role: string;
+  role: 'entrenador' | 'jugador' | 'admin'; // More specific role type
+  isActive: boolean; // Added isActive
   team?: ITeam;
+  createdAt: string; // Added createdAt
+  updatedAt: string; // Added updatedAt
 }
 
 export function useAuth() {
@@ -25,11 +29,14 @@ export function useAuth() {
         if (response.ok) {
           const { data } = await response.json();
           setUser({
-            id: data.id,
+            _id: data._id, // Renamed from 'id'
             name: data.name,
             email: data.email,
             role: data.role,
+            isActive: data.isActive, // Added isActive
             team: data.team,
+            createdAt: data.createdAt, // Added createdAt
+            updatedAt: data.updatedAt, // Added updatedAt
           });
         } else {
           setUser(null);

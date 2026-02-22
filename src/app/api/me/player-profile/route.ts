@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar el perfil de Jugador que corresponde al ID de Usuario del token
     const playerProfile = await Player.findOne({
-      user: verified.payload.id,
+      user: verified.payload._id,
     }).select('_id');
 
     if (!playerProfile) {

@@ -44,8 +44,8 @@ export default function SessionManager() {
         setLoading(true);
         const statusParam = activeTab === 'open' ? 'open' : 'closed';
         const [playersRes, sessionsRes] = await Promise.all([
-          fetch(`/api/players?coachId=${user.id}`),
-          fetch(`/api/sessions?coachId=${user.id}&page=${currentPage}&limit=${sessionsPerPage}&status=${statusParam}`),
+          fetch(`/api/players?coachId=${user._id}`),
+          fetch(`/api/sessions?coachId=${user._id}&page=${currentPage}&limit=${sessionsPerPage}&status=${statusParam}`),
         ]);
 
         if (!playersRes.ok || !sessionsRes.ok) {
@@ -111,7 +111,7 @@ export default function SessionManager() {
 
     const newSessionData = {
       name: sessionName,
-      coach: user.id,
+      coach: user._id,
       sessionType,
       teams,
       date: new Date().toISOString(),

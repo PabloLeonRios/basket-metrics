@@ -50,7 +50,7 @@ export default function PlayerManager() {
       if (!user) return;
       try {
         setLoading(true);
-        let url = `/api/players?coachId=${user.id}&page=${currentPage}&limit=${playersPerPage}`;
+        let url = `/api/players?coachId=${user._id}&page=${currentPage}&limit=${playersPerPage}`;
         if (showInactive) {
             url += '&status=inactive';
         }
@@ -80,7 +80,7 @@ export default function PlayerManager() {
     e.preventDefault();
     if (!user) return;
     try {
-      const newPlayerData = { name, dorsal: Number(dorsal), position, team: user.team?.name, coach: user.id };
+      const newPlayerData = { name, dorsal: Number(dorsal), position, team: user.team?.name, coach: user._id };
       const response = await fetch('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +191,7 @@ export default function PlayerManager() {
           {players.map((player) => (
             <div key={player._id} className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col h-full transition-transform transform hover:scale-105 hover:shadow-lg">
               <div className="flex-grow flex items-center space-x-4">
-                <JerseyIcon number={player.dorsal} className="h-20 w-20 flex-shrink-0" />
+                <JerseyIcon number={player.dorsal} className="h-24 w-24 flex-shrink-0" />
                 <div className="flex-grow">
                   <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{player.name}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{player.position || 'Sin posición'}</p>

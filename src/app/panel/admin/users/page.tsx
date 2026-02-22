@@ -68,7 +68,7 @@ export default function AdminUserManagementPage() {
   }, [adminUser, authLoading, selectedTeam, debouncedSearchTerm]);
 
   const handleUpdateUser = async (userId: string, payload: object, successMessage: string) => {
-    if (payload.hasOwnProperty('isActive') && adminUser?.id === userId) {
+    if (payload.hasOwnProperty('isActive') && adminUser?._id === userId) {
         toast.error('No puedes desactivar tu propia cuenta.');
         return;
     }
@@ -161,7 +161,7 @@ export default function AdminUserManagementPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <Button
                     onClick={() => handleUpdateUser(user._id, { isActive: !user.isActive }, `Usuario ${user.isActive ? 'desactivado' : 'activado'}.`)}
-                    disabled={adminUser?.id === user._id}
+                    disabled={adminUser?._id === user._id}
                     variant={user.isActive ? 'danger' : 'primary'}
                     size="sm"
                   >

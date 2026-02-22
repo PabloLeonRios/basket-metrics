@@ -23,7 +23,7 @@ const JerseyIcon: React.FC<JerseyIconProps> = ({ number, className }) => {
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xl font-bold text-gray-600 dark:text-gray-300">
+        <span className="text-2xl font-bold text-gray-600 dark:text-gray-300">
           {number || '?'}
         </span>
       </div>

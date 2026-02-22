@@ -53,7 +53,7 @@ export default function Assistant() {
     async function fetchPlayers() {
       if (!user) return;
       try {
-        const response = await fetch(`/api/players?coachId=${user.id}`);
+        const response = await fetch(`/api/players?coachId=${user._id}`);
         if (!response.ok)
           throw new Error('No se pudieron cargar los jugadores.');
         const { data } = await response.json();

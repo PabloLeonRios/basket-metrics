@@ -35,7 +35,7 @@ export async function PUT(
     if (role !== undefined) updateData.role = role;
 
     // Prevenir que un admin se desactive a si mismo
-    if (userToUpdate._id.toString() === verified.payload.id && isActive === false) {
+    if (userToUpdate._id.toString() === verified.payload._id && isActive === false) {
         return NextResponse.json({ success: false, message: 'Un administrador no puede desactivar su propia cuenta.' }, { status: 400 });
     }
 

@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       email: placeholderEmail,
       password: hashedPassword,
       role: 'jugador',
-      isActive: false, // El jugador se crea como inactivo por defecto
+      isActive: true, // User is active by default
       team: coachUser.team, // Asignar el equipo del entrenador
     });
     console.log('Step 4 Complete: User object created.');

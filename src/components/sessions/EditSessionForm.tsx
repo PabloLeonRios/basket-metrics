@@ -36,7 +36,7 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
       try {
         setLoading(true);
         const [playersRes, sessionRes, eventsRes] = await Promise.all([
-          fetch(`/api/players?coachId=${user.id}`),
+          fetch(`/api/players?coachId=${user._id}`),
           fetch(`/api/sessions/${sessionId}`),
           fetch(`/api/game-events?sessionId=${sessionId}`),
         ]);
