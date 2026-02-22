@@ -4,6 +4,8 @@ import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { IPlayer } from '@/types/definitions'; // Importar IPlayer
+import Button from '@/components/ui/Button'; // Import Button
+import Input from '@/components/ui/Input';   // Import Input
 
 export default function PlayerManager() {
   const { user, loading: authLoading } = useAuth();
@@ -16,17 +18,27 @@ export default function PlayerManager() {
   const [dorsal, setDorsal] = useState('');
   const [position, setPosition] = useState('');
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [playersPerPage] = useState(9); // Matches API default
+  const [totalPlayers, setTotalPlayers] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   useEffect(() => {
     async function fetchPlayers() {
       if (!user) return;
       try {
         setLoading(true);
-        const response = await fetch(`/api/players?coachId=${user.id}`);
+        const response = await fetch(
+          `/api/players?coachId=${user.id}&page=${currentPage}&limit=${playersPerPage}`
+        );
         if (!response.ok) {
           throw new Error('No se pudieron cargar los jugadores.');
         }
-        const { data } = await response.json();
+        const { data, totalCount, totalPages: apiTotalPages } = await response.json();
         setPlayers(data);
+        setTotalPlayers(totalCount);
+        setTotalPages(apiTotalPages);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
@@ -36,7 +48,7 @@ export default function PlayerManager() {
     if (!authLoading) {
       fetchPlayers();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, currentPage, playersPerPage]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -60,8 +72,8 @@ export default function PlayerManager() {
         throw new Error(errorData.message || 'No se pudo crear el jugador.');
       }
 
-      const { data: newPlayer } = await response.json();
-      setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
+      // After creating a new player, reset to first page to see the new player
+      setCurrentPage(1);
 
       // Limpiar formulario
       setName('');
@@ -69,6 +81,12 @@ export default function PlayerManager() {
       setPosition('');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al crear el jugador.');
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -87,14 +105,15 @@ export default function PlayerManager() {
             <label htmlFor="name" className={labelStyles}>
               Nombre Completo
             </label>
-            <input
+            <Input // Using Input component
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={inputStyles}
               placeholder="Ej: Michael Jordan"
               required
+              inputSize="lg"
+              className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -102,48 +121,53 @@ export default function PlayerManager() {
               <label htmlFor="dorsal" className={labelStyles}>
                 Dorsal
               </label>
-              <input
+              <Input // Using Input component
                 type="number"
                 id="dorsal"
                 value={dorsal}
                 onChange={(e) => setDorsal(e.target.value)}
-                className={inputStyles}
                 placeholder="Ej: 23"
+                inputSize="lg"
+                className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
               />
             </div>
             <div>
               <label htmlFor="position" className={labelStyles}>
                 Posición
               </label>
-              <input
+              <Input // Using Input component
                 type="text"
                 id="position"
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
-                className={inputStyles}
                 placeholder="Ej: Escolta"
+                inputSize="lg"
+                className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
               />
             </div>
             <div>
               <label htmlFor="team" className={labelStyles}>
                 Equipo
               </label>
-              <input
+              <Input // Using Input component
                 type="text"
                 id="team"
                 value={user?.team?.name || 'Sin equipo asignado'}
-                className={`${inputStyles} bg-gray-200 dark:bg-gray-700 cursor-not-allowed`}
+                className="bg-gray-200 dark:bg-gray-700 cursor-not-allowed border-gray-200 dark:border-gray-700 text-lg" // Kept specific styles
                 disabled
+                inputSize="lg"
               />
             </div>
           </div>
-          <button
+          <Button // Using Button component
             type="submit"
             disabled={!user?.team}
-            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            variant="primary"
+            size="md"
+            className="w-full sm:w-auto" // Retain specific width classes
           >
             {user?.team ? 'Guardar Jugador' : 'Asigna un equipo a tu perfil'}
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -180,6 +204,38 @@ export default function PlayerManager() {
             </Link>
           ))}
         </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-2 mt-8">
+            <Button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              variant="secondary"
+              size="sm"
+            >
+              Anterior
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                variant={currentPage === page ? 'primary' : 'secondary'}
+                size="sm"
+                className={currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'} // Add specific styles for selected page
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              variant="secondary"
+              size="sm"
+            >
+              Siguiente
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

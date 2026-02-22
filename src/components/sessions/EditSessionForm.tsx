@@ -2,6 +2,8 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Button from '@/components/ui/Button'; // Added import
+import Input from '@/components/ui/Input'; // Added import
 import { IPlayer, ISession, sessionTypes } from '@/types/definitions';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'react-toastify';
@@ -144,7 +146,7 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="sessionName" className={labelStyles}>Nombre de la Sesión</label>
-          <input type="text" id="sessionName" value={sessionName} onChange={(e) => setSessionName(e.target.value)} className={inputStyles} required />
+          <Input type="text" id="sessionName" value={sessionName} onChange={(e) => setSessionName(e.target.value)} required inputSize="lg" className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg" />
         </div>
         <div>
           <label htmlFor="sessionType" className={labelStyles}>Tipo de Sesión</label>
@@ -184,8 +186,8 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
         )}
       </div>
       <div className="mt-6 flex flex-col sm:flex-row justify-between gap-4">
-        <button type="submit" className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Guardar Cambios</button>
-        <button type="button" onClick={handleDeleteSession} disabled={hasGameEvents} className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Eliminar Sesión</button>
+        <Button type="submit" variant="primary" size="md">Guardar Cambios</Button>
+        <Button type="button" variant="danger" size="md" onClick={handleDeleteSession} disabled={hasGameEvents}>Eliminar Sesión</Button>
       </div>
       {hasGameEvents && <p className="text-xs text-gray-500 mt-2">No se puede eliminar una sesión con eventos registrados.</p>}
     </form>

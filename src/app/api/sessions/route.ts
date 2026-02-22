@@ -3,12 +3,15 @@ import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Session from '@/lib/models/Session';
 
-// GET: Obtener todas las sesiones de un entrenador
+// GET: Obtener todas las sesiones de un entrenador con paginación y filtro
 export async function GET(request: NextRequest) {
   await dbConnect();
   try {
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get('coachId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '9'); // Default to 9 sessions per page
+    const status = searchParams.get('status'); // 'open' or 'closed'
 
     if (!coachId) {
       return NextResponse.json(
@@ -20,9 +23,31 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const sessions = await Session.find({ coach: coachId }).sort({ date: -1 });
+    const query: any = { coach: coachId };
+
+    if (status === 'open') {
+      query.finishedAt = null;
+    } else if (status === 'closed') {
+      query.finishedAt = { $ne: null };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [sessions, totalCount] = await Promise.all([
+      Session.find(query).skip(skip).limit(limit).sort({ date: -1 }),
+      Session.countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
     return NextResponse.json(
-      { success: true, data: sessions },
+      {
+        success: true,
+        data: sessions,
+        currentPage: page,
+        totalPages,
+        totalCount,
+      },
       { status: 200 },
     );
   } catch (error) {

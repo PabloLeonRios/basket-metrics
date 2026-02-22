@@ -1,9 +1,13 @@
 'use client';
 
-import { useState, useEffect, FormEvent, useMemo } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import { IPlayer, ISession, sessionTypes } from '@/types/definitions';
 import { useAuth } from '@/hooks/useAuth';
+import Button from '@/components/ui/Button'; // Import Button
+import Input from '@/components/ui/Input';   // Import Input
+import Dropdown from '@/components/ui/Dropdown'; // Import Dropdown
+import Checkbox from '@/components/ui/Checkbox'; // Import Checkbox
 
 export default function SessionManager() {
   const { user, loading: authLoading } = useAuth();
@@ -16,13 +20,19 @@ export default function SessionManager() {
   }>({});
   const [activeTab, setActiveTab] = useState<'open' | 'closed'>('open');
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sessionsPerPage] = useState(9); // Matches API default
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   // --- FORM STATE ---
   const [sessionName, setSessionName] = useState('');
   const [sessionType, setSessionType] = useState<string>(sessionTypes[0]);
   const [teamAName, setTeamAName] = useState('Equipo A');
-  const [teamAPlayers, setTeamAPlayers] = useState<Set<string>>(new Set());
+  const [teamAPlayers, setTeamAPlayers] = useState(new Set<string>()); // Corrected initialization
   const [teamBName, setTeamBName] = useState('Equipo B');
-  const [teamBPlayers, setTeamBPlayers] = useState<Set<string>>(new Set());
+  const [teamBPlayers, setTeamBPlayers] = useState(new Set<string>()); // Corrected initialization
   // --- END FORM STATE ---
 
   useEffect(() => {
@@ -30,9 +40,10 @@ export default function SessionManager() {
       if (!user) return;
       try {
         setLoading(true);
+        const statusParam = activeTab === 'open' ? 'open' : 'closed';
         const [playersRes, sessionsRes] = await Promise.all([
           fetch(`/api/players?coachId=${user.id}`),
-          fetch(`/api/sessions?coachId=${user.id}`),
+          fetch(`/api/sessions?coachId=${user.id}&page=${currentPage}&limit=${sessionsPerPage}&status=${statusParam}`),
         ]);
 
         if (!playersRes.ok || !sessionsRes.ok) {
@@ -40,10 +51,12 @@ export default function SessionManager() {
         }
 
         const { data: playersData } = await playersRes.json();
-        const { data: sessionsData } = await sessionsRes.json();
+        const { data: sessionsData, totalCount, totalPages: apiTotalPages } = await sessionsRes.json();
 
         setAllPlayers(playersData);
         setSessions(sessionsData);
+        setTotalSessions(totalCount);
+        setTotalPages(apiTotalPages);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
@@ -53,20 +66,7 @@ export default function SessionManager() {
     if (!authLoading) {
       fetchData();
     }
-  }, [user, authLoading]);
-
-  const { openSessions, closedSessions } = useMemo(() => {
-    const open: ISession[] = [];
-    const closed: ISession[] = [];
-    sessions.forEach(session => {
-      if (session.finishedAt) {
-        closed.push(session);
-      } else {
-        open.push(session);
-      }
-    });
-    return { openSessions: open, closedSessions: closed };
-  }, [sessions]);
+  }, [user, authLoading, currentPage, sessionsPerPage, activeTab]); // Updated dependencies
 
   const handlePlayerToggle = (team: 'A' | 'B', playerId: string) => {
     const isPartido = sessionType === 'Partido';
@@ -123,8 +123,14 @@ export default function SessionManager() {
       });
       if (!response.ok) throw new Error('No se pudo crear la sesión');
 
-      const { data: newSession } = await response.json();
-      setSessions((prev) => [newSession, ...prev]);
+      // After creating a new session, refetch current page to include it
+      // if it matches the current activeTab filter
+      // (assuming new sessions are 'open' by default)
+      setCurrentPage(1); // Reset to first page to see the new session
+      // fetchData() will be called by useEffect after state update
+      // A more robust solution for displaying the new session would be to
+      // prepend it to the current sessions array if activeTab is 'open'
+      // or to specifically fetch it. For now, rely on re-fetching.
 
       // Reset form
       setSessionName('');
@@ -149,15 +155,16 @@ export default function SessionManager() {
     }
   };
 
-  const inputStyles =
-    'w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500';
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  const labelStyles = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'; // Keeping labelStyles
 
   if (loading) return <p>Cargando datos...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   
-  const sessionsToDisplay = activeTab === 'open' ? openSessions : closedSessions;
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -170,32 +177,27 @@ export default function SessionManager() {
               <label htmlFor="sessionName" className={labelStyles}>
                 Nombre de la Sesión
               </label>
-              <input
+              <Input // Using Input component
                 type="text"
                 id="sessionName"
                 value={sessionName}
                 onChange={(e) => setSessionName(e.target.value)}
-                className={inputStyles}
                 placeholder="Ej: Partido vs Rivales"
                 required
+                inputSize="lg"
+                className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
               />
             </div>
             <div>
               <label htmlFor="sessionType" className={labelStyles}>
                 Tipo de Sesión
               </label>
-              <select
-                id="sessionType"
+              <Dropdown
+                options={sessionTypes.map(type => ({ value: type, label: type }))}
                 value={sessionType}
-                onChange={(e) => setSessionType(e.target.value)}
-                className={inputStyles}
-              >
-                {sessionTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+                onChange={setSessionType}
+                className="w-full" // Apply width here
+              />
             </div>
           </div>
 
@@ -207,27 +209,27 @@ export default function SessionManager() {
                   ? 'Nombre Equipo A'
                   : 'Nombre del Grupo'}
               </label>
-              <input
+              <Input // Using Input component
                 type="text"
                 value={teamAName}
                 onChange={(e) => setTeamAName(e.target.value)}
-                className={inputStyles}
+                inputSize="lg"
+                className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
               />
               <p className={labelStyles}>Seleccionar Jugadores:</p>
               <div className="max-h-48 overflow-y-auto space-y-2 rounded-lg p-3 bg-gray-50 dark:bg-gray-800">
                 {allPlayers.map((player) => (
-                  <label
+                  <div // Changed from label to div, as Checkbox has its own label
                     key={player._id}
                     className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox // Using Checkbox component
+                      id={`teamA-player-${player._id}`}
                       checked={teamAPlayers.has(player._id)}
                       onChange={() => handlePlayerToggle('A', player._id)}
-                      className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
+                      label={player.name}
                     />
-                    <span>{player.name}</span>
-                  </label>
+                  </div>
                 ))}
               </div>
             </div>
@@ -236,65 +238,69 @@ export default function SessionManager() {
             {sessionType === 'Partido' && (
               <div className="space-y-3">
                 <label className={labelStyles}>Nombre Equipo B</label>
-                <input
+                <Input // Using Input component
                   type="text"
                   value={teamBName}
                   onChange={(e) => setTeamBName(e.target.value)}
-                  className={inputStyles}
+                  inputSize="lg"
+                  className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-lg"
                 />
                 <p className={labelStyles}>Seleccionar Jugadores:</p>
                 <div className="max-h-48 overflow-y-auto space-y-2 rounded-lg p-3 bg-gray-50 dark:bg-gray-800">
                   {allPlayers.map((player) => (
-                    <label
+                    <div // Changed from label to div, as Checkbox has its own label
                       key={player._id}
                       className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox // Using Checkbox component
+                        id={`teamB-player-${player._id}`}
                         checked={teamBPlayers.has(player._id)}
                         onChange={() => handlePlayerToggle('B', player._id)}
-                        className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
+                        label={player.name}
                       />
-                      <span>{player.name}</span>
-                    </label>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
 
-          <button
+          <Button // Using Button component
             type="submit"
-            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
+            variant="primary"
+            size="md"
+            className="w-full sm:w-auto" // Retain specific width classes
           >
             Crear Sesión
-          </button>
+          </Button>
         </form>
       </div>
 
       {/* Lista de Sesiones */}
       <div className="space-y-4">
         <div className="flex items-center border-b border-gray-200 dark:border-gray-700">
-            <button 
-                onClick={() => setActiveTab('open')}
-                className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            <Button // Using Button component for tabs
+                onClick={() => { setActiveTab('open'); setCurrentPage(1); }}
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'} border-none rounded-none`} // Styling for tab buttons
+                variant="secondary" // Using secondary as a base, with classNames for overrides
             >
-                Abiertas ({openSessions.length})
-            </button>
-            <button 
-                onClick={() => setActiveTab('closed')}
-                className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                Abiertas ({activeTab === 'open' ? totalSessions : '...'}) {/* Display total for active tab */}
+            </Button>
+            <Button // Using Button component for tabs
+                onClick={() => { setActiveTab('closed'); setCurrentPage(1); }}
+                className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'} border-none rounded-none`} // Styling for tab buttons
+                variant="secondary" // Using secondary as a base, with classNames for overrides
             >
-                Cerradas ({closedSessions.length})
-            </button>
+                Cerradas ({activeTab === 'closed' ? totalSessions : '...'}) {/* Display total for active tab */}
+            </Button>
         </div>
 
-        {sessionsToDisplay.length === 0 && <p>No hay sesiones en esta categoría.</p>}
+        {sessions.length === 0 && totalSessions === 0 && <p>No hay sesiones en esta categoría.</p>} {/* Use sessions.length */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sessionsToDisplay.map((session) => (
+          {sessions.map((session) => ( // Use sessions directly
             <div
               key={session._id}
-              className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex flex-col"
+              className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md flex items-center space-x-4 h-full flex-col md:flex-row transition-transform transform hover:scale-105 hover:shadow-lg" // Added flex-col md:flex-row for better layout on smaller screens
             >
               <div className="flex-grow">
                 <p className="font-bold text-lg">{session.name}</p>
@@ -306,8 +312,8 @@ export default function SessionManager() {
                   )}
                 </div>
               </div>
-              <div className="mt-4 flex flex-col gap-2">
-                {activeTab === 'open' ? (
+              <div className="mt-4 flex flex-col gap-2 w-full md:w-auto"> {/* Added w-full md:w-auto */}
+                {activeTab === 'open' ? ( // activeTab 'open' logic
                   <>
                     <Link
                       href={`/panel/tracker/${session._id}`}
@@ -326,15 +332,17 @@ export default function SessionManager() {
 
                 {(session.sessionType === 'Partido' || session.sessionType === 'Lanzamiento') && (
                   <>
-                    <button
+                    <Button // Using Button component
                       onClick={() => handleCalculateStats(session._id)}
                       disabled={calculationStatus[session._id] === 'calculating' || calculationStatus[session._id] === 'done'}
-                      className="text-center bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 w-full disabled:bg-gray-400"
+                      variant="secondary" // Assuming a greyish button is secondary
+                      size="md"
+                      className="w-full" // Retain specific width class
                     >
                       {calculationStatus[session._id] === 'calculating'
                         ? 'Calculando...'
                         : 'Calcular/Recalcular Stats'}
-                    </button>
+                    </Button>
                     {(calculationStatus[session._id] === 'done' || session.finishedAt) && (
                       <Link
                         href={`/panel/dashboard/${session._id}`}
@@ -349,6 +357,38 @@ export default function SessionManager() {
             </div>
           ))}
         </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-2 mt-8">
+            <Button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              variant="secondary"
+              size="sm"
+            >
+              Anterior
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                variant={currentPage === page ? 'primary' : 'secondary'}
+                size="sm"
+                className={currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'} // Add specific styles for selected page
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              variant="secondary"
+              size="sm"
+            >
+              Siguiente
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

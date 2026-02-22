@@ -6,12 +6,14 @@ import User from '@/lib/models/User';
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcrypt';
 
-// GET: Obtener todos los jugadores de un entrenador
+// GET: Obtener todos los jugadores de un entrenador con paginación
 export async function GET(request: NextRequest) {
   await dbConnect();
   try {
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get('coachId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '9'); // Default to 9 players per page
 
     if (!coachId) {
       return NextResponse.json(
@@ -23,12 +25,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const players = await Player.find({ coach: coachId });
+    const query: any = { coach: coachId };
+
+    const skip = (page - 1) * limit;
+
+    const [players, totalCount] = await Promise.all([
+      Player.find(query).skip(skip).limit(limit).sort({ name: 1 }), // Sort by name for consistency
+      Player.countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
 
     // Forzar la serialización para asegurar que _id sea un string
     const serializedPlayers = JSON.parse(JSON.stringify(players));
 
-    return NextResponse.json({ success: true, data: serializedPlayers }, { status: 200 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: serializedPlayers,
+        currentPage: page,
+        totalPages,
+        totalCount,
+      },
+      { status: 200 },
+    );
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error desconocido';

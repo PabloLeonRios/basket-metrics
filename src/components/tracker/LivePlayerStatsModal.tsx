@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Button from '@/components/ui/Button'; // Added import
 import { IGameEvent } from '@/types/definitions';
 
 interface LivePlayerStatsModalProps {
@@ -115,9 +116,9 @@ export default function LivePlayerStatsModal({
             <p className="text-sm text-gray-500">Pérdidas</p>
           </div>
         </div>
-        <button onClick={onClose} className="mt-6 w-full py-2 bg-gray-200 dark:bg-gray-700 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600">
+        <Button onClick={onClose} variant="secondary" size="md" className="mt-6 w-full">
           Cerrar
-        </button>
+        </Button>
       </div>
     </div>
   );

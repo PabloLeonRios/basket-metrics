@@ -1,0 +1,60 @@
+<svg width="1500" height="1400" viewBox="0 0 1500 1400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background: Wood texture - simplified with gradient/pattern for visual appeal -->
+    <defs>
+        <pattern id="woodPattern" patternUnits="userSpaceOnUse" width="100" height="100">
+            <rect x="0" y="0" width="100" height="100" fill="#D3A76C"/> <!-- Base wood color -->
+            <path d="M0 0L100 10V0H0Z M0 50L100 60V50H0Z M0 100L100 110V100H0Z" fill="rgba(0,0,0,0.1)"/> <!-- Grain effect -->
+            <path d="M0 0L10 100L0 100Z M50 0L60 100L50 100Z M100 0L110 100L100 100Z" fill="rgba(0,0,0,0.05)"/> <!-- Lighter grain -->
+        </pattern>
+    </defs>
+    <rect x="0" y="0" width="1500" height="1400" fill="url(#woodPattern)"/>
+
+    <!-- Court Lines (White, 5cm thickness for visibility) -->
+    <g stroke="white" stroke-width="5">
+        <!-- Outer boundary (half court) -->
+        <rect x="0" y="0" width="1500" height="1400"/>
+
+        <!-- Midcourt Line (Halfway at 7 meters from top/bottom) -->
+        <line x1="0" y1="700" x2="1500" y2="700"/>
+
+        <!-- Free Throw Lane (Key) - FIBA: 4.9m wide, extends 5.8m from baseline -->
+        <!-- Center of width (15m/2 = 7.5m). So 7.5m +/- 2.45m -->
+        <!-- Distance from baseline (0) to free throw line is 5.8m (580cm) -->
+        <rect x="505" y="0" width="490" height="580"/>
+
+        <!-- Free Throw Line -->
+        <line x1="505" y1="580" x2="995" y2="580"/>
+
+        <!-- Free Throw Circle (Top half) -->
+        <!-- Center of circle is at (1500/2, 580) = (750, 580) -->
+        <!-- Radius is 1.8m (180cm) -->
+        <path d="M750 580 A180 180 0 0 1 930 580" fill="none"/>
+        <path d="M750 580 A180 180 0 0 0 570 580" fill="none"/>
+
+        <!-- Basket/Rim - 0.45m diameter. Center at 1.575m from baseline. -->
+        <!-- For simplicity, let's place it slightly inside the baseline -->
+        <circle cx="750" cy="150" r="22.5" fill="none" stroke="red" stroke-width="3"/> <!-- Red for visibility -->
+
+        <!-- Backboard - 1.8m wide. Positioned at 1.2m from baseline. -->
+        <line x1="660" y1="120" x2="840" y2="120" stroke="gray" stroke-width="10"/> <!-- Gray for visibility -->
+
+        <!-- Three-point line - 6.75m from the center of the basket. -->
+        <!-- Center of basket is at (750, 150) -->
+        <!-- So, arc should be from (750-675, 150) to (750+675, 150) and then connect to straight lines parallel to baseline. -->
+        <!-- Straight lines extend from baseline to the point where the arc starts. -->
+        <!-- Arc center is 750, 150. Radius is 675. -->
+        <!-- The straight parts of the 3-point line are 0.9m from the sidelines. -->
+        <!-- Court width 15m. Sideline at 0 and 1500. So 90cm from sidelines are at x=90 and x=1410. -->
+        <!-- The arc starts when y is such that (x-750)^2 + (y-150)^2 = 675^2 -->
+        <!-- The arc starts at a specific y-coordinate where it meets the straight line. -->
+        <!-- For FIBA, the 3-point line consists of two parallel lines 0.9m from the sidelines,
+             extending 1.575m from the baseline, and then an arc of 6.75m radius from the center of the basket. -->
+        <!-- Let's simplify and make a continuous arc for demonstration -->
+        <path d="M90 0 L90 150 A675 675 0 0 1 1410 150 L1410 0" fill="none"/>
+
+        <!-- Small restricted area arc (dunkers spot) - 1.25m radius from basket center -->
+        <path d="M750 150 A125 125 0 0 1 875 150" fill="none" stroke-dasharray="20 10"/>
+        <path d="M750 150 A125 125 0 0 0 625 150" fill="none" stroke-dasharray="20 10"/>
+
+    </g>
+</svg>
