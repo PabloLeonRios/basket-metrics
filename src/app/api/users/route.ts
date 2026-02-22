@@ -26,9 +26,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Obtener todos los usuarios de la base de datos
-    // Excluimos la contraseña del resultado por seguridad
-    const users = await User.find({}).select('-password').populate('team');
+    const { searchParams } = new URL(request.url);
+    const teamId = searchParams.get('teamId');
+    const search = searchParams.get('search');
+
+    let query: any = {};
+
+    if (teamId) {
+      query.team = teamId;
+    }
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // 2. Obtener los usuarios de la base de datos
+    const users = await User.find(query).select('-password').populate('team');
 
     return NextResponse.json({ success: true, data: users }, { status: 200 });
   } catch (error) {

@@ -8,8 +8,10 @@ import Button from '@/components/ui/Button'; // Import Button
 import Input from '@/components/ui/Input';   // Import Input
 import Dropdown from '@/components/ui/Dropdown'; // Import Dropdown
 import Checkbox from '@/components/ui/Checkbox'; // Import Checkbox
+import { useRouter } from 'next/navigation'; // Added import
 
 export default function SessionManager() {
+  const router = useRouter(); // Initialize router
   const { user, loading: authLoading } = useAuth();
   const [sessions, setSessions] = useState<ISession[]>([]);
   const [allPlayers, setAllPlayers] = useState<IPlayer[]>([]);
@@ -123,19 +125,11 @@ export default function SessionManager() {
       });
       if (!response.ok) throw new Error('No se pudo crear la sesión');
 
-      // After creating a new session, refetch current page to include it
-      // if it matches the current activeTab filter
-      // (assuming new sessions are 'open' by default)
-      setCurrentPage(1); // Reset to first page to see the new session
-      // fetchData() will be called by useEffect after state update
-      // A more robust solution for displaying the new session would be to
-      // prepend it to the current sessions array if activeTab is 'open'
-      // or to specifically fetch it. For now, rely on re-fetching.
+      const { data: newSession } = await response.json(); // Capture newSession
 
-      // Reset form
-      setSessionName('');
-      setTeamAPlayers(new Set());
-      setTeamBPlayers(new Set());
+      // Redirect to the tracker for the new session
+      router.push(`/panel/tracker/${newSession._id}`);
+      
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al crear la sesión');
     }
@@ -197,6 +191,7 @@ export default function SessionManager() {
                 value={sessionType}
                 onChange={setSessionType}
                 className="w-full" // Apply width here
+                inputSize="lg" // Added for consistency
               />
             </div>
           </div>

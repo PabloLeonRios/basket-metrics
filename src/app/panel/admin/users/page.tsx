@@ -3,8 +3,12 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { IUser, ITeam } from '@/types/definitions';
+import Dropdown from '@/components/ui/Dropdown';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import { toast } from 'react-toastify';
 
-// Extendemos IUser para que coincida con lo que devuelve la API, incluyendo el equipo poblado
+// Extendemos IUser para que coincida con lo que devuelve la API
 type UserFromAPI = Omit<IUser, 'team'> & {
   _id: string;
   team?: ITeam;
@@ -19,32 +23,40 @@ export default function AdminUserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter and Search states
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!adminUser || adminUser.role !== 'admin') return;
       try {
         setLoading(true);
-        const [usersResponse, teamsResponse] = await Promise.all([
-          fetch('/api/users'),
-          fetch('/api/teams'),
-        ]);
-
-        const usersData = await usersResponse.json();
+        const teamsResponse = await fetch('/api/teams');
         const teamsData = await teamsResponse.json();
-
-        if (!usersResponse.ok)
-          throw new Error(usersData.message || 'Error al cargar usuarios.');
-        if (!teamsResponse.ok)
-          throw new Error(teamsData.message || 'Error al cargar equipos.');
+        if (!teamsResponse.ok) throw new Error(teamsData.message || 'Error al cargar equipos.');
+        setTeams(teamsData.data);
+        
+        let usersUrl = '/api/users?';
+        if (selectedTeam) usersUrl += `teamId=${selectedTeam}&`;
+        if (debouncedSearchTerm) usersUrl += `search=${debouncedSearchTerm}&`;
+        
+        const usersResponse = await fetch(usersUrl);
+        const usersData = await usersResponse.json();
+        if (!usersResponse.ok) throw new Error(usersData.message || 'Error al cargar usuarios.');
 
         setUsers(usersData.data);
-        setTeams(teamsData.data);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Error desconocido al cargar datos.',
-        );
+        setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos.');
       } finally {
         setLoading(false);
       }
@@ -53,13 +65,14 @@ export default function AdminUserManagementPage() {
     if (!authLoading) {
       fetchData();
     }
-  }, [adminUser, authLoading]);
+  }, [adminUser, authLoading, selectedTeam, debouncedSearchTerm]);
 
-  const handleUpdateUser = async (
-    userId: string,
-    payload: object,
-    successMessage: string,
-  ) => {
+  const handleUpdateUser = async (userId: string, payload: object, successMessage: string) => {
+    if (payload.hasOwnProperty('isActive') && adminUser?.id === userId) {
+        toast.error('No puedes desactivar tu propia cuenta.');
+        return;
+    }
+    
     try {
       const response = await fetch(`/api/users/${userId}`, {
         method: 'PUT',
@@ -68,134 +81,101 @@ export default function AdminUserManagementPage() {
       });
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || 'No se pudo actualizar el usuario.');
+      if (!response.ok) throw new Error(data.message || 'No se pudo actualizar el usuario.');
 
-      // Actualizar el estado localmente para reflejar el cambio en la UI
       setUsers((prevUsers) =>
-        prevUsers.map((u) => (u._id === userId ? data.data : u)),
+        prevUsers.map((u) => (u._id === userId ? { ...u, ...data.data } : u)),
       );
 
-      // Toast notification instead of alert (placeholder for future Toast implementation)
-      alert(successMessage);
+      toast.success(successMessage);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al actualizar.');
+      toast.error(err instanceof Error ? err.message : 'Error al actualizar.');
     }
-  };
-
-  const handleToggleUserStatus = (targetUser: UserFromAPI) => {
-    if (adminUser?.id === targetUser._id) {
-      alert('No puedes desactivar tu propia cuenta.');
-      return;
-    }
-    const newStatus = !targetUser.isActive;
-    const actionText = newStatus ? 'activar' : 'desactivar';
-    if (
-      !confirm(
-        `¿Seguro que quieres ${actionText} al usuario ${targetUser.name}?`,
-      )
-    )
-      return;
-
-    handleUpdateUser(
-      targetUser._id,
-      { isActive: newStatus },
-      `Usuario ${actionText}do.`,
-    );
-  };
-
-  const handleTeamChange = (
-    e: ChangeEvent<HTMLSelectElement>,
-    userId: string,
-  ) => {
-    const teamId = e.target.value;
-    handleUpdateUser(userId, { teamId }, 'Equipo del usuario actualizado.');
   };
 
   if (authLoading || loading) return <div className="p-8">Cargando...</div>;
   if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
-  if (adminUser?.role !== 'admin')
-    return <div className="p-8 text-yellow-500">Acceso denegado.</div>;
+  if (adminUser?.role !== 'admin') return <div className="p-8 text-yellow-500">Acceso denegado.</div>;
+
+  const teamOptions = [{ value: '', label: 'Todos los equipos' }, ...teams.map(t => ({ value: t._id, label: t.name }))];
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
       <header className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">
-          Administración de Usuarios
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Activa/desactiva cuentas y asigna usuarios a equipos.
-        </p>
+        <h1 className="text-2xl md:text-3xl font-bold">Administración de Usuarios</h1>
+        <p className="mt-1 text-sm text-gray-500">Activa/desactiva cuentas, asigna equipos y busca usuarios.</p>
       </header>
+      
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+        <div className="w-full sm:w-1/3">
+            <Dropdown 
+                options={teamOptions}
+                value={selectedTeam}
+                onChange={setSelectedTeam}
+                label="Filtrar por Equipo"
+            />
+        </div>
+        <div className="w-full sm:w-1/3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
+            <Input 
+                type="text"
+                placeholder="Nombre, email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
+      </div>
+      
       <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-xl shadow-md">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Nombre
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Rol
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Equipo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Estado
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Acción
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equipo</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-            {users.map((user) => (
+            {users.length > 0 ? users.map((user) => (
               <tr key={user._id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  {user.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.role}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{user.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <select
+                  <Dropdown
+                    options={[{ value: '', label: 'Sin equipo' }, ...teams.map(t => ({ value: t._id, label: t.name }))]}
                     value={user.team?._id || ''}
-                    onChange={(e) => handleTeamChange(e, user._id)}
-                    className="w-full p-2 border-gray-300 rounded-md dark:bg-gray-700"
+                    onChange={(teamId) => handleUpdateUser(user._id, { teamId }, 'Equipo del usuario actualizado.')}
+                    className="w-full"
                     disabled={user.role === 'admin'}
-                  >
-                    <option value="">Sin equipo</option>
-                    {teams.map((team) => (
-                      <option key={team._id} value={team._id}>
-                        {team.name}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                  >
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {user.isActive ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => handleToggleUserStatus(user)}
+                  <Button
+                    onClick={() => handleUpdateUser(user._id, { isActive: !user.isActive }, `Usuario ${user.isActive ? 'desactivado' : 'activado'}.`)}
                     disabled={adminUser?.id === user._id}
-                    className={`font-bold py-2 px-4 rounded ${adminUser?.id === user._id ? 'bg-gray-400 cursor-not-allowed' : user.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'}`}
+                    variant={user.isActive ? 'danger' : 'primary'}
+                    size="sm"
                   >
                     {user.isActive ? 'Desactivar' : 'Activar'}
-                  </button>
+                  </Button>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={6} className="text-center py-8 text-gray-500">
+                  No se encontraron usuarios con los filtros aplicados.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

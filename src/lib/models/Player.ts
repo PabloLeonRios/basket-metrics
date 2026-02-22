@@ -30,6 +30,10 @@ const PlayerSchema: Schema = new Schema(
     team: {
       type: String,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

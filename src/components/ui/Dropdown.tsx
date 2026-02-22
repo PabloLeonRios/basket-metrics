@@ -1,6 +1,6 @@
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { ChevronUpDownIcon } from '@heroicons/react/20/solid'; // Necesitará @heroicons/react
+import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
 
 interface Option {
   value: string;
@@ -13,10 +13,32 @@ interface DropdownProps {
   onChange: (value: string) => void;
   label?: string;
   className?: string;
+  inputSize?: 'sm' | 'md' | 'lg';
+  disabled?: boolean; // Added disabled prop
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, label, className }) => {
+const Dropdown: React.FC<DropdownProps> = ({
+  options,
+  value,
+  onChange,
+  label,
+  className,
+  inputSize = 'md',
+  disabled = false, // Default disabled to false
+}) => {
   const selectedOption = options.find((option) => option.value === value) || options[0];
+
+  const sizeStyles = {
+    sm: 'px-2 py-1 text-sm',
+    md: 'px-3 py-2 text-base',
+    lg: 'px-4 py-3 text-lg',
+  };
+
+  const disabledStyles = disabled
+    ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed'
+    : 'bg-white dark:bg-gray-800';
+  
+  const buttonClasses = `relative w-full cursor-default rounded-lg border text-left focus:outline-none transition-colors duration-150 ease-in-out border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${disabledStyles} ${sizeStyles[inputSize]}`;
 
   return (
     <div className={`w-full ${className}`}>
@@ -25,9 +47,9 @@ const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, label, cl
           {label}
         </Listbox.Label>
       )}
-      <Listbox value={value} onChange={onChange}>
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
         <div className="relative mt-1">
-          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white dark:bg-gray-800 py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-300 sm:text-sm">
+          <Listbox.Button className={buttonClasses}>
             <span className="block truncate text-gray-900 dark:text-gray-50">{selectedOption?.label}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon
@@ -64,7 +86,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, value, onChange, label, cl
                       </span>
                       {selected ? (
                         <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-indigo-600">
-                          {/* CheckIcon */}
+                          {/* CheckIcon can be added here */}
                         </span>
                       ) : null}
                     </>

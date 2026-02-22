@@ -27,6 +27,7 @@ export interface IPlayer {
   position?: string;
   dorsal?: number;
   team?: string;
+  isActive?: boolean;
 }
 
 // --- SESSION ---

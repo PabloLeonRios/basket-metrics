@@ -1,10 +1,13 @@
 // src/app/panel/layout.tsx
 'use client';
 
-import { useEffect, PropsWithChildren } from 'react';
+import { useEffect, PropsWithChildren, Fragment } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import Button from '@/components/ui/Button';
 
 export default function PanelLayout({ children }: PropsWithChildren) {
   const { user, loading, isAuthenticated } = useAuth();
@@ -23,16 +26,29 @@ export default function PanelLayout({ children }: PropsWithChildren) {
     } catch (error) {
       console.error('Fallo al cerrar sesión en el servidor', error);
     } finally {
-      // Forzar recarga para asegurar que el estado de useAuth se limpie
       window.location.href = '/login';
     }
   };
 
   const navLinks = [
     { name: 'Dashboard', href: '/panel/dashboard' },
-    { name: 'Jugadores', href: '/panel/players' },
-    { name: 'Sesiones', href: '/panel/sessions' },
-    { name: 'Asistente', href: '/panel/assistant' },
+    {
+      name: 'Jugadores',
+      basePath: '/panel/players',
+      items: [
+        { name: 'Alta/Modificación', href: '/panel/players' },
+        // Future link: { name: 'Estadísticas Globales', href: '/panel/players/stats' },
+      ],
+    },
+    {
+      name: 'Sesiones',
+      basePath: '/panel/sessions',
+      items: [
+        { name: 'Alta/Modificación', href: '/panel/sessions' },
+        // Future link: { name: 'Visualizar Calendario', href: '/panel/sessions/calendar' },
+      ],
+    },
+    { name: 'Asistente', href: '/panel/assistant', basePath: '/panel/assistant' },
   ];
 
   if (loading || !isAuthenticated) {
@@ -54,15 +70,54 @@ export default function PanelLayout({ children }: PropsWithChildren) {
             
             {user?.role === 'entrenador' && (
               <div className="hidden md:flex items-center gap-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className={`font-semibold ${pathname.startsWith(link.href) ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {navLinks.map((link) =>
+                  link.items ? (
+                    <Menu as="div" className="relative inline-block text-left" key={link.name}>
+                      <div>
+                        <Menu.Button className={`inline-flex w-full justify-center rounded-md px-2 py-2 text-sm font-semibold transition-colors ${pathname.startsWith(link.basePath) ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}>
+                          {link.name}
+                          <ChevronDownIcon className="-mr-1 ml-1 h-5 w-5" aria-hidden="true" />
+                        </Menu.Button>
+                      </div>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <div className="px-1 py-1">
+                            {link.items.map((item) => (
+                              <Menu.Item key={item.name}>
+                                {({ active }) => (
+                                  <Link
+                                    href={item.href}
+                                    className={`${
+                                      active ? 'bg-blue-500 text-white' : 'text-gray-900 dark:text-gray-100'
+                                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                  >
+                                    {item.name}
+                                  </Link>
+                                )}
+                              </Menu.Item>
+                            ))}
+                          </div>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  ) : (
+                    <Link
+                      key={link.name}
+                      href={link.href!}
+                      className={`font-semibold px-2 py-2 ${pathname.startsWith(link.basePath || link.href!) ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'}`}
+                    >
+                      {link.name}
+                    </Link>
+                  )
+                )}
               </div>
             )}
             {user?.role === 'admin' && (
@@ -87,12 +142,13 @@ export default function PanelLayout({ children }: PropsWithChildren) {
                     </span>
                 )}
             </div>
-            <button
+            <Button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
+              variant="danger"
+              size="sm"
             >
               Cerrar Sesión
-            </button>
+            </Button>
           </div>
         </nav>
       </header>

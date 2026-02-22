@@ -6,14 +6,16 @@ import User from '@/lib/models/User';
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcrypt';
 
-// GET: Obtener todos los jugadores de un entrenador con paginación
+// GET: Obtener todos los jugadores de un entrenador con paginación, búsqueda y filtro de estado
 export async function GET(request: NextRequest) {
   await dbConnect();
   try {
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get('coachId');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '9'); // Default to 9 players per page
+    const limit = parseInt(searchParams.get('limit') || '9');
+    const search = searchParams.get('search');
+    const isActive = searchParams.get('isActive') === 'true';
 
     if (!coachId) {
       return NextResponse.json(
@@ -25,18 +27,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const query: any = { coach: coachId };
+    const query: any = {
+      $and: [
+        { coach: coachId },
+        { isActive: isActive }
+      ]
+    };
+
+    if (search) {
+      const searchOr: any = {
+        $or: [
+          { name: { $regex: search, $options: 'i' } }
+        ]
+      };
+      if (!isNaN(Number(search))) {
+        searchOr.$or.push({ dorsal: Number(search) });
+      }
+      query.$and.push(searchOr);
+    }
 
     const skip = (page - 1) * limit;
 
     const [players, totalCount] = await Promise.all([
-      Player.find(query).skip(skip).limit(limit).sort({ name: 1 }), // Sort by name for consistency
+      Player.find(query).skip(skip).limit(limit).sort({ name: 1 }),
       Player.countDocuments(query),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    // Forzar la serialización para asegurar que _id sea un string
     const serializedPlayers = JSON.parse(JSON.stringify(players));
 
     return NextResponse.json(
