@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     // --- Crear el JWT ---
     const secret = getJwtSecretKey();
     const token = await new jose.SignJWT({
-      id: user._id.toString(),
+      _id: user._id.toString(),
       email: user.email,
       name: user.name,
       role: user.role,

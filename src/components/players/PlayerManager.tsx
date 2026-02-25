@@ -47,10 +47,11 @@ export default function PlayerManager() {
   
   useEffect(() => {
     async function fetchPlayers() {
-      if (!user?._id) return; // Ensure user._id is available
+      // The guard `if (!authLoading && user?._id)` is now outside,
+      // so we can assume user._id is present here.
       try {
         setLoading(true);
-        let url = `/api/players?coachId=${user._id}&page=${currentPage}&limit=${playersPerPage}`;
+        let url = `/api/players?coachId=${user!._id}&page=${currentPage}&limit=${playersPerPage}`;
         if (showInactive) {
             url += '&status=inactive';
         }
@@ -71,10 +72,11 @@ export default function PlayerManager() {
         setLoading(false);
       }
     }
-    if (user?._id) { // Only fetch if user._id is available
+    // Only fetch if authentication is resolved and we have a user.
+    if (!authLoading && user?._id) {
       fetchPlayers();
     }
-  }, [user, currentPage, playersPerPage, debouncedSearchTerm, showInactive]); // Removed authLoading from dependencies
+  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
