@@ -28,23 +28,24 @@ export async function GET(request: NextRequest) {
     }
     
     // Build the query object
-    const query: any = {
-      $and: [
-        { coach: coachId },
-        { isActive: status !== 'inactive' }
-      ]
-    };
+    const query: any = { coach: coachId };
+
+    if (status === 'inactive') {
+      // If status is 'inactive', we only want players where isActive is false.
+      query.isActive = false;
+    } else {
+      // By default, show active players. This now includes players where `isActive` is true
+      // AND players where the `isActive` field does not exist (for backward compatibility).
+      query.isActive = { $ne: false };
+    }
 
     if (search) {
-      const searchOr: any = {
-        $or: [
-          { name: { $regex: search, $options: 'i' } }
-        ]
-      };
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } }
+      ];
       if (!isNaN(Number(search))) {
-        searchOr.$or.push({ dorsal: Number(search) });
+        query.$or.push({ dorsal: Number(search) });
       }
-      query.$and.push(searchOr);
     }
 
     const skip = (page - 1) * limit;
