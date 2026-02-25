@@ -23,7 +23,7 @@ export async function verifyAuth(
     // Aseguramos que el payload tiene la estructura esperada de AuthUser
     // Asumiendo que el JWT payload contiene _id, name, email, role, isActive, createdAt, updatedAt
     const authPayload: AuthUser = {
-      _id: payload._id as string, // Changed from id to _id
+      _id: (payload._id as string) || (payload.id as string), // Changed from id to _id, with fallback for older tokens
       name: payload.name as string,
       email: payload.email as string,
       role: payload.role as AuthUser['role'], // Use specific role type

@@ -47,7 +47,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
             Basket-Metrics
           </Link>
         </div>
-        <Sidebar user={user} />
+        <Sidebar user={user} isSidebarOpen={isSidebarOpen} />
       </aside>
 
       {/* Main Content */}

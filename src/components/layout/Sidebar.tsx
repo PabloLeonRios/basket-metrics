@@ -85,7 +85,7 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
                         <>
                           <Disclosure.Button
                             className={classNames(
-                              isActiveParent ? 'bg-gray-100 dark:bg-gray-800' : 'text-gray-900 dark:text-gray-50 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800', // Changed text color
+                              isActiveParent ? 'bg-gray-100 dark:bg-gray-800 text-blue-600' : 'text-gray-900 dark:text-gray-50 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-800', // Changed text color
                               'flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold'
                             )}
                           >
