@@ -134,20 +134,34 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     }
 
     // --- REVISED 3-POINT LOGIC ---
-    const basketCenter = { x: 50, y: 15.5 };
-    const threePointRadius = 36.5; 
-    const threePointLineYLimit = 30;
-    const threePointLineX1 = 8;
-    const threePointLineX2 = 92;
+    // Coordinates are based on the SVG viewBox="0 0 100 94"
+    const basketY = 15.5;
+    const basketX = 50;
 
-    const distance = Math.sqrt(Math.pow(x - basketCenter.x, 2) + Math.pow(y - basketCenter.y, 2));
-    
+    // Using squared distances is more efficient as it avoids Math.sqrt
+    const threePointRadiusSq = 36.5 * 36.5; 
+    const cornerThreeYLimit = 29;  // Y-level where the arc meets the vertical lines
+    const cornerThreeXLeft = 13;   // X-position of the left vertical line
+    const cornerThreeXRight = 87;  // X-position of the right vertical line
+
+    const distSq = Math.pow(x - basketX, 2) + Math.pow(y - basketY, 2);
+
     let isThree = false;
-    if (distance > threePointRadius) {
+
+    // A shot from behind the backboard is never a 3-pointer.
+    if (y < basketY) {
+      isThree = false;
+    } else {
+      // Check if the shot is from the corner three area
+      if (y < cornerThreeYLimit) {
+        if (x < cornerThreeXLeft || x > cornerThreeXRight) {
+          isThree = true;
+        }
+      } 
+      // If not a corner three, check if it's behind the arc
+      else if (distSq > threePointRadiusSq) {
         isThree = true;
-    }
-    if (distance <= threePointRadius && y < threePointLineYLimit && (x < threePointLineX1 || x > threePointLineX2)) {
-        isThree = false;
+      }
     }
 
     setShotValue(isThree ? 3 : 2);
@@ -167,20 +181,18 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     setShowFreeThrowModal(false);
   };
 
-  const handleUndoLastEvent = useCallback(async () => {
-    if (gameEvents.length === 0) return;
-    const lastEvent = gameEvents[0];
-    if (!confirm(`¿Estás seguro de que quieres deshacer el último evento: ${lastEvent.type.toUpperCase()}?`)) return;
+  const handleUndoEvent = useCallback(async (eventId: string) => {
+    if (!confirm(`¿Estás seguro de que quieres deshacer este evento?`)) return;
 
     try {
-        const response = await fetch(`/api/game-events/${lastEvent._id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/game-events/${eventId}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('No se pudo deshacer el evento.');
-        setGameEvents(prev => prev.slice(1));
-        toast.info('Último evento deshecho.');
+        setGameEvents(prev => prev.filter(event => event._id !== eventId));
+        toast.info('Evento deshecho.');
     } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Error al deshacer.');
     }
-  }, [gameEvents]);
+  }, []);
 
   if (loading) return <div>Cargando tracker...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
@@ -238,7 +250,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || isSessionFinished}>TAP</Button>
             <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || isSessionFinished}>PER</Button>
             <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || isSessionFinished}>FALTA</Button>
-            <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished} className="col-span-2">Tiro Libre</Button>
+            <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished} className="col-span-2">Libre</Button>
           </div>
         </div>
       </div>
@@ -251,7 +263,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
 
       {/* Columna Derecha: Log de Juego */}
       <div className="w-full lg:w-1/4">
-        <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={handleUndoLastEvent} isSessionFinished={isSessionFinished} sessionId={sessionId} />
+        <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={handleUndoEvent} isSessionFinished={isSessionFinished} sessionId={sessionId} />
       </div>
 
       {/* Modales */}

@@ -26,19 +26,21 @@ export default function LivePlayerStatsModal({
       switch (event.type) {
         case 'tiro':
           const { made, value } = event.details;
-          if (value === 1) {
-            fta++;
-            if (made) ftm++;
-          } else {
-            fga++;
-            if (made) fgm++;
-            if (value === 3) {
-              threePa++;
-              if (made) threePm++;
-            }
+          fga++;
+          if (made) fgm++;
+          if (value === 3) {
+            threePa++;
+            if (made) threePm++;
           }
           if(made) points += value as number;
           break;
+        case 'tiro_libre':
+            fta++;
+            if (event.details.made) {
+                ftm++;
+                points++;
+            }
+            break;
         case 'rebote':
           event.details.type === 'ofensivo' ? orb++ : drb++;
           break;
@@ -48,7 +50,7 @@ export default function LivePlayerStatsModal({
         case 'robo':
           stl++;
           break;
-        case 'tapón':
+        case 'tapon':
           blk++;
           break;
         case 'perdida':

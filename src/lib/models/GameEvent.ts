@@ -25,12 +25,13 @@ const GameEventSchema: Schema = new Schema(
       required: true,
       enum: [
         'tiro',
+        'tiro_libre',
         'perdida',
         'rebote',
         'asistencia',
         'robo',
         'falta',
-        'tapón',
+        'tapon',
       ],
     },
     details: {

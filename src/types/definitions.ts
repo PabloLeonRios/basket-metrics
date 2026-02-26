@@ -63,12 +63,13 @@ export interface IGameEvent {
   team: string;
   type:
     | 'tiro'
+    | 'tiro_libre'
     | 'perdida'
     | 'rebote'
     | 'asistencia'
     | 'robo'
     | 'falta'
-    | 'tapón';
+    | 'tapon';
   details: Record<string, unknown>;
   createdAt?: string; // Campo para la fecha de creación del evento
 }

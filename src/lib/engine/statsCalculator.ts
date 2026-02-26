@@ -155,17 +155,16 @@ async function calculateAndSaveTeamStats(
 }
 
 function getTeamTotals(events: IGameEvent[]): TeamTotals {
-  let points = 0,
-    fga = 0,
-    orb = 0,
-    tov = 0,
-    fta = 0;
+  let points = 0, fga = 0, orb = 0, tov = 0, fta = 0;
   for (const event of events) {
     if (event.type === 'tiro') {
       const details = event.details as { made: boolean; value: number };
       if (details.made) points += details.value;
-      if (details.value > 1) fga++;
-      else fta++;
+      fga++;
+    } else if (event.type === 'tiro_libre') {
+        const details = event.details as { made: boolean };
+        if (details.made) points++;
+        fta++;
     } else if (event.type === 'rebote') {
       const details = event.details as { type: string };
       if (details.type === 'ofensivo') orb++;
@@ -179,33 +178,27 @@ function getTeamTotals(events: IGameEvent[]): TeamTotals {
 
 function calculatePlayerStats(playerEvents: IGameEvent[]): PlayerStats {
   const stats: PlayerStats = {
-    points: 0,
-    fga: 0,
-    fgm: 0,
-    '3pa': 0,
-    '3pm': 0,
-    fta: 0,
-    ftm: 0,
-    orb: 0,
-    drb: 0,
-    ast: 0,
-    stl: 0,
-    tov: 0,
-    blk: 0,
-    pf: 0,
+    points: 0, fga: 0, fgm: 0, '3pa': 0, '3pm': 0, fta: 0, ftm: 0,
+    orb: 0, drb: 0, ast: 0, stl: 0, tov: 0, blk: 0, pf: 0,
   };
   for (const event of playerEvents) {
     switch (event.type) {
       case 'tiro':
         const tiroDetails = event.details as { made: boolean; value: number };
-        if (tiroDetails.value > 1) stats.fga++;
+        stats.fga++;
         if (tiroDetails.value === 3) stats['3pa']++;
-        if (tiroDetails.value === 1) stats.fta++;
         if (tiroDetails.made) {
           stats.points += tiroDetails.value;
-          if (tiroDetails.value > 1) stats.fgm++;
+          stats.fgm++;
           if (tiroDetails.value === 3) stats['3pm']++;
-          if (tiroDetails.value === 1) stats.ftm++;
+        }
+        break;
+    case 'tiro_libre':
+        const ftDetails = event.details as { made: boolean };
+        stats.fta++;
+        if(ftDetails.made) {
+            stats.ftm++;
+            stats.points++;
         }
         break;
       case 'rebote':
@@ -222,7 +215,7 @@ function calculatePlayerStats(playerEvents: IGameEvent[]): PlayerStats {
       case 'perdida':
         stats.tov++;
         break;
-      case 'tapón':
+      case 'tapon':
         stats.blk++;
         break;
       case 'falta':

@@ -97,7 +97,7 @@ export default function AdminUserManagementPage() {
   if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
   if (adminUser?.role !== 'admin') return <div className="p-8 text-yellow-500">Acceso denegado.</div>;
 
-  const teamOptions = [{ value: '', label: 'Todos los equipos' }, ...teams.map(t => ({ value: t._id, label: t.name }))];
+  const teamOptions = [{ value: '', label: 'Todos los equipos' }, ...teams.map(t => ({ value: t._id.toString(), label: t.name }))];
 
   return (
     <main className="flex-1 p-4 md:p-6 lg:p-8">
