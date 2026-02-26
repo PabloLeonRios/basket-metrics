@@ -42,6 +42,8 @@ export default function Assistant() {
   );
   const [situation, setSituation] = useState<GameSituation>('BALANCED');
   const [recommendation, setRecommendation] = useState<PlayerProfile[]>([]);
+  const [allProfiles, setAllProfiles] = useState<PlayerProfile[]>([]);
+  const [reasoning, setReasoning] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,6 +85,8 @@ export default function Assistant() {
     }
     setLoading(true);
     setRecommendation([]);
+    setAllProfiles([]);
+    setReasoning('');
     setError(null);
     try {
       const response = await fetch('/api/assistant/recommend', {
@@ -98,7 +102,9 @@ export default function Assistant() {
         throw new Error(message || 'No se pudo generar la recomendación.');
       }
       const { data } = await response.json();
-      setRecommendation(data);
+      setRecommendation(data.lineup);
+      setReasoning(data.reasoning);
+      setAllProfiles(data.allProfiles);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
@@ -164,34 +170,70 @@ export default function Assistant() {
       </div>
 
       {/* Paso 3: Resultado */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">Paso 3: Quinteto Recomendado</h2>
-        {error && <p className="text-red-500">{error}</p>}
-        {recommendation.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {recommendation.map((profile) => (
-              <div
-                key={profile.playerId}
-                onClick={() => handleProfileClick(profile)}
-                className="group relative bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg border-l-4 border-green-500 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                <StatTooltip stats={profile.careerAverages} />
-                <p className="text-lg font-bold">{profile.name}</p>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {Array.from(profile.tags).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs font-semibold rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {error && <p className="text-red-500 text-center">{error}</p>}
+      {recommendation.length > 0 && (
+        <div className="space-y-6">
+          {/* Análisis de la Recomendación */}
+          <div>
+            <h2 className="text-xl font-bold mb-2">Análisis de la Recomendación</h2>
+            <div className="bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+              <p className="text-gray-800 dark:text-gray-200">{reasoning}</p>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Quinteto Recomendado */}
+          <div>
+            <h2 className="text-xl font-bold">Quinteto Recomendado</h2>
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {recommendation.map((profile) => (
+                <div
+                  key={profile.playerId}
+                  onClick={() => handleProfileClick(profile)}
+                  className="group relative bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg border-l-4 border-green-500 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <StatTooltip stats={profile.careerAverages} />
+                  <p className="text-lg font-bold">{profile.name}</p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {Array.from(profile.tags).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs font-semibold rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Perfiles de Jugadores Considerados */}
+          <div>
+            <h2 className="text-xl font-bold">Perfiles de Jugadores Considerados</h2>
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {allProfiles.map((profile) => (
+                <div
+                  key={profile.playerId}
+                  onClick={() => handleProfileClick(profile)}
+                  className="group relative bg-white dark:bg-gray-900 p-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <p className="font-bold">{profile.name}</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {profile.tags.size > 0 ? (
+                      Array.from(profile.tags).map((tag) => (
+                        <span key={tag} className="px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-xs font-semibold rounded-full">{tag}</span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">Sin perfil definido</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Detalles del Jugador */}
       {isModalOpen && modalPlayerProfile && (

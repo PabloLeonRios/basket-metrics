@@ -26,7 +26,9 @@ const Dropdown: React.FC<DropdownProps> = ({
   inputSize = 'md',
   disabled = false, // Default disabled to false
 }) => {
-  const selectedOption = options.find((option) => option.value === value) || options[0];
+  const selectedOption = options.find((option) => option.value === value);
+
+  const displayLabel = selectedOption?.label || 'Seleccionar...'; // Fallback display text
 
   const sizeStyles = {
     sm: 'px-2 py-1 text-sm',
@@ -50,7 +52,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       <Listbox value={value} onChange={onChange} disabled={disabled}>
         <div className="relative mt-1">
           <Listbox.Button className={buttonClasses}>
-            <span className="block truncate text-gray-900 dark:text-gray-50">{selectedOption?.label}</span>
+            <span className="block truncate text-gray-900 dark:text-gray-50">{displayLabel}</span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon
                 className="h-5 w-5 text-gray-400"

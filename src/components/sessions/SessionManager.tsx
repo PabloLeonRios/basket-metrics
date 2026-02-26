@@ -42,10 +42,23 @@ export default function SessionManager() {
       if (!user) return;
       try {
         setLoading(true);
+        
+        const isAdmin = user.role === 'admin';
         const statusParam = activeTab === 'open' ? 'open' : 'closed';
+        
+        // Base URLs
+        let playersUrl = '/api/players?';
+        let sessionsUrl = `/api/sessions?page=${currentPage}&limit=${sessionsPerPage}&status=${statusParam}`;
+
+        // Add coachId only if the user is NOT an admin
+        if (!isAdmin) {
+          playersUrl += `coachId=${user._id}`;
+          sessionsUrl += `&coachId=${user._id}`;
+        }
+        
         const [playersRes, sessionsRes] = await Promise.all([
-          fetch(`/api/players?coachId=${user._id}`),
-          fetch(`/api/sessions?coachId=${user._id}&page=${currentPage}&limit=${sessionsPerPage}&status=${statusParam}`),
+          fetch(playersUrl),
+          fetch(sessionsUrl),
         ]);
 
         if (!playersRes.ok || !sessionsRes.ok) {

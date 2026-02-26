@@ -5,11 +5,17 @@ import Player from '@/lib/models/Player';
 import User from '@/lib/models/User';
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcrypt';
+import { verifyAuth } from '@/lib/auth';
 
 // GET: Obtener todos los jugadores de un entrenador con paginación, búsqueda y filtro de estado
 export async function GET(request: NextRequest) {
   await dbConnect();
   try {
+    // Admin check: Allow fetching all players
+    const token = request.cookies.get('token')?.value;
+    const { payload } = await verifyAuth(token);
+    const isAdmin = payload?.role === 'admin';
+
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get('coachId');
     const page = parseInt(searchParams.get('page') || '1');
@@ -17,18 +23,21 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const status = searchParams.get('status'); // 'inactive' or default to active
 
-    if (!coachId) {
+    if (!coachId && !isAdmin) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Se requiere el ID del entrenador (coachId).',
+          message: 'Se requiere el ID del entrenador (coachId) para usuarios no administradores.',
         },
         { status: 400 },
       );
     }
     
     // Build the query object
-    const query: any = { coach: coachId };
+    const query: any = {};
+    if (coachId) {
+      query.coach = coachId;
+    }
 
     if (status === 'inactive') {
       // If status is 'inactive', we only want players where isActive is false.

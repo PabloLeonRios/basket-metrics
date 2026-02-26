@@ -70,13 +70,15 @@ export async function POST(request: Request) {
     });
 
     // 3. Generar perfiles
-    const playerProfiles = generatePlayerProfiles(playersWithStats);
+    const allProfiles = generatePlayerProfiles(playersWithStats);
 
     // 4. Obtener recomendación
-    const recommendation = recommendLineup(playerProfiles, situation);
+    const { lineup, reasoning } = recommendLineup(allProfiles, situation);
 
+    // Devolvemos todos los perfiles para que la UI pueda mostrarlos,
+    // la recomendación (quinteto) y la explicación.
     return NextResponse.json(
-      { success: true, data: recommendation },
+      { success: true, data: { lineup, reasoning, allProfiles } },
       { status: 200 },
     );
   } catch (error) {

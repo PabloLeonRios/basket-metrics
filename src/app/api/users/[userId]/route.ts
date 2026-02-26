@@ -7,9 +7,9 @@ import { verifyAuth } from '@/lib/auth';
 // PUT: Actualizar un usuario (rol, equipo, estado)
 export async function PUT(
   request: NextRequest,
-  context: any // Using 'any' to bypass the type checker for this argument
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const { userId } = context.params;
+  const { userId } = await params;
   await dbConnect();
   try {
     const body = await request.json();

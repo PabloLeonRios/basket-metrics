@@ -5,13 +5,14 @@ import TeamGameStats from '@/lib/models/TeamGameStats';
 
 // Asumimos que el middleware protege esta ruta
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
   await dbConnect();
 
   try {
-    const pathname = request.nextUrl.pathname;
-    const parts = pathname.split('/');
-    const sessionId = parts[parts.length - 1]; // la URL es /api/stats/[sessionId]
+    const { sessionId } = await params;
 
     if (!sessionId) {
       return NextResponse.json(

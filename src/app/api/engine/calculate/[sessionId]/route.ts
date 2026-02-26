@@ -4,11 +4,12 @@ import { calculateStatsForSession } from '@/lib/engine/statsCalculator';
 
 // Asumimos que el middleware protege esta ruta para que solo usuarios logueados puedan acceder
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
   try {
-    const pathname = request.nextUrl.pathname;
-    const parts = pathname.split('/');
-    const sessionId = parts[parts.length - 1]; // La URL es /api/engine/calculate/[sessionId]
+    const { sessionId } = await params;
 
     if (!sessionId) {
       return NextResponse.json(

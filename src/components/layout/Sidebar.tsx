@@ -17,11 +17,10 @@ const navigation = [
   { name: 'Dashboard', href: '/panel/dashboard', basePath: '/panel/dashboard' },
   {
     name: 'Jugadores',
-    href: '/panel/players',
     basePath: '/panel/players',
     items: [
       { name: 'Gestionar Jugadores', href: '/panel/players' },
-      // { name: 'Estadísticas', href: '/panel/players/stats' }, // Future
+      { name: 'Añadir Jugador', href: '/panel/players/new' },
     ],
   },
   {
@@ -34,6 +33,7 @@ const navigation = [
     ],
   },
   { name: 'Asistente IA', href: '/panel/assistant', basePath: '/panel/assistant' },
+  { name: 'Ayuda', href: '/panel/help', basePath: '/panel/help' },
   {
     name: 'Administración', // Changed name from 'Admin' for better UX
     adminOnly: true,

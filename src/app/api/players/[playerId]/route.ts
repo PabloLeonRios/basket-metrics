@@ -8,9 +8,9 @@ import GameEvent from '@/lib/models/GameEvent';
 // GET: Obtener un jugador específico
 export async function GET(
   request: NextRequest,
-  context: any // Using 'any' to bypass the type checker for this argument
+  { params }: { params: Promise<{ playerId: string }> }
 ) {
-  const { playerId } = context.params;
+  const { playerId } = await params;
   await dbConnect();
   try {
     const player = await Player.findById(playerId).populate('user', 'email isActive');
@@ -33,9 +33,9 @@ export async function GET(
 // PUT: Actualizar un jugador
 export async function PUT(
   request: NextRequest,
-  context: any // Using 'any' to bypass the type checker for this argument
+  { params }: { params: Promise<{ playerId: string }> }
 ) {
-  const { playerId } = context.params;
+  const { playerId } = await params;
   await dbConnect();
   try {
     const body = await request.json();
@@ -72,9 +72,9 @@ export async function PUT(
 // DELETE: Eliminar un jugador
 export async function DELETE(
   request: NextRequest,
-  context: any // Using 'any' to bypass the type checker for this argument
+  { params }: { params: Promise<{ playerId: string }> }
 ) {
-  const { playerId } = context.params;
+  const { playerId } = await params;
   await dbConnect();
   try {
     const player = await Player.findById(playerId);

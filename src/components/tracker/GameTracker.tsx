@@ -42,7 +42,42 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   }, [session]);
 
   useEffect(() => {
-    // ... (same as before)
+    async function fetchSessionData() {
+      try {
+        setLoading(true);
+        const [sessionRes, eventsRes] = await Promise.all([
+          fetch(`/api/sessions/${sessionId}`),
+          fetch(`/api/game-events?sessionId=${sessionId}`),
+        ]);
+
+        if (!sessionRes.ok) {
+          const errorData = await sessionRes.json();
+          throw new Error(
+            `Error al cargar la sesión: ${errorData.message || 'Error del servidor'}`,
+          );
+        }
+        if (!eventsRes.ok) {
+          const errorData = await eventsRes.json();
+          throw new Error(
+            `Error al cargar los eventos: ${errorData.message || 'Error del servidor'}`,
+          );
+        }
+
+        const { data: sessionData } = await sessionRes.json();
+        const { data: eventsData } = await eventsRes.json();
+
+        setSession(sessionData);
+        setGameEvents(eventsData);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Un error desconocido ha ocurrido.',
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSessionData();
   }, [sessionId]);
 
   const logEvent = async (type: string, details: Record<string, unknown>) => {

@@ -16,11 +16,6 @@ export default function PlayerManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Form state
-  const [name, setName] = useState('');
-  const [dorsal, setDorsal] = useState('');
-  const [position, setPosition] = useState('');
-
   // Pagination and Search states
   const [currentPage, setCurrentPage] = useState(1);
   const [playersPerPage] = useState(9);
@@ -47,11 +42,17 @@ export default function PlayerManager() {
   
   useEffect(() => {
     async function fetchPlayers() {
-      // The guard `if (!authLoading && user?._id)` is now outside,
-      // so we can assume user._id is present here.
+      // The guard `if (!authLoading && user)` is now outside.
       try {
         setLoading(true);
-        let url = `/api/players?coachId=${user!._id}&page=${currentPage}&limit=${playersPerPage}`;
+        let url = `/api/players?page=${currentPage}&limit=${playersPerPage}`;
+
+        // If the user is not an admin, they must be a coach. Fetch their players.
+        if (user?.role !== 'admin') {
+          url += `&coachId=${user!._id}`;
+        }
+        // Admins can see all players, so we don't add coachId for them.
+
         if (showInactive) {
             url += '&status=inactive';
         }
@@ -73,38 +74,10 @@ export default function PlayerManager() {
       }
     }
     // Only fetch if authentication is resolved and we have a user.
-    if (!authLoading && user?._id) {
+    if (!authLoading && user) {
       fetchPlayers();
     }
   }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive]);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    try {
-      const newPlayerData = { name, dorsal: Number(dorsal), position, team: user.team?.name, coach: user._id };
-      const response = await fetch('/api/players', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPlayerData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'No se pudo crear el jugador.');
-      }
-      
-      toast.success('Jugador creado con éxito.');
-      setSearchTerm('');
-      setCurrentPage(1);
-
-      setName('');
-      setDorsal('');
-      setPosition('');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al crear el jugador.');
-    }
-  };
 
   const handleUpdatePlayer = async (e: FormEvent) => {
     e.preventDefault();
@@ -161,21 +134,10 @@ export default function PlayerManager() {
 
   return (
     <div className="space-y-8">
-      {/* Formulario para añadir jugador */}
-      <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-bold mb-4">Añadir Nuevo Jugador</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* ... form content ... */}
-          <Button type="submit" disabled={!user?.team} variant="primary" size="md" className="w-full sm:w-auto">
-            {user?.team ? 'Guardar Jugador' : 'Asigna un equipo a tu perfil'}
-          </Button>
-        </form>
-      </div>
-
       {/* Lista de Jugadores */}
       <div className="space-y-4">
         <div className="flex justify-between items-center flex-wrap gap-4">
-            <h2 className="text-xl font-bold">Jugadores del Equipo</h2>
+            <h2 className="text-xl font-bold">Gestión de Jugadores</h2>
             <div className="flex items-center gap-4">
               <Checkbox label="Ver Inactivos" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
               <div className="w-full max-w-xs">

@@ -71,7 +71,7 @@ export default function TopPlayers() {
                 <Link href={`/panel/players/${player.playerId}`} key={player.playerId} className="block transition-transform transform hover:scale-105">
                     <div className={`p-4 rounded-lg shadow-lg flex flex-col items-center space-y-3 ${cardColors[index]}`}>
                         <div className="flex items-center gap-4">
-                            <JerseyIcon number={player.dorsal} className="h-12 w-12 flex-shrink-0" />
+                            <JerseyIcon number={player.dorsal} className="h-24 w-24 flex-shrink-0" />
                             <p className="text-lg font-bold text-gray-900 dark:text-gray-50 truncate">{player.name}</p>
                         </div>
                         <div className="w-full border-t border-black border-opacity-10 my-2"></div>

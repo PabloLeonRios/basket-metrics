@@ -2,28 +2,36 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Session from '@/lib/models/Session';
+import { verifyAuth } from '@/lib/auth';
 
 // GET: Obtener todas las sesiones de un entrenador con paginación y filtro
 export async function GET(request: NextRequest) {
   await dbConnect();
   try {
+    const token = request.cookies.get('token')?.value;
+    const { payload } = await verifyAuth(token);
+    const isAdmin = payload?.role === 'admin';
+
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get('coachId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '9'); // Default to 9 sessions per page
     const status = searchParams.get('status'); // 'open' or 'closed'
 
-    if (!coachId) {
+    if (!coachId && !isAdmin) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Se requiere el ID del entrenador (coachId).',
+          message: 'Se requiere el ID del entrenador (coachId) para usuarios no administradores.',
         },
         { status: 400 },
       );
     }
 
-    const query: any = { coach: coachId };
+    const query: any = {};
+    if (coachId) {
+      query.coach = coachId;
+    }
 
     if (status === 'open') {
       query.finishedAt = null;
