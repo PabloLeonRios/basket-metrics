@@ -40,11 +40,11 @@ const PlayerGameStatsSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-    // Índice para asegurar que solo haya un doc de stats por jugador y por sesión
-    index: { session: 1, player: 1 },
-    unique: true,
   },
 );
+
+// Índice para asegurar que solo haya un doc de stats por jugador y por sesión
+PlayerGameStatsSchema.index({ session: 1, player: 1 }, { unique: true });
 
 const PlayerGameStats: Model<PlayerGameStatsDocument> =
   models.PlayerGameStats ||

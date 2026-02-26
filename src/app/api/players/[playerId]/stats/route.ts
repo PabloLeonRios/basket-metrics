@@ -2,8 +2,10 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import PlayerGameStats from '@/lib/models/PlayerGameStats';
-import Player from '@/lib/models/Player'; // Importar Player
+import Player from '@/lib/models/Player';
+import Session from '@/lib/models/Session';
 import mongoose from 'mongoose';
+import { calculateStatsForSession } from '@/lib/engine/statsCalculator';
 
 export async function GET(
   request: NextRequest,
@@ -19,6 +21,34 @@ export async function GET(
         { status: 400 },
       );
     }
+
+    // --- CÁLCULO JUST-IN-TIME ---
+    // 1. Encontrar todas las sesiones en las que participó el jugador.
+    const playerSessions = await Session.find({ "teams.players": playerId }).select('_id');
+    const playerSessionIds = playerSessions.map(s => s._id);
+
+    // 2. Encontrar todas las stats ya calculadas para este jugador.
+    const existingStats = await PlayerGameStats.find({ player: playerId }).select('session');
+    const calculatedSessionIds = new Set(existingStats.map(stat => stat.session.toString()));
+
+    // 3. Determinar qué sesiones necesitan ser calculadas.
+    const sessionsToCalculate = playerSessionIds.filter(id => !calculatedSessionIds.has(id.toString()));
+
+    // 4. Calcular las stats para las sesiones pendientes.
+    if (sessionsToCalculate.length > 0) {
+      console.log(`Calculando stats para ${sessionsToCalculate.length} sesiones pendientes para el jugador ${playerId}...`);
+      for (const sessionId of sessionsToCalculate) {
+        // Envolvemos en try/catch para que un error en una sesión no detenga todo
+        try {
+          await calculateStatsForSession(sessionId.toString());
+        } catch (calcError) {
+          console.error(`Error calculando stats para la sesión ${sessionId}:`, calcError);
+        }
+      }
+      console.log('Cálculo de sesiones pendientes finalizado.');
+    }
+    // --- FIN CÁLCULO JUST-IN-TIME ---
+
 
     // 1. Obtener todas las estadísticas partido a partido del jugador
     const gameByGameStats = await PlayerGameStats.find({

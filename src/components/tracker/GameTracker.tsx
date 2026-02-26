@@ -38,8 +38,21 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [shotValue, setShotValue] = useState<2 | 3>(2); // State for the shot value
 
   const playerIdToName = useMemo(() => {
-    // ... (same as before)
+    if (!session) return {};
+    const map: { [key: string]: string } = {};
+    session.teams.forEach((team) => {
+      if (team && team.players) {
+        team.players.forEach((player) => {
+          if (player) {
+            map[player._id] = player.name;
+          }
+        });
+      }
+    });
+    return map;
   }, [session]);
+
+  const isSessionFinished = !!session?.finishedAt;
 
   useEffect(() => {
     async function fetchSessionData() {
@@ -80,9 +93,35 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     fetchSessionData();
   }, [sessionId]);
 
-  const logEvent = async (type: string, details: Record<string, unknown>) => {
-    // ... (same as before)
-  };
+  const logEvent = useCallback(async (type: string, details: Record<string, unknown>) => {
+    if (!selectedPlayer) return;
+    if (isSessionFinished) {
+        toast.warn('La sesión ya ha finalizado.');
+        return;
+    }
+
+    const eventData = {
+      session: sessionId,
+      player: selectedPlayer.id,
+      team: selectedPlayer.teamName,
+      type: type,
+      details: details,
+    };
+
+    try {
+      const response = await fetch('/api/game-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData),
+      });
+      if (!response.ok) throw new Error('No se pudo registrar el evento.');
+      const { data: newEvent } = await response.json();
+      setGameEvents((prev) => [newEvent, ...prev]);
+      toast.success(`Evento '${type}' registrado para ${selectedPlayer.name}.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al registrar evento.');
+    }
+  }, [selectedPlayer, sessionId, isSessionFinished]);
 
   const handleCourtClick = useCallback((x: number, y: number) => {
     if (!selectedPlayer) {
@@ -95,23 +134,19 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     }
 
     // --- REVISED 3-POINT LOGIC ---
-    // Visually re-estimated coordinates from prueba.png for viewBox "0 0 100 94"
     const basketCenter = { x: 50, y: 15.5 };
-    const threePointRadius = 36.5; // Approx distance from basket to top of arc (52 - 15.5)
-    const threePointLineYLimit = 30; // Approx Y-coordinate where the straight lines start
+    const threePointRadius = 36.5; 
+    const threePointLineYLimit = 30;
     const threePointLineX1 = 8;
     const threePointLineX2 = 92;
 
     const distance = Math.sqrt(Math.pow(x - basketCenter.x, 2) + Math.pow(y - basketCenter.y, 2));
     
     let isThree = false;
-    // Check if it's beyond the arc part
     if (distance > threePointRadius) {
         isThree = true;
     }
-    // If it's inside the arc's distance, check if it's in the corner three area
     if (distance <= threePointRadius && y < threePointLineYLimit && (x < threePointLineX1 || x > threePointLineX2)) {
-        // This is behind the backboard, not a valid shot. Let's consider it a 2 for simplicity of UI.
         isThree = false;
     }
 
@@ -122,41 +157,108 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
 
   const handleShot = (made: boolean) => {
     if (!shotCoordinates) return;
-
-    logEvent('tiro', {
-      made,
-      value: shotValue,
-      x: shotCoordinates.x,
-      y: shotCoordinates.y,
-    });
-
+    logEvent('tiro', { made, value: shotValue, x: shotCoordinates.x, y: shotCoordinates.y });
     setShowShotModal(false);
     setShotCoordinates(null);
   };
   
   const handleFreeThrow = (made: boolean) => {
-    // ... (same as before)
+    logEvent('tiro_libre', { made });
+    setShowFreeThrowModal(false);
   };
 
-  // ... other handlers ...
+  const handleUndoLastEvent = useCallback(async () => {
+    if (gameEvents.length === 0) return;
+    const lastEvent = gameEvents[0];
+    if (!confirm(`¿Estás seguro de que quieres deshacer el último evento: ${lastEvent.type.toUpperCase()}?`)) return;
+
+    try {
+        const response = await fetch(`/api/game-events/${lastEvent._id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('No se pudo deshacer el evento.');
+        setGameEvents(prev => prev.slice(1));
+        toast.info('Último evento deshecho.');
+    } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Error al deshacer.');
+    }
+  }, [gameEvents]);
 
   if (loading) return <div>Cargando tracker...</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
   if (!session) return <div>No se encontraron datos de la sesión.</div>;
 
-  const isSessionFinished = !!session.finishedAt;
+  const teamA = session.teams[0];
+  const teamB = session.teams.length > 1 ? session.teams[1] : null;
 
   return (
     <div className="flex flex-col lg:flex-row gap-4">
-      {/* ... Player List and Actions ... */}
-      
-      {/* Modal de Tiro de Campo */}
+      {/* Columna Izquierda: Jugadores y Acciones */}
+      <div className="w-full lg:w-1/4 space-y-4">
+        {/* Lista de Jugadores */}
+        <div className="space-y-4">
+          {teamA && (
+            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+              <h3 className="font-bold text-lg mb-2">{teamA.name}</h3>
+              <div className="space-y-1">
+                {teamA.players.map((player) => (
+                  <button
+                    key={player._id}
+                    onClick={() => setSelectedPlayer({ id: player._id, name: player.name, teamName: teamA.name })}
+                    className={`w-full text-left p-2 rounded-md ${selectedPlayer?.id === player._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                  >
+                    #{player.dorsal} - {player.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {teamB && (
+            <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+              <h3 className="font-bold text-lg mb-2">{teamB.name}</h3>
+              <div className="space-y-1">
+                {teamB.players.map((player) => (
+                  <button
+                    key={player._id}
+                    onClick={() => setSelectedPlayer({ id: player._id, name: player.name, teamName: teamB.name })}
+                    className={`w-full text-left p-2 rounded-md ${selectedPlayer?.id === player._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                  >
+                    #{player.dorsal} - {player.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Acciones */}
+        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+          <h3 className="font-bold text-lg mb-2">Acciones Rápidas</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || isSessionFinished}>AST</Button>
+            <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || isSessionFinished}>ROBO</Button>
+            <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || isSessionFinished}>TAP</Button>
+            <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || isSessionFinished}>PER</Button>
+            <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || isSessionFinished}>FALTA</Button>
+            <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished} className="col-span-2">Tiro Libre</Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Columna Central: Cancha y Stats */}
+      <div className="flex-1 lg:max-w-2xl mx-auto">
+        <Court onClick={handleCourtClick} />
+        <FloatingStats events={gameEvents} />
+      </div>
+
+      {/* Columna Derecha: Log de Juego */}
+      <div className="w-full lg:w-1/4">
+        <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={handleUndoLastEvent} isSessionFinished={isSessionFinished} sessionId={sessionId} />
+      </div>
+
+      {/* Modales */}
       {showShotModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4">
-            <h3 className="text-2xl font-bold text-center">
-              {`Resultado del Tiro (${shotValue} Puntos)`}
-            </h3>
+            <h3 className="text-2xl font-bold text-center">{`Resultado del Tiro (${shotValue} Puntos)`}</h3>
             <div className="flex justify-center gap-4">
               <Button onClick={() => handleShot(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button>
               <Button onClick={() => handleShot(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button>
@@ -165,8 +267,18 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           </div>
         </div>
       )}
-      
-      {/* ... Other Modals and components ... */}
+      {showFreeThrowModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4">
+            <h3 className="text-2xl font-bold text-center">Resultado del Tiro Libre</h3>
+            <div className="flex justify-center gap-4">
+                <Button onClick={() => handleFreeThrow(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button>
+                <Button onClick={() => handleFreeThrow(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button>
+            </div>
+            <button onClick={() => setShowFreeThrowModal(false)} className="mt-4 text-sm text-gray-500 w-full text-center">Cancelar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

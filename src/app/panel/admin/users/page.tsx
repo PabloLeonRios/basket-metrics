@@ -147,7 +147,7 @@ export default function AdminUserManagementPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <Dropdown
                     options={[{ value: '', label: 'Sin equipo' }, ...teams.map(t => ({ value: t._id.toString(), label: t.name }))]}
-                    value={user.team?._id.toString() || ''}
+                    value={(user.team?._id)?.toString() || ''}
                     onChange={(teamId) => handleUpdateUser(user._id, { teamId }, 'Equipo del usuario actualizado.')}
                     className="w-full"
                     disabled={user.role === 'admin'}
