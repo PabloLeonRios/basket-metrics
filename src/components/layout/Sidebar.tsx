@@ -25,11 +25,10 @@ const navigation = [
   },
   {
     name: 'Sesiones',
-    href: '/panel/sessions',
     basePath: '/panel/sessions',
     items: [
       { name: 'Gestionar Sesiones', href: '/panel/sessions' },
-      // { name: 'Calendario', href: '/panel/sessions/calendar' }, // Future
+      { name: 'Crear Sesión', href: '/panel/sessions/new' },
     ],
   },
   { name: 'Asistente IA', href: '/panel/assistant', basePath: '/panel/assistant' },

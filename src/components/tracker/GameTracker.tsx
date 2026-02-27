@@ -23,6 +23,18 @@ interface SelectedPlayer {
   teamName: string;
 }
 
+const getActionButtonClass = (eventType: string) => {
+    switch (eventType) {
+        case 'asistencia': return 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+        case 'robo': return 'bg-teal-600 hover:bg-teal-700 focus:ring-teal-500';
+        case 'tapon': return 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500';
+        case 'perdida': return 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500';
+        case 'falta': return 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500';
+        case 'tiro_libre': return 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500';
+        default: return 'bg-gray-600 hover:bg-gray-700 focus:ring-gray-500';
+    }
+}
+
 export default function GameTracker({ sessionId }: { sessionId: string }) {
   // --- Estados del Componente ---
   const [session, setSession] = useState<TrackerSessionData | null>(null);
@@ -133,35 +145,21 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
       return;
     }
 
-    // --- REVISED 3-POINT LOGIC ---
-    // Coordinates are based on the SVG viewBox="0 0 100 94"
+    // --- SIMPLIFIED 3-POINT LOGIC PER USER REQUEST ---
     const basketY = 15.5;
     const basketX = 50;
+    const threePointRadius = 36.5; 
 
-    // Using squared distances is more efficient as it avoids Math.sqrt
-    const threePointRadiusSq = 36.5 * 36.5; 
-    const cornerThreeYLimit = 29;  // Y-level where the arc meets the vertical lines
-    const cornerThreeXLeft = 13;   // X-position of the left vertical line
-    const cornerThreeXRight = 87;  // X-position of the right vertical line
-
-    const distSq = Math.pow(x - basketX, 2) + Math.pow(y - basketY, 2);
+    const distance = Math.sqrt(Math.pow(x - basketX, 2) + Math.pow(y - basketY, 2));
 
     let isThree = false;
-
-    // A shot from behind the backboard is never a 3-pointer.
+    // If the shot is from behind the backboard, it's always 2 points.
     if (y < basketY) {
       isThree = false;
-    } else {
-      // Check if the shot is from the corner three area
-      if (y < cornerThreeYLimit) {
-        if (x < cornerThreeXLeft || x > cornerThreeXRight) {
-          isThree = true;
-        }
-      } 
-      // If not a corner three, check if it's behind the arc
-      else if (distSq > threePointRadiusSq) {
-        isThree = true;
-      }
+    } 
+    // Otherwise, check if the distance is outside the semicircle radius.
+    else if (distance > threePointRadius) {
+      isThree = true;
     }
 
     setShotValue(isThree ? 3 : 2);
@@ -177,7 +175,8 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   };
   
   const handleFreeThrow = (made: boolean) => {
-    logEvent('tiro_libre', { made });
+    // A free throw always has a value of 1 and occurs at a fixed spot.
+    logEvent('tiro_libre', { made, value: 1, x: 50, y: 32 });
     setShowFreeThrowModal(false);
   };
 
@@ -245,12 +244,12 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
           <h3 className="font-bold text-lg mb-2">Acciones Rápidas</h3>
           <div className="grid grid-cols-2 gap-2">
-            <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || isSessionFinished}>AST</Button>
-            <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || isSessionFinished}>ROBO</Button>
-            <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || isSessionFinished}>TAP</Button>
-            <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || isSessionFinished}>PER</Button>
-            <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || isSessionFinished}>FALTA</Button>
-            <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished} className="col-span-2">Libre</Button>
+            <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || isSessionFinished} className={`w-full ${getActionButtonClass('asistencia')}`}>AST</Button>
+            <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || isSessionFinished} className={`w-full ${getActionButtonClass('robo')}`}>ROBO</Button>
+            <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || isSessionFinished} className={`w-full ${getActionButtonClass('tapon')}`}>TAP</Button>
+            <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || isSessionFinished} className={`w-full ${getActionButtonClass('perdida')}`}>PER</Button>
+            <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || isSessionFinished} className={`w-full ${getActionButtonClass('falta')}`}>FALTA</Button>
+            <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished} className={`col-span-2 w-full ${getActionButtonClass('tiro_libre')}`}>Libre</Button>
           </div>
         </div>
       </div>

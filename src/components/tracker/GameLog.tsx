@@ -74,7 +74,7 @@ export default function GameLog({ events, playerIdToName, onUndo, isSessionFinis
         </div>
       ) : (
         <ul className="space-y-2 overflow-y-auto">
-          {events.map((event) => (
+          {[...events].reverse().map((event) => (
             <li key={event._id} className={getEventRowClass(event)}>
               <div className="flex justify-between items-start">
                 <div>
