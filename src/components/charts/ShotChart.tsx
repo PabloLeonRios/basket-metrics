@@ -38,26 +38,26 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
   `;
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg">
+    <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg">
       {title && <h3 className="text-xl font-bold mb-3 text-center text-gray-800 dark:text-gray-100">{title}</h3>}
       <div className="w-full max-w-md mx-auto aspect-[100/94]">
         <svg
           viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full bg-amber-600 dark:bg-amber-800 rounded-lg"
+          className="w-full h-full bg-[#EBD2B1] dark:bg-[#4a3c2a] rounded-lg shadow-inner"
         >
-          <g stroke="#6E4C2A" strokeWidth="0.4" fill="none" className="dark:stroke-gray-300/70">
+          <g stroke="#111827" strokeWidth="0.3" fill="none" className="dark:stroke-gray-300/80">
             <rect
               x={keyX_svg}
               y="0"
               width={keyWidth_svg}
               height={keyHeight_svg}
-              className="fill-amber-700/40 dark:fill-amber-900/40"
-              stroke="#6E4C2A"
+              className="fill-[#D4B692] dark:fill-[#3e3223]"
+              strokeWidth="0.3"
             />
-            <path d={threePointLinePath} strokeWidth="0.6" />
+            <path d={threePointLinePath} strokeWidth="0.5" />
             <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} />
-            <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} strokeDasharray="0.4,0.4" />
+            <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} strokeDasharray="0.6,0.6" />
             <path d={`M ${hoopX_svg - noChargeRadius_svg} ${hoopY_svg} A ${noChargeRadius_svg} ${noChargeRadius_svg} 0 0 0 ${hoopX_svg + noChargeRadius_svg} ${hoopY_svg}`} />
             <line
               x1={hoopX_svg - backboardWidth_svg / 2}
@@ -65,15 +65,15 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
               x2={hoopX_svg + backboardWidth_svg / 2}
               y2={backboardY_svg}
               strokeWidth="0.5"
-              className="dark:stroke-gray-300"
+              className="stroke-gray-800 dark:stroke-gray-300"
             />
             <circle
               cx={hoopX_svg}
               cy={hoopY_svg}
               r={hoopRadius_svg}
-              stroke="#E53935"
+              stroke="#B91C1C"
               strokeWidth="0.4"
-              className="fill-transparent"
+              fill="#F9FAFB"
             />
           </g>
 
@@ -83,9 +83,9 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
               cx={shot.x}
               cy={shot.y}
               r="1.2"
-              fill={shot.made ? '#4ade80' : '#f87171'}
+              fill={shot.made ? '#16A34A' : '#EF4444'}
               stroke="white"
-              strokeWidth="0.3"
+              strokeWidth="0.2"
               opacity="0.9"
             />
           ))}
@@ -93,11 +93,11 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
       </div>
       <div className="flex justify-center items-center gap-6 mt-4 text-sm text-gray-700 dark:text-gray-300">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-green-400 border border-gray-300 dark:border-gray-600"></div>
+          <div className="w-4 h-4 rounded-full bg-green-600 border border-gray-300 dark:border-gray-600"></div>
           <span>Anotado</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-red-400 border border-gray-300 dark:border-gray-600"></div>
+          <div className="w-4 h-4 rounded-full bg-red-500 border border-gray-300 dark:border-gray-600"></div>
           <span>Fallado</span>
         </div>
       </div>

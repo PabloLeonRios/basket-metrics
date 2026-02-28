@@ -170,8 +170,24 @@ export default function PlayerManager() {
         </div>
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center space-x-2 mt-8">
-            {/* ... pagination buttons ... */}
+          <div className="flex justify-center items-center space-x-4 mt-8">
+            <Button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              variant="secondary"
+            >
+              Anterior
+            </Button>
+            <span className="text-gray-700 dark:text-gray-300">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              variant="secondary"
+            >
+              Siguiente
+            </Button>
           </div>
         )}
       </div>
