@@ -40,6 +40,11 @@ const SessionSchema: Schema = new Schema(
       type: Date,
       required: false,
     },
+    currentQuarter: {
+      type: Number,
+      required: true,
+      default: 1,
+    },
   },
   {
     timestamps: true,

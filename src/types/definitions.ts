@@ -69,7 +69,8 @@ export interface IGameEvent {
     | 'asistencia'
     | 'robo'
     | 'falta'
-    | 'tapon';
+    | 'tapon'
+    | 'substitution';
   details: Record<string, unknown>;
   createdAt?: string; // Campo para la fecha de creación del evento
 }

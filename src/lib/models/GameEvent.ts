@@ -32,11 +32,17 @@ const GameEventSchema: Schema = new Schema(
         'robo',
         'falta',
         'tapon',
+        'substitution',
       ],
     },
     details: {
       type: Schema.Types.Mixed,
     },
+    quarter: {
+        type: Number,
+        required: true,
+        default: 1,
+    }
   },
   {
     timestamps: true,

@@ -44,6 +44,7 @@ export async function PUT(
 
     const updateData: { [key: string]: any } = {};
     if (body.finishedAt) updateData.finishedAt = new Date(body.finishedAt);
+    if (body.currentQuarter) updateData.currentQuarter = body.currentQuarter;
     if (body.name) updateData.name = body.name;
     if (body.sessionType) updateData.sessionType = body.sessionType;
     if (body.teams) updateData.teams = body.teams;

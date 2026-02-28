@@ -2,6 +2,22 @@
 'use client';
 
 import { memo } from 'react';
+import {
+  SVG_WIDTH,
+  SVG_HEIGHT,
+  scale,
+  hoopX_svg,
+  hoopY_svg,
+  threePointRadius_svg,
+  threePointSideLineXLeft_svg,
+  threePointSideLineXRight_svg,
+  threePointArcStartY_svg,
+  KEY_WIDTH_M,
+  KEY_HEIGHT_M,
+  BACKBOARD_WIDTH_M,
+  BACKBOARD_Y_M,
+  HOOP_RADIUS_M,
+} from '@/lib/court-geometry';
 
 interface Shot {
   x: number;
@@ -14,34 +30,22 @@ interface ShotChartProps {
   title?: string;
 }
 
-// Re-usar las mismas dimensiones y lógica de escalado que en Court.tsx
-const COURT_WIDTH_M = 15;
-const COURT_HEIGHT_M = 14;
-const SVG_WIDTH = 100;
-const SVG_HEIGHT = (COURT_HEIGHT_M / COURT_WIDTH_M) * SVG_WIDTH;
-
-const scale = (val: number) => (val / COURT_WIDTH_M) * SVG_WIDTH;
-
-const THREE_POINT_RADIUS_M = 6.75;
-const KEY_WIDTH_M = 4.9;
-const KEY_HEIGHT_M = 5.8;
-const HOOP_CENTER_Y_M = 1.575;
-const RESTRICTED_AREA_RADIUS_M = 1.25;
-const THREE_POINT_SIDE_M = 0.9;
-
-
 const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
-    // Coordenadas SVG
-    const hoopX = SVG_WIDTH / 2;
-    const hoopY = scale(HOOP_CENTER_Y_M);
-    const threePointRadius = scale(THREE_POINT_RADIUS_M);
-    
-    const keyWidth = scale(KEY_WIDTH_M);
-    const keyHeight = scale(KEY_HEIGHT_M);
-    const keyX = (SVG_WIDTH - keyWidth) / 2;
-
-    const freeThrowLineY = scale(KEY_HEIGHT_M);
-    const restrictedRadius = scale(RESTRICTED_AREA_RADIUS_M);
+  // Derived coordinates for drawing from the geometry library
+  const keyWidth_svg = scale(KEY_WIDTH_M);
+  const keyHeight_svg = scale(KEY_HEIGHT_M);
+  const keyX_svg = (SVG_WIDTH - keyWidth_svg) / 2;
+  const backboardWidth_svg = scale(BACKBOARD_WIDTH_M);
+  const backboardY_svg = scale(BACKBOARD_Y_M);
+  const hoopRadius_svg = scale(HOOP_RADIUS_M);
+  
+  // Path for the 3-point line
+  const threePointLinePath = `
+    M ${threePointSideLineXLeft_svg},0
+    L ${threePointSideLineXLeft_svg},${threePointArcStartY_svg}
+    A ${threePointRadius_svg},${threePointRadius_svg} 0 0 1 ${threePointSideLineXRight_svg},${threePointArcStartY_svg}
+    L ${threePointSideLineXRight_svg},0
+  `;
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg">
@@ -50,29 +54,40 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
         <svg
           viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full bg-orange-200 dark:bg-gray-700 rounded-lg"
+          className="w-full h-full bg-amber-600 dark:bg-amber-800 rounded-lg"
         >
-           <g stroke="#1f2937" strokeWidth="0.5" fill="none" className="dark:stroke-gray-300">
-                {/* Key */}
-                <rect x={keyX} y="0" width={keyWidth} height={keyHeight} className="fill-orange-300 dark:fill-gray-600" stroke="none" />
-                <line x1={keyX} y1="0" x2={keyX} y2={keyHeight} />
-                <line x1={keyX + keyWidth} y1="0" x2={keyX + keyWidth} y2={keyHeight} />
-                <line x1={keyX} y1={keyHeight} x2={keyX + keyWidth} y2={keyHeight} />
-
-                {/* Free throw circle arc */}
-                <path d={`M ${keyX} ${freeThrowLineY} A ${scale(1.8)} ${scale(1.8)} 0 0 1 ${keyX + keyWidth} ${freeThrowLineY}`} />
-
-                {/* Restricted area arc */}
-                <path d={`M ${hoopX - restrictedRadius} ${hoopY} A ${restrictedRadius} ${restrictedRadius} 0 0 0 ${hoopX + restrictedRadius} ${hoopY}`} />
-
-                {/* Three point line */}
-                <path d={`M ${scale(THREE_POINT_SIDE_M)} 0 L ${scale(THREE_POINT_SIDE_M)} ${hoopY - threePointRadius} A ${threePointRadius} ${threePointRadius} 0 0 1 ${SVG_WIDTH - scale(THREE_POINT_SIDE_M)} ${hoopY - threePointRadius} L ${SVG_WIDTH - scale(THREE_POINT_SIDE_M)} 0`} />
-
-                {/* Hoop */}
-                <circle cx={hoopX} cy={hoopY} r={scale(0.225)} className="fill-transparent stroke-red-500" strokeWidth="0.4" />
-                {/* Backboard */}
-                <line x1={hoopX - scale(0.9)} y1={scale(1.2)} x2={hoopX + scale(0.9)} y2={scale(1.2)} strokeWidth="0.5" />
-            </g>
+          {/* Court markings */}
+          <g stroke="#1f2937" strokeWidth="0.3" fill="none" className="dark:stroke-gray-400">
+            <rect
+              x={keyX_svg}
+              y="0"
+              width={keyWidth_svg}
+              height={keyHeight_svg}
+              className="fill-amber-700/80 dark:fill-amber-900/80"
+              stroke="none"
+            />
+            <line x1={keyX_svg} y1="0" x2={keyX_svg} y2={keyHeight_svg} />
+            <line x1={keyX_svg + keyWidth_svg} y1="0" x2={keyX_svg + keyWidth_svg} y2={keyHeight_svg} />
+            <line x1={keyX_svg} y1={keyHeight_svg} x2={keyX_svg + keyWidth_svg} y2={keyHeight_svg} />
+            <path d={threePointLinePath} />
+            {/* Free-throw circle arc */}
+            <path d={`M ${keyX_svg} ${keyHeight_svg} A ${scale(1.8)} ${scale(1.8)} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} />
+            <line
+              x1={hoopX_svg - backboardWidth_svg / 2}
+              y1={backboardY_svg}
+              x2={hoopX_svg + backboardWidth_svg / 2}
+              y2={backboardY_svg}
+              strokeWidth="0.5"
+              className="stroke-gray-600 dark:stroke-gray-400"
+            />
+            <circle
+              cx={hoopX_svg}
+              cy={hoopY_svg}
+              r={hoopRadius_svg}
+              className="fill-transparent stroke-red-500"
+              strokeWidth="0.4"
+            />
+          </g>
 
           {/* Render shots */}
           {shots.map((shot, index) => (
@@ -81,7 +96,7 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
               cx={shot.x}
               cy={shot.y}
               r="1.2"
-              fill={shot.made ? '#4ade80' : '#f87171'} // green-400 for make, red-400 for miss
+              fill={shot.made ? '#4ade80' : '#f87171'}
               stroke="white"
               strokeWidth="0.3"
               opacity="0.9"
