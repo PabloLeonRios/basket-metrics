@@ -51,27 +51,25 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
         className="w-full h-full bg-amber-600 dark:bg-amber-800 rounded-lg shadow-md"
       >
         {/* Court markings */}
-        <g stroke="#fff" strokeWidth="0.3" fill="none" className="dark:stroke-gray-300">
+        <g stroke="#fff" strokeWidth="0.5" fill="none" className="dark:stroke-gray-400/80">
           
           <rect
             x={keyX_svg}
             y="0"
             width={keyWidth_svg}
             height={keyHeight_svg}
-            className="fill-amber-700/80 dark:fill-amber-900/80"
+            className="fill-amber-700/50 dark:fill-amber-900/50"
             stroke="none"
           />
           <line x1={keyX_svg} y1="0" x2={keyX_svg} y2={keyHeight_svg} />
           <line x1={keyX_svg + keyWidth_svg} y1="0" x2={keyX_svg + keyWidth_svg} y2={keyHeight_svg} />
           <line x1={keyX_svg} y1={keyHeight_svg} x2={keyX_svg + keyWidth_svg} y2={keyHeight_svg} />
 
-          <path d={threePointLinePath} />
+          <path d={threePointLinePath} strokeWidth="0.7" />
 
-          {/* Free-throw circle */}
           <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} />
-          <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} strokeDasharray="0.6,0.6" />
+          <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} strokeDasharray="0.5,0.5" />
 
-          {/* No-charge semi-circle */}
           <path d={`M ${hoopX_svg - noChargeRadius_svg} ${hoopY_svg} A ${noChargeRadius_svg} ${noChargeRadius_svg} 0 0 0 ${hoopX_svg + noChargeRadius_svg} ${hoopY_svg}`} />
           
           <line
@@ -79,16 +77,16 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
             y1={backboardY_svg}
             x2={hoopX_svg + backboardWidth_svg / 2}
             y2={backboardY_svg}
-            strokeWidth="0.5"
-            className="stroke-gray-100 dark:stroke-gray-400"
+            strokeWidth="0.6"
+            className="stroke-gray-200 dark:stroke-gray-400"
           />
           
           <circle
             cx={hoopX_svg}
             cy={hoopY_svg}
             r={hoopRadius_svg}
-            className="fill-transparent"
-            strokeWidth="0.4"
+            className="fill-transparent stroke-red-500"
+            strokeWidth="0.5"
           />
         </g>
         
