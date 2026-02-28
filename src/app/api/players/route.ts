@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get('coachId');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '9');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const search = searchParams.get('search');
     const status = searchParams.get('status'); // 'inactive' or default to active
 
