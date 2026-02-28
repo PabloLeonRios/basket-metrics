@@ -13,27 +13,14 @@ import Button from '@/components/ui/Button';
 import PlayerStatsModal from './PlayerStatsModal';
 import { isThreePointer } from '@/lib/court-geometry';
 import { MagnifyingGlassIcon, FlagIcon, ArrowRightIcon, LightBulbIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
+import { ProactiveSuggestion } from '@/lib/recommender/lineupRecommender';
 
-// --- Types ---
-interface TrackerSessionData extends ISession {
-  currentQuarter: number;
-  teams: TeamData[];
-}
-interface TeamData {
-  _id: string;
-  name: string;
-  players: IPlayer[];
-}
-interface SelectedPlayer {
-  id: string;
-  name: string;
-  teamName: string;
-}
+interface TrackerSessionData extends ISession { currentQuarter: number; teams: TeamData[]; }
+interface TeamData { _id: string; name: string; players: IPlayer[]; }
+interface SelectedPlayer { id: string; name: string; teamName: string; }
 
-// --- Component ---
 export default function GameTracker({ sessionId }: { sessionId: string }) {
   const router = useRouter();
-  // --- State ---
   const [session, setSession] = useState<TrackerSessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +28,6 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [gameEvents, setGameEvents] = useState<IGameEvent[]>([]);
   const [onCourtPlayerIds, setOnCourtPlayerIds] = useState<Set<string>>(new Set());
   
-  // Modals State
   const [showSubModal, setShowSubModal] = useState(false);
   const [playerToSubOut, setPlayerToSubOut] = useState<IPlayer | null>(null);
   const [showShotModal, setShowShotModal] = useState(false);
@@ -49,23 +35,21 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [shotValue, setShotValue] = useState<2 | 3>(2);
   const [showPlayerStatsModal, setShowPlayerStatsModal] = useState(false);
   const [statsPlayer, setStatsPlayer] = useState<{player: IPlayer, stats: any} | null>(null);
+  const [showAISuggestionModal, setShowAISuggestionModal] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<ProactiveSuggestion | null>(null);
+  const [loadingAISuggestion, setLoadingAISuggestion] = useState(false);
 
-  // --- Derived State ---
   const isSessionFinished = useMemo(() => !!session?.finishedAt, [session]);
   const currentQuarter = useMemo(() => session?.currentQuarter || 1, [session]);
   const allPlayers = useMemo(() => session?.teams.flatMap(t => t.players) || [], [session]);
   const playerIdToName = useMemo(() => Object.fromEntries(allPlayers.map(p => [p._id, p.name])), [allPlayers]);
   const benchPlayers = useMemo(() => allPlayers.filter(p => !onCourtPlayerIds.has(p._id)), [allPlayers, onCourtPlayerIds]);
 
-  // --- Data Fetching ---
   useEffect(() => {
     async function fetchSessionData() {
       try {
         setLoading(true);
-        const [sessionRes, eventsRes] = await Promise.all([
-          fetch(`/api/sessions/${sessionId}`),
-          fetch(`/api/game-events?sessionId=${sessionId}`),
-        ]);
+        const [sessionRes, eventsRes] = await Promise.all([ fetch(`/api/sessions/${sessionId}`), fetch(`/api/game-events?sessionId=${sessionId}`), ]);
         if (!sessionRes.ok) throw new Error('Error al cargar la sesión');
         if (!eventsRes.ok) throw new Error('Error al cargar los eventos');
         
@@ -76,43 +60,33 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         setGameEvents(eventsData);
 
         const onCourtIds = new Set<string>();
-        const initialPlayers = sessionData.teams.flatMap((t: TeamData) => t.players);
-        
-        if (sessionData.sessionType === 'Partido') {
-            const subs = eventsData.filter((e: IGameEvent) => e.type === 'substitution').sort((a: IGameEvent, b: IGameEvent) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
-            const initialStarters = new Set<string>();
-            sessionData.teams.forEach((team: TeamData) => {
-                team.players.slice(0, 5).forEach((p: IPlayer) => initialStarters.add(p._id));
-            });
+        const allPlayersCurrent = sessionData.teams.flatMap((t: TeamData) => t.players);
 
+        if (sessionData.sessionType === 'Partido') {
+            const onCourtStarters = new Set<string>();
+            sessionData.teams.forEach((team: TeamData) => { team.players.slice(0, 5).forEach((p: IPlayer) => onCourtStarters.add(p._id)); });
+            
+            const subs = eventsData.filter((e: IGameEvent) => e.type === 'substitution').sort((a: IGameEvent, b: IGameEvent) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
             subs.forEach((event: IGameEvent) => {
                 const details = event.details as { playerIn: string, playerOut: string };
-                initialStarters.delete(details.playerOut);
-                initialStarters.add(details.playerIn);
+                onCourtStarters.delete(details.playerOut);
+                onCourtStarters.add(details.playerIn);
             });
-            initialStarters.forEach(id => onCourtIds.add(id));
+            onCourtStarters.forEach(id => onCourtIds.add(id));
         } else {
-            initialPlayers.forEach((p: IPlayer) => onCourtIds.add(p._id));
+            allPlayersCurrent.forEach((p: IPlayer) => onCourtIds.add(p._id));
         }
         setOnCourtPlayerIds(onCourtIds);
-
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Un error desconocido ha ocurrido.');
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { setError(err instanceof Error ? err.message : 'Un error desconocido ha ocurrido.'); } finally { setLoading(false); }
     }
     fetchSessionData();
   }, [sessionId]);
 
-  // --- Event Handlers ---
   const handleUpdateSession = useCallback(async (updateData: Partial<TrackerSessionData>) => {
     try {
         const response = await fetch(`/api/sessions/${sessionId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updateData) });
         if (!response.ok) throw new Error('No se pudo actualizar la sesión.');
-        const { data: updatedSession } = await response.json();
-        setSession(updatedSession);
-        return updatedSession;
+        const { data: updatedSession } = await response.json(); setSession(updatedSession); return updatedSession;
     } catch (err) { toast.error(err instanceof Error ? err.message : 'Error al actualizar sesión.'); }
   }, [sessionId]);
 
@@ -132,45 +106,43 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
       if (!response.ok) throw new Error(`No se pudo registrar el evento: ${type}`);
       const { data: newEvent } = await response.json();
       setGameEvents(prev => [newEvent, ...prev]);
-      if(type !== 'substitution') toast.success(`Evento '${type}' registrado.`);
+      if(type !== 'substitution') toast.success(`'${type}' registrado para ${playerForEvent.name}.`);
     } catch (err) { toast.error(err instanceof Error ? err.message : 'Error al registrar evento.'); }
   }, [selectedPlayer, sessionId, isSessionFinished, currentQuarter, session]);
 
-  const handleManualSubstitution = (playerIn: IPlayer) => {
-    if (!playerToSubOut || isSessionFinished) return;
+  const handleSubstitution = (playerOut: IPlayer, playerIn: IPlayer) => {
+    if (isSessionFinished) return;
     setOnCourtPlayerIds(prev => {
         const newSet = new Set(prev);
-        newSet.delete(playerToSubOut._id);
+        newSet.delete(playerOut._id);
         newSet.add(playerIn._id);
         return newSet;
     });
-    logEvent('substitution', { playerIn: { _id: playerIn._id, name: playerIn.name }, playerOut: { _id: playerToSubOut._id, name: playerToSubOut.name } });
-    toast.success(`${playerIn.name} entra por ${playerToSubOut.name}.`);
-    setShowSubModal(false);
-    setPlayerToSubOut(null);
+    logEvent('substitution', { playerIn: { _id: playerIn._id, name: playerIn.name }, playerOut: { _id: playerOut._id, name: playerOut.name } });
+    toast.success(`${playerIn.name} entra por ${playerOut.name}.`);
+    if(showSubModal) { setShowSubModal(false); setPlayerToSubOut(null); }
+    if(showAISuggestionModal) setShowAISuggestionModal(false);
   };
   
   const handleAdvanceQuarter = () => { if (!isSessionFinished && currentQuarter < 10 && confirm(`¿Avanzar al cuarto ${currentQuarter + 1}?`)) { handleUpdateSession({ currentQuarter: currentQuarter + 1 }); } };
   const handleFinishSession = async () => { if (!isSessionFinished && confirm('¿Finalizar esta sesión?')) { const updated = await handleUpdateSession({ finishedAt: new Date().toISOString() }); if (updated) { toast.success('Sesión finalizada.'); router.push(`/panel/dashboard/${sessionId}`); } } };
   const handleCourtClick = useCallback((x: number, y: number) => { if (selectedPlayer && onCourtPlayerIds.has(selectedPlayer.id) && !isSessionFinished) { setShotValue(isThreePointer(x, y) ? 3 : 2); setShotCoordinates({ x, y }); setShowShotModal(true); } else if (!selectedPlayer) { toast.error('Selecciona un jugador.'); } else { toast.error('El jugador seleccionado no está en la cancha.'); } }, [selectedPlayer, isSessionFinished, onCourtPlayerIds]);
   const handleShot = (made: boolean) => { if (!shotCoordinates) return; logEvent('tiro', { made, value: shotValue, x: shotCoordinates.x, y: shotCoordinates.y }); setShowShotModal(false); setShotCoordinates(null); };
+  const calculateStatsForPlayer = useCallback((playerId: string) => { return {}; }, [gameEvents]);
+  const handleShowPlayerStats = (player: IPlayer) => { const stats = calculateStatsForPlayer(player._id); setStatsPlayer({ player, stats }); setShowPlayerStatsModal(true); };
 
-  // --- Render ---
-  if (loading) return <div className="p-8 text-center">Cargando...</div>;
+  if (loading) return <div className="p-8 text-center">Cargando tracker...</div>;
   if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
   if (!session) return <div className="p-8 text-center">No se encontraron datos de la sesión.</div>;
   
   return (
     <>
       <div className="flex flex-col lg:flex-row gap-4 p-4">
-        {/* Left Column */}
         <div className="w-full lg:w-1/4 space-y-4">
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
             <h3 className="font-bold text-lg mb-3">Control del Partido</h3>
             <div className="space-y-2">
-                <div className="flex items-center justify-between text-lg">
-                    <span>Cuarto:</span><span className="font-bold text-blue-500">{currentQuarter}</span>
-                </div>
+                <div className="flex items-center justify-between text-lg"><span>Cuarto:</span><span className="font-bold text-blue-500">{currentQuarter}</span></div>
                 <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center"><ArrowRightIcon className="h-5 w-5 mr-2"/>Siguiente Cuarto</Button>
                 <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center"><FlagIcon className="h-5 w-5 mr-2"/>Finalizar Sesión</Button>
             </div>
@@ -188,8 +160,8 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                         {isPartido && <span className={`inline-block h-2.5 w-2.5 rounded-full mr-2 ${isOnCourt ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></span>}
                         #{player.dorsal} - {player.name}
                       </button>
-                      {isPartido && <button onClick={() => { setPlayerToSubOut(player); setShowSubModal(true); }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full ml-1"><ArrowsRightLeftIcon className="h-5 w-5" /></button>}
-                      <button onClick={() => { setStatsPlayer({ player, stats: {} }); setShowPlayerStatsModal(true); }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full ml-1"><MagnifyingGlassIcon className="h-5 w-5" /></button>
+                      {isPartido && <button onClick={() => { setPlayerToSubOut(player); setShowSubModal(true); }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full ml-1" title="Sustituir"><ArrowsRightLeftIcon className="h-5 w-5" /></button>}
+                      <button onClick={() => handleShowPlayerStats(player)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full ml-1" title="Ver Estadísticas"><MagnifyingGlassIcon className="h-5 w-5" /></button>
                     </div>
                   );
                 })}
@@ -197,16 +169,14 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             </div>
           ))}
         </div>
-
-        {/* Center Column */}
         <div className="flex-1 lg:max-w-2xl mx-auto flex flex-col gap-4">
             <Court onClick={handleCourtClick} shotCoordinates={shotCoordinates} />
             <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-bold text-lg">Acciones Rápidas</h3>
-                <span className="text-blue-500 text-sm font-medium">{selectedPlayer?.name || '...'}</span>
+                <span className="text-blue-500 text-sm font-medium truncate">{selectedPlayer?.name || '...'}</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 text-sm">
+              <div className="grid grid-cols-4 gap-2 text-xs sm:text-sm">
                 <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || isSessionFinished}>AST</Button>
                 <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || isSessionFinished}>ROBO</Button>
                 <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || isSessionFinished}>TAP</Button>
@@ -214,20 +184,16 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || isSessionFinished}>REB-O</Button>
                 <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || isSessionFinished}>REB-D</Button>
                 <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || isSessionFinished}>FALTA</Button>
-                <Button onClick={() => {}} disabled={isSessionFinished} className="bg-blue-600 text-white hover:bg-blue-700"><LightBulbIcon className="h-5 w-5" /></Button>
+                <Button onClick={() => { /* handleGetProactiveSuggestion */ }} disabled={isSessionFinished} className="bg-blue-600 text-white hover:bg-blue-700 justify-center"><LightBulbIcon className="h-5 w-5" /></Button>
               </div>
             </div>
             <FloatingStats events={gameEvents} />
         </div>
-
-        {/* Right Column */}
         <div className="w-full lg:w-1/4">
           <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={() => {}} isSessionFinished={isSessionFinished} sessionId={sessionId} />
         </div>
       </div>
-      
-      {/* Modals */}
-      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} benchPlayers={benchPlayers} onSubstitute={handleManualSubstitution} />
+      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} benchPlayers={benchPlayers} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
       {showShotModal && ( <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20"><div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4"><h3 className="text-2xl font-bold text-center">{`Tiro de ${shotValue} Puntos`}</h3><div className="flex justify-center gap-4"><Button onClick={() => handleShot(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button><Button onClick={() => handleShot(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button></div><button onClick={() => setShowShotModal(false)} className="mt-4 text-sm text-gray-500">Cancelar</button></div></div> )}
       {showPlayerStatsModal && statsPlayer && ( <PlayerStatsModal isOpen={showPlayerStatsModal} onClose={() => setShowPlayerStatsModal(false)} player={statsPlayer.player} stats={statsPlayer.stats}/>)}
     </>

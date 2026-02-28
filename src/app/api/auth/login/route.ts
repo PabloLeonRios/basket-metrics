@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Crear el JWT ---
+    // Defensively serialize the team object to prevent errors with corrupted population
+    const teamObject = user.team ? JSON.parse(JSON.stringify(user.team)) : undefined;
+
     const secret = getJwtSecretKey();
     const token = await new jose.SignJWT({
       _id: user._id.toString(),
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       role: user.role,
       isActive: user.isActive,
-      team: user.team ? (user.team as PopulatedTeam).toObject() : undefined,
+      team: teamObject,
       createdAt: (user.createdAt as unknown as Date).toISOString(),
       updatedAt: (user.updatedAt as unknown as Date).toISOString(),
     })
