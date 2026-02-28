@@ -28,6 +28,10 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const selectedOption = options.find((option) => option.value === value);
 
+  // If the passed value prop doesn't exist in the options, default to an empty string
+  // This prevents Headless UI from crashing if it receives a value that has no corresponding Option.
+  const finalValue = selectedOption ? value : '';
+
   const displayLabel = selectedOption?.label || 'Seleccionar...'; // Fallback display text
 
   const sizeStyles = {
@@ -49,7 +53,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           {label}
         </Listbox.Label>
       )}
-      <Listbox value={value} onChange={onChange} disabled={disabled}>
+      <Listbox value={finalValue} onChange={onChange} disabled={disabled}>
         <div className="relative mt-1">
           <Listbox.Button className={buttonClasses}>
             <span className="block truncate text-gray-900 dark:text-gray-50">{displayLabel}</span>

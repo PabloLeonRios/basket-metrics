@@ -38,7 +38,6 @@ export default function AdminUserManagementPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // The auth check here is important client-side to avoid even trying to fetch
       if (!adminUser || adminUser.role !== 'admin') {
           setLoading(false);
           return;

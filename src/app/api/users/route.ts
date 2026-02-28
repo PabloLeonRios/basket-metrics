@@ -9,23 +9,23 @@ export async function GET(request: NextRequest) {
   await dbConnect();
 
   try {
-    // ---- TEMPORARY DEBUG: AUTH DISABLED ----
-    // const token = request.cookies.get('token')?.value;
-    // const verified = await verifyAuth(token);
+    // 1. Verificar la autenticación y el rol del usuario
+    const token = request.cookies.get('token')?.value;
+    const verified = await verifyAuth(token);
 
-    // if (!verified.success || !verified.payload) {
-    //   return NextResponse.json(verified, { status: 401 });
-    // }
+    if (!verified.success || !verified.payload) {
+      return NextResponse.json(verified, { status: 401 });
+    }
 
-    // if (verified.payload.role !== 'admin') {
-    //   return NextResponse.json(
-    //     {
-    //       success: false,
-    //       message: 'Acceso denegado: Se requiere rol de Administrador.',
-    //     },
-    //     { status: 403 },
-    //   );
-    // }
+    if (verified.payload.role !== 'admin') {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Acceso denegado: Se requiere rol de Administrador.',
+        },
+        { status: 403 },
+      );
+    }
 
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get('teamId');
