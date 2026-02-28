@@ -2,6 +2,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
+import Team from '@/lib/models/Team'; // Ensure Team model is registered for populate
 import { verifyAuth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
