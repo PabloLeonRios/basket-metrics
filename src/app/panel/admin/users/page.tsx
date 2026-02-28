@@ -22,6 +22,8 @@ export default function AdminUserManagementPage() {
   const [teams, setTeams] = useState<ITeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugData, setDebugData] = useState<any>(null);
+
 
   // Filter and Search states
   const [selectedTeam, setSelectedTeam] = useState<string>('');
@@ -52,6 +54,7 @@ export default function AdminUserManagementPage() {
         
         const usersResponse = await fetch(usersUrl);
         const usersData = await usersResponse.json();
+        setDebugData(usersData); // Store for debugging
         if (!usersResponse.ok) throw new Error(usersData.message || 'Error al cargar usuarios.');
 
         setUsers(usersData.data || []);
@@ -88,7 +91,7 @@ export default function AdminUserManagementPage() {
       );
 
       toast.success(successMessage);
-    } catch (err) {
+    } catch (err) => {
       toast.error(err instanceof Error ? err.message : 'Error al actualizar.');
     }
   };
@@ -179,6 +182,13 @@ export default function AdminUserManagementPage() {
           </tbody>
         </table>
       </div>
+
+      {debugData && (
+        <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded">
+          <h3 className="font-bold">Debug Info:</h3>
+          <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(debugData, null, 2)}</pre>
+        </div>
+      )}
     </main>
   );
 }

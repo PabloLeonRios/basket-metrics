@@ -46,8 +46,19 @@ export async function GET(request: NextRequest) {
 
     // 2. Obtener los usuarios de la base de datos
     const users = await User.find(query).select('-password').populate('team');
+    const userCount = await User.countDocuments(query);
 
-    return NextResponse.json({ success: true, data: users }, { status: 200 });
+
+    return NextResponse.json({ 
+      success: true, 
+      data: users,
+      debug: {
+        message: "Información de depuración",
+        userPayload: verified.payload,
+        querySent: query,
+        usersFound: userCount
+      }
+    }, { status: 200 });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error desconocido';
