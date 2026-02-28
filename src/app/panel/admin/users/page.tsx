@@ -54,7 +54,7 @@ export default function AdminUserManagementPage() {
         const usersData = await usersResponse.json();
         if (!usersResponse.ok) throw new Error(usersData.message || 'Error al cargar usuarios.');
 
-        setUsers(usersData.data);
+        setUsers(usersData.data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos.');
       } finally {

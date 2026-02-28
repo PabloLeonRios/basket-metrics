@@ -23,7 +23,7 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
   return (
     <div className="w-full max-w-lg mx-auto aspect-[100/94] touch-none relative">
       <Image
-        src="/prueba.png"
+        src="/prueba2.png"
         alt="Media cancha de baloncesto"
         layout="fill"
         objectFit="cover"

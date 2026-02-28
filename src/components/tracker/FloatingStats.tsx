@@ -29,6 +29,13 @@ export default function FloatingStats({ events }: FloatingStatsProps) {
             points += event.details.value as number;
           }
           break;
+        case 'tiro_libre':
+          shotsAttempted++;
+          if (event.details.made) {
+            shotsMade++;
+            points++;
+          }
+          break;
         case 'rebote':
           if (event.details.type === 'ofensivo') {
             offensiveRebounds++;
