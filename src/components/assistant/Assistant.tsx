@@ -78,6 +78,15 @@ export default function Assistant() {
     });
   };
 
+  const handleSelectAllToggle = () => {
+    // If all are already selected, deselect all. Otherwise, select all.
+    if (selectedPlayerIds.size === allPlayers.length) {
+      setSelectedPlayerIds(new Set());
+    } else {
+      setSelectedPlayerIds(new Set(allPlayers.map(p => p._id)));
+    }
+  };
+
   const handleRecommend = async () => {
     if (selectedPlayerIds.size < 5) {
       alert('Debes seleccionar al menos 5 jugadores disponibles.');
@@ -119,7 +128,15 @@ export default function Assistant() {
     <div className="space-y-8">
       {/* Step 1 & 2 */}
       <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-bold mb-4">Paso 1: Selecciona Jugadores y Situación</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Paso 1: Selecciona Jugadores y Situación</h2>
+          <button
+            onClick={handleSelectAllToggle}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+          >
+            {selectedPlayerIds.size === allPlayers.length ? 'Deseleccionar Todos' : 'Seleccionar Todos'}
+          </button>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-6">
           {allPlayers.map((player) => (
             <label key={player._id} className={`p-3 rounded-lg cursor-pointer text-center border-2 ${selectedPlayerIds.has(player._id) ? 'bg-blue-500 text-white border-blue-600' : 'bg-gray-100 dark:bg-gray-800 border-gray-200'}`}>

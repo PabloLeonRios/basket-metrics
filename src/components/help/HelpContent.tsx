@@ -34,7 +34,7 @@ export default function HelpContent() {
       <HelpSection title="Abreviaturas de Estadísticas Básicas">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
-                <Definition term="PTS" definition="Puntos" />
+                <Definition term="PTS" definition="Puntos Anotados Totales" />
                 <Definition term="REB" definition="Rebotes Totales" />
                 <Definition term="OREB" definition="Rebotes Ofensivos" />
                 <Definition term="DREB" definition="Rebotes Defensivos" />
@@ -50,6 +50,7 @@ export default function HelpContent() {
                 <Definition term="FGM / FGA" definition="Tiros de Campo Anotados / Intentados" />
                 <Definition term="3PM / 3PA" definition="Tiros de 3 Puntos Anotados / Intentados" />
                 <Definition term="FTM / FTA" definition="Tiros Libres Anotados / Intentados" />
+                <Definition term="Game Score" definition="Valoración individual del rendimiento en un partido específico (ver fórmula avanzada)." />
             </div>
         </div>
       </HelpSection>
