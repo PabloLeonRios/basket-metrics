@@ -95,6 +95,11 @@ export default function HelpContent() {
           formula="(Puntos Oponente / Posesiones Oponente) * 100"
           explanation="Puntos recibidos por un equipo o jugador por cada 100 posesiones. Mide la eficiencia defensiva."
         />
+
+        <Definition 
+          term="Idoneidad (Suitability Score)" 
+          definition="Una puntuación generada por el Asistente de IA que indica qué tan adecuado es un jugador para una situación de partido específica, considerando sus perfiles y estadísticas." 
+        />
       </HelpSection>
     </div>
   );

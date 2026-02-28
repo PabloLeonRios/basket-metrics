@@ -163,9 +163,9 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             <h3 className="font-bold text-lg mb-3">Control del Partido</h3>
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-lg"><span>Cuarto:</span><span className="font-bold text-blue-500">{currentQuarter}</span></div>
-                <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center"><ArrowRightIcon className="h-5 w-5 mr-2"/>Siguiente Cuarto</Button>
-                <Button onClick={handleGetProactiveSuggestion} disabled={isSessionFinished || loadingAISuggestion} className="w-full justify-center bg-blue-600 hover:bg-blue-700"><LightBulbIcon className="h-5 w-5 mr-2" />Sugerencia IA</Button>
-                <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center"><FlagIcon className="h-5 w-5 mr-2"/>Finalizar Sesión</Button>
+                <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center"><ArrowRightIcon className="h-5 w-5"/>Siguiente Cuarto</Button>
+                <Button onClick={handleGetProactiveSuggestion} disabled={isSessionFinished || loadingAISuggestion} className="w-full justify-center bg-blue-600 hover:bg-blue-700"><LightBulbIcon className="h-5 w-5" />Sugerencia IA</Button>
+                <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center"><FlagIcon className="h-5 w-5"/>Finalizar Sesión</Button>
             </div>
           </div>
           {session.teams.map(team => (

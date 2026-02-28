@@ -12,6 +12,7 @@ const Button: React.FC<ButtonProps> = ({
   className,
   ...props
 }) => {
+  //const baseStyles = 'font-semibold rounded-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2';
   const baseStyles = 'font-semibold rounded-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variantStyles = {
