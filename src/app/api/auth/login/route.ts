@@ -18,6 +18,10 @@ type PopulatedTeam = ITeam & { toObject: () => ITeam };
 
 export async function POST(request: NextRequest) {
   await dbConnect();
+  
+  // Explicitly reference Team model to ensure it's registered by Mongoose
+  // in serverless environments before the User.populate call.
+  Team.exists({});
 
   try {
     const { email, password } = await request.json();
