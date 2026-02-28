@@ -50,7 +50,6 @@ export default function HelpContent() {
                 <Definition term="FGM / FGA" definition="Tiros de Campo Anotados / Intentados" />
                 <Definition term="3PM / 3PA" definition="Tiros de 3 Puntos Anotados / Intentados" />
                 <Definition term="FTM / FTA" definition="Tiros Libres Anotados / Intentados" />
-                <Definition term="Game Score" definition="Valoración individual del rendimiento en un partido específico (ver fórmula avanzada)." />
             </div>
         </div>
       </HelpSection>
@@ -59,6 +58,12 @@ export default function HelpContent() {
         <p className="mb-6 text-gray-700 dark:text-gray-300">
           Estas métricas ofrecen una visión más profunda del rendimiento de un jugador o equipo, más allá de las estadísticas tradicionales.
         </p>
+
+        <Formula 
+          name="Idoneidad (Suitability Score)"
+          formula="Σ (Puntos por Tag) + Bonus"
+          explanation="Puntuación generada por la IA para una situación de partido. Suma puntos por cada 'Tag' (perfil) que un jugador posee, y aplica un bonus por estadísticas de carrera. El resultado se normaliza en una escala de 1 a 10 para indicar qué tan adecuado es el jugador."
+        />
         
         <Formula 
           name="eFG% (Effective Field Goal Percentage)"
@@ -94,11 +99,6 @@ export default function HelpContent() {
           name="Rating Defensivo (DRtg)"
           formula="(Puntos Oponente / Posesiones Oponente) * 100"
           explanation="Puntos recibidos por un equipo o jugador por cada 100 posesiones. Mide la eficiencia defensiva."
-        />
-
-        <Definition 
-          term="Idoneidad (Suitability Score)" 
-          definition="Una puntuación generada por el Asistente de IA que indica qué tan adecuado es un jugador para una situación de partido específica, considerando sus perfiles y estadísticas." 
         />
       </HelpSection>
     </div>

@@ -19,6 +19,20 @@ interface TrackerSessionData extends ISession { currentQuarter: number; teams: T
 interface TeamData { _id: string; name: string; players: IPlayer[]; }
 interface SelectedPlayer { id: string; name: string; teamName: string; }
 
+const getActionButtonClass = (eventType: string) => {
+    switch (eventType) {
+        case 'asistencia': return 'bg-blue-600 hover:bg-blue-700';
+        case 'robo': return 'bg-teal-600 hover:bg-teal-700';
+        case 'tapon': return 'bg-purple-600 hover:bg-purple-700';
+        case 'perdida': return 'bg-yellow-600 hover:bg-yellow-700';
+        case 'rebote_ofensivo': return 'bg-cyan-600 hover:bg-cyan-700';
+        case 'rebote_defensivo': return 'bg-pink-600 hover:bg-pink-700';
+        case 'falta': return 'bg-orange-600 hover:bg-orange-700';
+        case 'tiro_libre': return 'bg-indigo-600 hover:bg-indigo-700';
+        default: return 'bg-gray-600 hover:bg-gray-700';
+    }
+}
+
 export default function GameTracker({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [session, setSession] = useState<TrackerSessionData | null>(null);
@@ -31,6 +45,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [showSubModal, setShowSubModal] = useState(false);
   const [playerToSubOut, setPlayerToSubOut] = useState<IPlayer | null>(null);
   const [showShotModal, setShowShotModal] = useState(false);
+  const [showFreeThrowModal, setShowFreeThrowModal] = useState(false);
   const [shotCoordinates, setShotCoordinates] = useState<{ x: number; y: number } | null>(null);
   const [shotValue, setShotValue] = useState<2 | 3>(2);
   const [showPlayerStatsModal, setShowPlayerStatsModal] = useState(false);
@@ -163,9 +178,9 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             <h3 className="font-bold text-lg mb-3">Control del Partido</h3>
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-lg"><span>Cuarto:</span><span className="font-bold text-blue-500">{currentQuarter}</span></div>
-                <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center"><ArrowRightIcon className="h-5 w-5"/>Siguiente Cuarto</Button>
-                <Button onClick={handleGetProactiveSuggestion} disabled={isSessionFinished || loadingAISuggestion} className="w-full justify-center bg-blue-600 hover:bg-blue-700"><LightBulbIcon className="h-5 w-5" />Sugerencia IA</Button>
-                <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center"><FlagIcon className="h-5 w-5"/>Finalizar Sesión</Button>
+                <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center"><ArrowRightIcon className="h-5 w-5 mr-2"/>Siguiente Cuarto</Button>
+                <Button onClick={handleGetProactiveSuggestion} disabled={isSessionFinished || loadingAISuggestion} className="w-full justify-center bg-blue-600 text-white hover:bg-blue-700"><LightBulbIcon className="h-5 w-5 mr-2" />Sugerencia IA</Button>
+                <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center"><FlagIcon className="h-5 w-5 mr-2"/>Finalizar Sesión</Button>
             </div>
           </div>
           {session.teams.map(team => (
@@ -207,7 +222,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-O</Button>
                 <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-D</Button>
                 <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>FALTA</Button>
-                <Button onClick={() => {}} disabled={!selectedPlayer || isSessionFinished}>LIBRE</Button>
+                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished}>LIBRE</Button>
               </div>
             </div>
             <FloatingStats events={gameEvents} />
@@ -216,7 +231,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={() => {}} isSessionFinished={isSessionFinished} sessionId={sessionId} />
         </div>
       </div>
-      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} benchPlayers={benchPlayers} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
+      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} allPlayers={allPlayers} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
       {showAISuggestionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setShowAISuggestionModal(false)}>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
