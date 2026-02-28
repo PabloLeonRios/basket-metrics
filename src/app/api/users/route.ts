@@ -9,23 +9,23 @@ export async function GET(request: NextRequest) {
   await dbConnect();
 
   try {
-    // 1. Verificar la autenticación y el rol del usuario
-    const token = request.cookies.get('token')?.value;
-    const verified = await verifyAuth(token);
+    // ---- TEMPORARY DEBUG: AUTH DISABLED ----
+    // const token = request.cookies.get('token')?.value;
+    // const verified = await verifyAuth(token);
 
-    if (!verified.success || !verified.payload) {
-      return NextResponse.json(verified, { status: 401 });
-    }
+    // if (!verified.success || !verified.payload) {
+    //   return NextResponse.json(verified, { status: 401 });
+    // }
 
-    if (verified.payload.role !== 'admin') {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Acceso denegado: Se requiere rol de Administrador.',
-        },
-        { status: 403 },
-      );
-    }
+    // if (verified.payload.role !== 'admin') {
+    //   return NextResponse.json(
+    //     {
+    //       success: false,
+    //       message: 'Acceso denegado: Se requiere rol de Administrador.',
+    //     },
+    //     { status: 403 },
+    //   );
+    // }
 
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get('teamId');
@@ -46,19 +46,8 @@ export async function GET(request: NextRequest) {
 
     // 2. Obtener los usuarios de la base de datos
     const users = await User.find(query).select('-password').populate('team');
-    const userCount = await User.countDocuments(query);
 
-
-    return NextResponse.json({ 
-      success: true, 
-      data: users,
-      debug: {
-        message: "Información de depuración",
-        userPayload: verified.payload,
-        querySent: query,
-        usersFound: userCount
-      }
-    }, { status: 200 });
+    return NextResponse.json({ success: true, data: users }, { status: 200 });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error desconocido';

@@ -22,8 +22,6 @@ export default function AdminUserManagementPage() {
   const [teams, setTeams] = useState<ITeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugData, setDebugData] = useState<any>(null);
-
 
   // Filter and Search states
   const [selectedTeam, setSelectedTeam] = useState<string>('');
@@ -40,13 +38,17 @@ export default function AdminUserManagementPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!adminUser || adminUser.role !== 'admin') return;
+      // The auth check here is important client-side to avoid even trying to fetch
+      if (!adminUser || adminUser.role !== 'admin') {
+          setLoading(false);
+          return;
+      };
       try {
         setLoading(true);
         const teamsResponse = await fetch('/api/teams');
         const teamsData = await teamsResponse.json();
         if (!teamsResponse.ok) throw new Error(teamsData.message || 'Error al cargar equipos.');
-        setTeams(teamsData.data);
+        setTeams(teamsData.data || []);
         
         let usersUrl = '/api/users?';
         if (selectedTeam) usersUrl += `teamId=${selectedTeam}&`;
@@ -54,11 +56,10 @@ export default function AdminUserManagementPage() {
         
         const usersResponse = await fetch(usersUrl);
         const usersData = await usersResponse.json();
-        setDebugData(usersData); // Store for debugging
         if (!usersResponse.ok) throw new Error(usersData.message || 'Error al cargar usuarios.');
 
         setUsers(usersData.data || []);
-      } catch (err: any) {
+      } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos.');
       } finally {
         setLoading(false);
@@ -182,13 +183,6 @@ export default function AdminUserManagementPage() {
           </tbody>
         </table>
       </div>
-
-      {debugData && (
-        <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded">
-          <h3 className="font-bold">Debug Info:</h3>
-          <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(debugData, null, 2)}</pre>
-        </div>
-      )}
     </main>
   );
 }
