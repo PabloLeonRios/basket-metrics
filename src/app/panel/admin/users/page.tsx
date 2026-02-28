@@ -58,7 +58,7 @@ export default function AdminUserManagementPage() {
         if (!usersResponse.ok) throw new Error(usersData.message || 'Error al cargar usuarios.');
 
         setUsers(usersData.data || []);
-      } catch (err) {
+      } catch (err: any) {
         setError(err instanceof Error ? err.message : 'Error desconocido al cargar datos.');
       } finally {
         setLoading(false);
@@ -91,7 +91,7 @@ export default function AdminUserManagementPage() {
       );
 
       toast.success(successMessage);
-    } catch (err) => {
+    } catch (err: any) {
       toast.error(err instanceof Error ? err.message : 'Error al actualizar.');
     }
   };
