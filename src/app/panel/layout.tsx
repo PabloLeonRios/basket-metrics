@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
 import Sidebar from '@/components/layout/Sidebar';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; // For sidebar toggle icon
+import { Dribbble } from 'lucide-react';
 
 export default function PanelLayout({ children }: PropsWithChildren) {
   const { user, loading, isAuthenticated } = useAuth();
@@ -44,25 +45,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
       <aside className={`flex-shrink-0 ${isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-md h-screen sticky top-0`}>
         <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
           <Link href="/panel" className="flex items-center gap-2 font-bold text-xl text-orange-600">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-orange-500"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M4.93 4.93l14.14 14.14"></path>
-              <path d="M19.07 4.93l-14.14 14.14"></path>
-              <path d="M22 12H2"></path>
-              <path d="M12 2a10 10 0 0 0-9.8 11.5"></path>
-              <path d="M12 22a10 10 0 0 1 9.8-11.5"></path>
-            </svg>
+            <Dribbble className="w-6 h-6 text-orange-500" />
             <span>Basket-Metrics</span>
           </Link>
         </div>
