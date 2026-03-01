@@ -231,7 +231,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={() => {}} isSessionFinished={isSessionFinished} sessionId={sessionId} />
         </div>
       </div>
-      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} allPlayers={allPlayers} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
+      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} teamPlayers={session?.teams.find(t => t.players.some(p => p._id === playerToSubOut?._id))?.players || []} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
       {showAISuggestionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setShowAISuggestionModal(false)}>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
