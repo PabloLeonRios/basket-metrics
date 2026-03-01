@@ -9,6 +9,10 @@ import Input from '@/components/ui/Input';
 import Checkbox from '@/components/ui/Checkbox';
 import JerseyIcon from '@/components/ui/JerseyIcon';
 import { toast } from 'react-toastify';
+import { utils, writeFile } from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 export default function PlayerManager() {
   const { user, loading: authLoading } = useAuth();
@@ -32,6 +36,52 @@ export default function PlayerManager() {
   const [editDorsal, setEditDorsal] = useState('');
   const [editPosition, setEditPosition] = useState('');
   const [editTeam, setEditTeam] = useState('');
+
+  // Export methods
+  const exportToExcel = () => {
+    if (players.length === 0) {
+      toast.info('No hay jugadores para exportar.');
+      return;
+    }
+    const data = players.map(p => ({
+      Nombre: p.name,
+      Dorsal: p.dorsal || '-',
+      Posición: p.position || '-',
+      Equipo: p.team || '-',
+      Estado: p.isActive !== false ? 'Activo' : 'Inactivo',
+    }));
+
+    const worksheet = utils.json_to_sheet(data);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Jugadores');
+    writeFile(workbook, 'jugadores.xlsx');
+  };
+
+  const exportToPDF = () => {
+    if (players.length === 0) {
+      toast.info('No hay jugadores para exportar.');
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text('Listado de Jugadores', 14, 15);
+
+    const tableData = players.map(p => [
+      p.name,
+      p.dorsal?.toString() || '-',
+      p.position || '-',
+      p.team || '-',
+      p.isActive !== false ? 'Activo' : 'Inactivo',
+    ]);
+
+    autoTable(doc, {
+      startY: 20,
+      head: [['Nombre', 'Dorsal', 'Posición', 'Equipo', 'Estado']],
+      body: tableData,
+    });
+
+    doc.save('jugadores.pdf');
+  };
 
   // Debounce search term
   useEffect(() => {
@@ -179,6 +229,14 @@ export default function PlayerManager() {
         <div className="flex justify-between items-center flex-wrap gap-4">
             <h2 className="text-xl font-bold">Gestión de Jugadores</h2>
             <div className="flex items-center gap-4">
+              <Button variant="secondary" onClick={exportToExcel} className="flex items-center gap-2">
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                Excel
+              </Button>
+              <Button variant="secondary" onClick={exportToPDF} className="flex items-center gap-2">
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                PDF
+              </Button>
               <Checkbox label="Ver Inactivos" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
               <div className="w-full max-w-xs">
                   <Input type="text" placeholder="Buscar por nombre o dorsal..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} inputSize="md" />
