@@ -5,6 +5,7 @@ import User from '@/lib/models/User';
 import { IUser } from '@/types/definitions';
 import bcrypt from 'bcrypt';
 import { verifyAuth } from '@/lib/auth';
+import { isPasswordStrong, passwordPolicyMessage } from '@/lib/password-policy';
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -15,6 +16,10 @@ export async function POST(request: NextRequest) {
 
     if (!name || !email || !password) {
       return NextResponse.json({ success: false, message: 'Nombre, email y contraseña son requeridos.' }, { status: 400 });
+    }
+
+    if (!isPasswordStrong(password)) {
+      return NextResponse.json({ success: false, message: passwordPolicyMessage }, { status: 400 });
     }
 
     const existingUser = await User.findOne({ email });

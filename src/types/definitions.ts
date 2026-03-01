@@ -8,6 +8,8 @@ export interface IUser {
   role: 'entrenador' | 'jugador' | 'admin';
   isActive: boolean;
   team?: ITeam;
+  failedLoginAttempts?: number;
+  lockUntil?: Date | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -13,7 +13,7 @@ import { getJwtSecretKey } from '@/lib/auth-secret';
 import { ITeam } from '@/types/definitions';
 
 // Tipo local para informar a TypeScript que esperamos la contraseña aquí
-type UserWithPassword = IUser & Document & { password?: string };
+type UserWithPassword = IUser & Document & { password?: string, failedLoginAttempts: number, lockUntil: Date | null };
 type PopulatedTeam = ITeam & { toObject: () => ITeam };
 
 export async function POST(request: NextRequest) {
@@ -35,13 +35,21 @@ export async function POST(request: NextRequest) {
 
     // Buscar al usuario, pedir la contraseña y hacer un cast al tipo local
     const user = (await User.findOne({ email })
-      .select('+password')
+      .select('+password +failedLoginAttempts +lockUntil')
       .populate('team')) as UserWithPassword;
 
     if (!user || !user.password) {
       return NextResponse.json(
         { success: false, message: 'Credenciales inválidas.' },
         { status: 401 },
+      );
+    }
+
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      return NextResponse.json(
+        { success: false, message: 'Cuenta bloqueada temporalmente por demasiados intentos fallidos. Inténtalo más tarde.' },
+        { status: 403 },
       );
     }
 
@@ -57,10 +65,25 @@ export async function POST(request: NextRequest) {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      const attempts = (user.failedLoginAttempts || 0) + 1;
+      let updateFields: any = { failedLoginAttempts: attempts };
+
+      if (attempts >= 5) {
+        // Bloquear por 10 minutos
+        updateFields.lockUntil = new Date(Date.now() + 10 * 60 * 1000);
+      }
+
+      await User.findByIdAndUpdate(user._id, { $set: updateFields });
+
       return NextResponse.json(
         { success: false, message: 'Credenciales inválidas.' },
         { status: 401 },
       );
+    }
+
+    // Reiniciar intentos fallidos al iniciar sesión exitosamente
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      await User.findByIdAndUpdate(user._id, { $set: { failedLoginAttempts: 0, lockUntil: null } });
     }
 
     // --- Crear el JWT ---
