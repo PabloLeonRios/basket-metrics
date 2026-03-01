@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user (direct insert with driver)...');
-    const newUserPlain: Record<string, unknown> = newUser.toObject() as Record<string, unknown>;
+    const newUserPlain: Record<string, unknown> = newUser.toObject() as unknown as Record<string, unknown>;
     delete newUserPlain._id;
     delete newUserPlain.__v;
     const result = await User.collection.insertOne(newUserPlain);
