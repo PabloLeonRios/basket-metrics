@@ -24,6 +24,7 @@ export default function PlayerManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [showInactive, setShowInactive] = useState(false);
+  const [showRivals, setShowRivals] = useState(false);
 
   // Edit Modal state
   const [editingPlayer, setEditingPlayer] = useState<IPlayer | null>(null);
@@ -31,6 +32,7 @@ export default function PlayerManager() {
   const [editDorsal, setEditDorsal] = useState('');
   const [editPosition, setEditPosition] = useState('');
   const [editTeam, setEditTeam] = useState('');
+  const [editIsRival, setEditIsRival] = useState(false);
 
   // Debounce search term
   useEffect(() => {
@@ -57,6 +59,9 @@ export default function PlayerManager() {
         if (showInactive) {
             url += '&status=inactive';
         }
+        if (showRivals) {
+            url += '&showRivals=true';
+        }
         if (debouncedSearchTerm) {
           url += `&search=${debouncedSearchTerm}`;
         }
@@ -78,14 +83,14 @@ export default function PlayerManager() {
     if (!authLoading && user) {
       fetchPlayers();
     }
-  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive]);
+  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive, showRivals]);
 
   const handleUpdatePlayer = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingPlayer) return;
 
     try {
-      const updatedData = { name: editName, dorsal: Number(editDorsal), position: editPosition, team: editTeam };
+      const updatedData = { name: editName, dorsal: Number(editDorsal), position: editPosition, team: editTeam, isRival: editIsRival };
       const response = await fetch(`/api/players/${editingPlayer._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -126,6 +131,7 @@ export default function PlayerManager() {
     setEditDorsal(String(player.dorsal || ''));
     setEditPosition(player.position || '');
     setEditTeam(player.team || '');
+    setEditIsRival(!!player.isRival);
   };
 
   const handlePageChange = (page: number) => {
@@ -142,6 +148,7 @@ export default function PlayerManager() {
             <h2 className="text-xl font-bold">Gestión de Jugadores</h2>
             <div className="flex items-center gap-4">
               <Checkbox label="Ver Inactivos" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
+              <Checkbox label="Mostrar Rivales" checked={showRivals} onChange={(e) => setShowRivals(e.target.checked)} />
               <div className="w-full max-w-xs">
                   <Input type="text" placeholder="Buscar por nombre o dorsal..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} inputSize="md" />
               </div>
@@ -159,7 +166,10 @@ export default function PlayerManager() {
               <div className="flex-grow flex items-center space-x-4">
                 <JerseyIcon number={player.dorsal} className="h-24 w-24 flex-shrink-0" />
                 <div className="flex-grow">
-                  <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{player.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{player.name}</p>
+                    {player.isRival && <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Rival</span>}
+                  </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{player.position || 'Sin posición'}</p>
                   {player.team && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Equipo: {player.team}</p>}
                 </div>
@@ -222,7 +232,10 @@ export default function PlayerManager() {
               </div>
               <div>
                 <label htmlFor="editTeam" className={labelStyles}>Equipo</label>
-                <Input id="editTeam" type="text" value={editTeam} onChange={(e) => setEditTeam(e.target.value)} placeholder="Ej: Equipo Rival" />
+                <Input id="editTeam" type="text" value={editTeam} onChange={(e) => setEditTeam(e.target.value)} placeholder={editIsRival ? "Ej: Equipo Rival" : "Ej: Mi Equipo"} />
+              </div>
+              <div className="py-2">
+                <Checkbox label="Es jugador rival" checked={editIsRival} onChange={(e) => setEditIsRival(e.target.checked)} />
               </div>
               <div className="flex justify-between items-center pt-4">
                 <Button type="submit" variant="primary">Guardar Cambios</Button>

@@ -39,11 +39,16 @@ export async function PUT(
   await dbConnect();
   try {
     const body = await request.json();
-    const { name, dorsal, position, isActive, team } = body;
+    const { name, dorsal, position, isActive, team, isRival } = body;
+
+    const updateData: any = { name, dorsal, position, isActive, team };
+    if (isRival !== undefined) {
+      updateData.isRival = isRival;
+    }
 
     const updatedPlayer = await Player.findByIdAndUpdate(
       playerId,
-      { name, dorsal, position, isActive, team },
+      updateData,
       { returnDocument: 'after', runValidators: true },
     );
 

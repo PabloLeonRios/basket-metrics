@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Checkbox from '@/components/ui/Checkbox';
 import { toast } from 'react-toastify';
 
 export default function CreatePlayerForm() {
@@ -16,6 +17,7 @@ export default function CreatePlayerForm() {
   const [dorsal, setDorsal] = useState('');
   const [position, setPosition] = useState('');
   const [team, setTeam] = useState('');
+  const [isRival, setIsRival] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const labelStyles = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
@@ -32,8 +34,9 @@ export default function CreatePlayerForm() {
         name, 
         dorsal: Number(dorsal), 
         position, 
-        team: team || user.team?.name,
-        coach: user._id 
+        team: team || (isRival ? 'Equipo Rival' : user.team?.name),
+        coach: user._id,
+        isRival
       };
       const response = await fetch('/api/players', {
         method: 'POST',
@@ -84,8 +87,11 @@ export default function CreatePlayerForm() {
           </div>
           <div>
             <label htmlFor="team" className={labelStyles}>Equipo (Opcional)</label>
-            <Input id="team" type="text" value={team} onChange={(e) => setTeam(e.target.value)} placeholder={user?.team?.name || "Ej: Equipo Rival"} />
+            <Input id="team" type="text" value={team} onChange={(e) => setTeam(e.target.value)} placeholder={isRival ? "Ej: Equipo Rival" : (user?.team?.name || "Ej: Mi Equipo")} />
           </div>
+        </div>
+        <div className="py-2">
+            <Checkbox label="Es jugador rival" checked={isRival} onChange={(e) => setIsRival(e.target.checked)} />
         </div>
         <Button type="submit" disabled={isSubmitting} variant="primary" size="md" className="w-full sm:w-auto">
           {isSubmitting ? 'Creando...' : 'Guardar Jugador'}

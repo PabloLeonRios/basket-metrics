@@ -30,6 +30,7 @@ export interface IPlayer {
   dorsal?: number;
   team?: string;
   isActive?: boolean;
+  isRival?: boolean;
 }
 
 // --- SESSION ---

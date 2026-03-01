@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100');
     const search = searchParams.get('search');
     const status = searchParams.get('status'); // 'inactive' or default to active
+    const showRivals = searchParams.get('showRivals') === 'true';
 
     if (!coachId && !isAdmin) {
       return NextResponse.json(
@@ -46,6 +47,12 @@ export async function GET(request: NextRequest) {
       // By default, show active players. This now includes players where `isActive` is true
       // AND players where the `isActive` field does not exist (for backward compatibility).
       query.isActive = { $ne: false };
+    }
+
+    if (showRivals) {
+      query.isRival = true;
+    } else {
+      query.isRival = { $ne: true };
     }
 
     if (search) {
@@ -93,8 +100,8 @@ export async function POST(request: NextRequest) {
   console.log('--- PLAYER CREATION REQUEST START ---');
   await dbConnect();
   try {
-    const { name, dorsal, position, team, coach } = await request.json();
-    console.log('Step 1: Payload received:', { name, team, coach });
+    const { name, dorsal, position, team, coach, isRival } = await request.json();
+    console.log('Step 1: Payload received:', { name, team, coach, isRival });
 
     if (!name || !coach) {
       console.error('Validation failed: name or coach missing.');
@@ -149,6 +156,7 @@ export async function POST(request: NextRequest) {
       dorsal,
       position,
       team, // Este es el nombre del equipo (String), que viene del autocompletado
+      isRival: !!isRival,
     });
     console.log('Step 6 Complete: Player object created.');
 
