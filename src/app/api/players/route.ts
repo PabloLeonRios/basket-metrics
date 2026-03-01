@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Build the query object
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (coachId) {
       query.coach = coachId;
     }
@@ -141,11 +141,11 @@ export async function POST(request: NextRequest) {
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user (direct insert with driver)...');
-    const newUserPlain: any = newUser.toObject();
+    const newUserPlain: Record<string, unknown> = newUser.toObject();
     delete newUserPlain._id;
     delete newUserPlain.__v;
     const result = await User.collection.insertOne(newUserPlain);
-    newUser._id = result.insertedId as any; // Assign the newly generated _id back to the Mongoose document for subsequent use
+    newUser._id = result.insertedId as unknown; // Assign the newly generated _id back to the Mongoose document for subsequent use
     console.log('Step 5 Complete: New user saved (direct insert). Inserted ID:', result.insertedId);
 
     console.log('Step 6: Creating new player object...');

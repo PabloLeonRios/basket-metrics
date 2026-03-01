@@ -41,7 +41,7 @@ export async function PUT(
     const body = await request.json();
     const { name, dorsal, position, isActive, team, isRival } = body;
 
-    const updateData: any = { name, dorsal, position, isActive, team };
+    const updateData: Record<string, unknown> = { name, dorsal, position, isActive, team };
     if (isRival !== undefined) {
       updateData.isRival = isRival;
     }
