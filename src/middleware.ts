@@ -8,6 +8,25 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const { pathname } = request.nextUrl;
 
+  // 0. CSRF Protection for state-changing methods
+  // We only check if origin or referer is present to avoid blocking API clients
+  // that don't send these headers, but we validate them if they do exist.
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+    const origin = request.headers.get('origin') || request.headers.get('referer');
+    const host = request.headers.get('host');
+
+    if (origin && host) {
+      try {
+        const originUrl = new URL(origin);
+        if (originUrl.host !== host) {
+          return NextResponse.json({ success: false, message: 'Invalid origin (CSRF protection)' }, { status: 403 });
+        }
+      } catch (e) {
+        return NextResponse.json({ success: false, message: 'Invalid origin format (CSRF protection)' }, { status: 400 });
+      }
+    }
+  }
+
   // 1. Rate Limiting
   const isRateLimitedRoute =
     pathname.startsWith('/api/auth/login') ||

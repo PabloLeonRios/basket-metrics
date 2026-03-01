@@ -42,6 +42,14 @@ const UserSchema: Schema = new Schema(
       ref: 'Team',
       required: false,
     },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lockUntil: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true, // Añade createdAt y updatedAt automáticamente

@@ -4,6 +4,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { isPasswordStrong, passwordPolicyMessage } from '@/lib/password-policy';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -17,6 +18,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!isPasswordStrong(password)) {
+      setError(passwordPolicyMessage);
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/auth/register', {
