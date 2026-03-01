@@ -33,11 +33,11 @@ export default function SessionManager() {
       toast.info('No hay sesiones para exportar.');
       return;
     }
-    const data = sessions.map((s) => ({
+    const data = sessions.map(s => ({
       Nombre: s.name,
       Fecha: new Date(s.date).toLocaleDateString(),
       Tipo: s.sessionType,
-      Equipos: s.teams?.map((t) => t.name).join(', ') || '-',
+      Equipos: s.teams?.map(t => t.name).join(', ') || '-',
     }));
 
     const worksheet = utils.json_to_sheet(data);
@@ -55,11 +55,11 @@ export default function SessionManager() {
     const doc = new jsPDF();
     doc.text('Listado de Sesiones', 14, 15);
 
-    const tableData = sessions.map((s) => [
+    const tableData = sessions.map(s => [
       s.name,
       new Date(s.date).toLocaleDateString(),
       s.sessionType,
-      s.teams?.map((t) => t.name).join(', ') || '-',
+      s.teams?.map(t => t.name).join(', ') || '-',
     ]);
 
     autoTable(doc, {
@@ -91,11 +91,7 @@ export default function SessionManager() {
           throw new Error('No se pudieron cargar las sesiones.');
         }
 
-        const {
-          data: sessionsData,
-          totalCount,
-          totalPages: apiTotalPages,
-        } = await sessionsRes.json();
+        const { data: sessionsData, totalCount, totalPages: apiTotalPages } = await sessionsRes.json();
 
         setSessions(sessionsData);
         setTotalSessions(totalCount);
@@ -140,48 +136,32 @@ export default function SessionManager() {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <div className="flex items-center border-b border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => {
-                setActiveTab('open');
-                setCurrentPage(1);
-              }}
-              className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Abiertas ({activeTab === 'open' ? totalSessions : '...'})
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('closed');
-                setCurrentPage(1);
-              }}
-              className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              Cerradas ({activeTab === 'closed' ? totalSessions : '...'})
-            </button>
+              <button
+                  onClick={() => { setActiveTab('open'); setCurrentPage(1); }}
+                  className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                  Abiertas ({activeTab === 'open' ? totalSessions : '...'})
+              </button>
+              <button
+                  onClick={() => { setActiveTab('closed'); setCurrentPage(1); }}
+                  className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                  Cerradas ({activeTab === 'closed' ? totalSessions : '...'})
+              </button>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              onClick={exportToExcel}
-              className="flex items-center gap-2"
-            >
+            <Button variant="secondary" onClick={exportToExcel} className="flex items-center gap-2">
               <ArrowDownTrayIcon className="w-4 h-4" />
               Excel
             </Button>
-            <Button
-              variant="secondary"
-              onClick={exportToPDF}
-              className="flex items-center gap-2"
-            >
+            <Button variant="secondary" onClick={exportToPDF} className="flex items-center gap-2">
               <ArrowDownTrayIcon className="w-4 h-4" />
               PDF
             </Button>
           </div>
         </div>
 
-        {sessions.length === 0 && totalSessions === 0 && (
-          <p>No hay sesiones en esta categoría.</p>
-        )}
+        {sessions.length === 0 && totalSessions === 0 && <p>No hay sesiones en esta categoría.</p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {sessions.map((session) => (
             <div
@@ -194,9 +174,7 @@ export default function SessionManager() {
                   <p>{session.sessionType}</p>
                   <p>Inicio: {new Date(session.date).toLocaleString()}</p>
                   {session.finishedAt && (
-                    <p className="text-green-600">
-                      Fin: {new Date(session.finishedAt).toLocaleString()}
-                    </p>
+                    <p className="text-green-600">Fin: {new Date(session.finishedAt).toLocaleString()}</p>
                   )}
                 </div>
               </div>
@@ -218,15 +196,11 @@ export default function SessionManager() {
                   </>
                 ) : null}
 
-                {(session.sessionType === 'Partido' ||
-                  session.sessionType === 'Lanzamiento') && (
+                {(session.sessionType === 'Partido' || session.sessionType === 'Lanzamiento') && (
                   <>
                     <Button
                       onClick={() => handleCalculateStats(session._id)}
-                      disabled={
-                        calculationStatus[session._id] === 'calculating' ||
-                        calculationStatus[session._id] === 'done'
-                      }
+                      disabled={calculationStatus[session._id] === 'calculating' || calculationStatus[session._id] === 'done'}
                       variant="secondary"
                       size="md"
                       className="w-full"
@@ -235,8 +209,7 @@ export default function SessionManager() {
                         ? 'Calculando...'
                         : 'Calcular/Recalcular Stats'}
                     </Button>
-                    {(calculationStatus[session._id] === 'done' ||
-                      session.finishedAt) && (
+                    {(calculationStatus[session._id] === 'done' || session.finishedAt) && (
                       <Link
                         href={`/panel/dashboard/${session._id}`}
                         className="text-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 w-full"
@@ -267,11 +240,7 @@ export default function SessionManager() {
                 onClick={() => handlePageChange(page)}
                 variant={currentPage === page ? 'primary' : 'secondary'}
                 size="sm"
-                className={
-                  currentPage === page
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700'
-                }
+                className={currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}
               >
                 {page}
               </Button>

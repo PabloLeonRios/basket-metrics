@@ -3,22 +3,10 @@
 
 import { memo } from 'react';
 import {
-  SVG_WIDTH,
-  SVG_HEIGHT,
-  scale,
-  hoopX_svg,
-  hoopY_svg,
-  threePointRadius_svg,
-  threePointSideLineXLeft_svg,
-  threePointSideLineXRight_svg,
-  threePointArcStartY_svg,
-  KEY_WIDTH_M,
-  KEY_HEIGHT_M,
-  BACKBOARD_WIDTH_M,
-  BACKBOARD_Y_M,
-  HOOP_RADIUS_M,
-  FREE_THROW_CIRCLE_RADIUS_M,
-  NO_CHARGE_SEMI_CIRCLE_RADIUS_M,
+  SVG_WIDTH, SVG_HEIGHT, scale, hoopX_svg, hoopY_svg,
+  threePointRadius_svg, threePointSideLineXLeft_svg, threePointSideLineXRight_svg, threePointArcStartY_svg,
+  KEY_WIDTH_M, KEY_HEIGHT_M, BACKBOARD_WIDTH_M, BACKBOARD_Y_M, HOOP_RADIUS_M,
+  FREE_THROW_CIRCLE_RADIUS_M, NO_CHARGE_SEMI_CIRCLE_RADIUS_M
 } from '@/lib/court-geometry';
 
 interface Shot {
@@ -52,11 +40,7 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
 
   return (
     <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg">
-      {title && (
-        <h3 className="text-xl font-bold mb-3 text-center text-gray-800 dark:text-gray-100">
-          {title}
-        </h3>
-      )}
+      {title && <h3 className="text-xl font-bold mb-3 text-center text-gray-800 dark:text-gray-100">{title}</h3>}
       <div className="w-full max-w-lg mx-auto aspect-[100/94] touch-none relative overflow-hidden rounded-lg shadow-2xl border-4 border-gray-800 dark:border-gray-900">
         <svg
           viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -66,33 +50,14 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
         >
           <defs>
             {/* Wood texture pattern */}
-            <pattern
-              id="wood-pattern"
-              patternUnits="userSpaceOnUse"
-              width="10"
-              height="40"
-              patternTransform="rotate(0)"
-            >
+            <pattern id="wood-pattern" patternUnits="userSpaceOnUse" width="10" height="40" patternTransform="rotate(0)">
               {/* Base plank */}
               <rect width="10" height="40" fill="#CD9B66" />
               {/* Alternate plank shade */}
               <rect width="5" height="40" fill="#D4A373" />
-              <rect
-                x="0"
-                y="10"
-                width="10"
-                height="1"
-                fill="rgba(0,0,0,0.05)"
-              />
+              <rect x="0" y="10" width="10" height="1" fill="rgba(0,0,0,0.05)" />
               <rect x="5" y="30" width="5" height="1" fill="rgba(0,0,0,0.05)" />
-              <line
-                x1="5"
-                y1="0"
-                x2="5"
-                y2="40"
-                stroke="rgba(0,0,0,0.1)"
-                strokeWidth="0.5"
-              />
+              <line x1="5" y1="0" x2="5" y2="40" stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
             </pattern>
 
             {/* Subtle lighting gradient */}
@@ -105,26 +70,11 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
           {/* Base wood floor */}
           <rect width="100%" height="100%" fill="url(#wood-pattern)" />
           {/* Stadium lighting overlay */}
-          <rect
-            width="100%"
-            height="100%"
-            fill="url(#lighting)"
-            pointerEvents="none"
-          />
+          <rect width="100%" height="100%" fill="url(#lighting)" pointerEvents="none" />
 
-          <g
-            stroke="#FFFFFF"
-            strokeWidth="0.4"
-            fill="none"
-            className="opacity-90"
-          >
+          <g stroke="#FFFFFF" strokeWidth="0.4" fill="none" className="opacity-90">
             {/* 2-Point Zone Fill (inside the 3-point line) */}
-            <path
-              d={threePointLinePath}
-              fill="#FFFFFF"
-              fillOpacity="0.1"
-              strokeWidth="1.5"
-            />
+            <path d={threePointLinePath} fill="#FFFFFF" fillOpacity="0.1" strokeWidth="1.5" />
 
             {/* Paint area (Key) */}
             <rect
@@ -138,50 +88,19 @@ const ShotChart = memo(function ShotChart({ shots, title }: ShotChartProps) {
             />
 
             {/* Free throw circle (top half solid) */}
-            <path
-              d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`}
-            />
+            <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} />
 
             {/* Free throw circle (bottom half dashed) */}
-            <path
-              d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`}
-              strokeDasharray="1.5,1.5"
-            />
+            <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} strokeDasharray="1.5,1.5" />
 
             {/* Restricted area (no charge semi-circle) */}
-            <path
-              d={`M ${hoopX_svg - noChargeRadius_svg} ${hoopY_svg} A ${noChargeRadius_svg} ${noChargeRadius_svg} 0 0 0 ${hoopX_svg + noChargeRadius_svg} ${hoopY_svg}`}
-            />
+            <path d={`M ${hoopX_svg - noChargeRadius_svg} ${hoopY_svg} A ${noChargeRadius_svg} ${noChargeRadius_svg} 0 0 0 ${hoopX_svg + noChargeRadius_svg} ${hoopY_svg}`} />
 
             {/* Post marks along the key */}
-            <line
-              x1={keyX_svg - 0.5}
-              y1={keyHeight_svg * 0.4}
-              x2={keyX_svg}
-              y2={keyHeight_svg * 0.4}
-              strokeWidth="0.6"
-            />
-            <line
-              x1={keyX_svg + keyWidth_svg}
-              y1={keyHeight_svg * 0.4}
-              x2={keyX_svg + keyWidth_svg + 0.5}
-              y2={keyHeight_svg * 0.4}
-              strokeWidth="0.6"
-            />
-            <line
-              x1={keyX_svg - 0.5}
-              y1={keyHeight_svg * 0.6}
-              x2={keyX_svg}
-              y2={keyHeight_svg * 0.6}
-              strokeWidth="0.6"
-            />
-            <line
-              x1={keyX_svg + keyWidth_svg}
-              y1={keyHeight_svg * 0.6}
-              x2={keyX_svg + keyWidth_svg + 0.5}
-              y2={keyHeight_svg * 0.6}
-              strokeWidth="0.6"
-            />
+            <line x1={keyX_svg - 0.5} y1={keyHeight_svg * 0.4} x2={keyX_svg} y2={keyHeight_svg * 0.4} strokeWidth="0.6" />
+            <line x1={keyX_svg + keyWidth_svg} y1={keyHeight_svg * 0.4} x2={keyX_svg + keyWidth_svg + 0.5} y2={keyHeight_svg * 0.4} strokeWidth="0.6" />
+            <line x1={keyX_svg - 0.5} y1={keyHeight_svg * 0.6} x2={keyX_svg} y2={keyHeight_svg * 0.6} strokeWidth="0.6" />
+            <line x1={keyX_svg + keyWidth_svg} y1={keyHeight_svg * 0.6} x2={keyX_svg + keyWidth_svg + 0.5} y2={keyHeight_svg * 0.6} strokeWidth="0.6" />
 
             {/* Backboard Support */}
             <rect

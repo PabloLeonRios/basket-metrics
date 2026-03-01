@@ -22,10 +22,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
         {...props}
       />
       {label && (
-        <label
-          htmlFor={generatedId}
-          className="ml-2 block text-sm text-gray-900 dark:text-gray-300 cursor-pointer"
-        >
+        <label htmlFor={generatedId} className="ml-2 block text-sm text-gray-900 dark:text-gray-300 cursor-pointer">
           {label}
         </label>
       )}

@@ -6,7 +6,7 @@ import { calculateStatsForSession } from '@/lib/engine/statsCalculator';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> },
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const { sessionId } = await params;

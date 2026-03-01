@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  TrophyIcon,
-  CalendarDaysIcon,
-  ClockIcon,
-} from '@heroicons/react/24/outline';
+import { TrophyIcon, CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 export default function SeasonsPage() {
   return (
@@ -36,45 +32,29 @@ export default function SeasonsPage() {
           </h2>
 
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Estamos trabajando en una nueva herramienta para que puedas
-            programar tus próximos partidos, establecer rivales, horarios y
-            tener una vista completa de tu calendario competitivo.
+            Estamos trabajando en una nueva herramienta para que puedas programar tus próximos partidos,
+            establecer rivales, horarios y tener una vista completa de tu calendario competitivo.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full mt-8 opacity-60 pointer-events-none grayscale">
             {/* Mock Matches Preview */}
             {[
               { day: '15', month: 'Nov', opponent: 'Águilas', type: 'Local' },
-              {
-                day: '22',
-                month: 'Nov',
-                opponent: 'Toros FC',
-                type: 'Visitante',
-              },
+              { day: '22', month: 'Nov', opponent: 'Toros FC', type: 'Visitante' },
               { day: '29', month: 'Nov', opponent: 'Leones', type: 'Local' },
             ].map((match, i) => (
-              <div
-                key={i}
-                className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 flex flex-col items-center"
-              >
+              <div key={i} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 flex flex-col items-center">
                 <CalendarDaysIcon className="h-10 w-10 text-gray-400 mb-3" />
-                <div className="text-2xl font-black text-gray-900 dark:text-white">
-                  {match.day}
-                </div>
-                <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  {match.month}
-                </div>
-                <div className="font-semibold text-gray-800 dark:text-gray-200">
-                  {match.opponent}
-                </div>
+                <div className="text-2xl font-black text-gray-900 dark:text-white">{match.day}</div>
+                <div className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">{match.month}</div>
+                <div className="font-semibold text-gray-800 dark:text-gray-200">{match.opponent}</div>
                 <div className="text-xs text-gray-500 mt-1">{match.type}</div>
               </div>
             ))}
           </div>
 
           <p className="text-sm text-gray-500 dark:text-gray-500 mt-8 italic">
-            Muy pronto podrás interactuar con este calendario. ¡Mantente atento
-            a las actualizaciones!
+            Muy pronto podrás interactuar con este calendario. ¡Mantente atento a las actualizaciones!
           </p>
         </div>
       </div>

@@ -8,15 +8,12 @@ import GameEvent from '@/lib/models/GameEvent';
 // GET: Obtener un jugador específico
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ playerId: string }> },
+  { params }: { params: Promise<{ playerId: string }> }
 ) {
   const { playerId } = await params;
   await dbConnect();
   try {
-    const player = await Player.findById(playerId).populate(
-      'user',
-      'email isActive',
-    );
+    const player = await Player.findById(playerId).populate('user', 'email isActive');
     if (!player) {
       return NextResponse.json(
         { success: false, message: 'Jugador no encontrado' },
@@ -25,8 +22,7 @@ export async function GET(
     }
     return NextResponse.json({ success: true, data: player });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
       { success: false, message: 'Error en el servidor', error: errorMessage },
       { status: 500 },
@@ -37,7 +33,7 @@ export async function GET(
 // PUT: Actualizar un jugador
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ playerId: string }> },
+  { params }: { params: Promise<{ playerId: string }> }
 ) {
   const { playerId } = await params;
   await dbConnect();
@@ -45,21 +41,16 @@ export async function PUT(
     const body = await request.json();
     const { name, dorsal, position, isActive, team, isRival } = body;
 
-    const updateData: Record<string, unknown> = {
-      name,
-      dorsal,
-      position,
-      isActive,
-      team,
-    };
+    const updateData: Record<string, unknown> = { name, dorsal, position, isActive, team };
     if (isRival !== undefined) {
       updateData.isRival = isRival;
     }
 
-    const updatedPlayer = await Player.findByIdAndUpdate(playerId, updateData, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const updatedPlayer = await Player.findByIdAndUpdate(
+      playerId,
+      updateData,
+      { returnDocument: 'after', runValidators: true },
+    );
 
     if (!updatedPlayer) {
       return NextResponse.json(
@@ -70,19 +61,14 @@ export async function PUT(
 
     // Also update the associated User's name if it has changed
     if (name) {
-      await User.findByIdAndUpdate(updatedPlayer.user, { name });
+        await User.findByIdAndUpdate(updatedPlayer.user, { name });
     }
 
     return NextResponse.json({ success: true, data: updatedPlayer });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
-      {
-        success: false,
-        message: 'Error al actualizar el jugador',
-        error: errorMessage,
-      },
+      { success: false, message: 'Error al actualizar el jugador', error: errorMessage },
       { status: 500 },
     );
   }
@@ -91,7 +77,7 @@ export async function PUT(
 // DELETE: Eliminar un jugador
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ playerId: string }> },
+  { params }: { params: Promise<{ playerId: string }> }
 ) {
   const { playerId } = await params;
   await dbConnect();
@@ -113,19 +99,11 @@ export async function DELETE(
     // Delete the player
     await Player.findByIdAndDelete(playerId);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Jugador eliminado correctamente',
-    });
+    return NextResponse.json({ success: true, message: 'Jugador eliminado correctamente' });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
-      {
-        success: false,
-        message: 'Error al eliminar el jugador',
-        error: errorMessage,
-      },
+      { success: false, message: 'Error al eliminar el jugador', error: errorMessage },
       { status: 500 },
     );
   }

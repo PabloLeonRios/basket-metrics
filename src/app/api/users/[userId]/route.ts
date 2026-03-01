@@ -7,7 +7,7 @@ import { verifyAuth } from '@/lib/auth';
 // PUT: Actualizar un usuario (rol, equipo, estado)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ userId: string }> },
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   const { userId } = await params;
   await dbConnect();
@@ -19,62 +19,33 @@ export async function PUT(
     const token = request.cookies.get('token')?.value;
     const verified = await verifyAuth(token);
 
-    if (
-      !verified.success ||
-      !verified.payload ||
-      verified.payload.role !== 'admin'
-    ) {
-      return NextResponse.json(
-        { success: false, message: 'Acceso denegado.' },
-        { status: 403 },
-      );
+    if (!verified.success || !verified.payload || verified.payload.role !== 'admin') {
+      return NextResponse.json({ success: false, message: 'Acceso denegado.' }, { status: 403 });
     }
 
     const userToUpdate = await User.findById(userId);
     if (!userToUpdate) {
-      return NextResponse.json(
-        { success: false, message: 'Usuario no encontrado.' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, message: 'Usuario no encontrado.' }, { status: 404 });
     }
 
     // Construir el objeto de actualización
     const updateData: { team?: string; isActive?: boolean; role?: string } = {};
-    if (teamId !== undefined)
-      updateData.team = teamId === '' ? undefined : teamId;
+    if (teamId !== undefined) updateData.team = teamId === '' ? undefined : teamId;
     if (isActive !== undefined) updateData.isActive = isActive;
     if (role !== undefined) updateData.role = role;
 
     // Prevenir que un admin se desactive a si mismo
-    if (
-      userToUpdate._id.toString() === verified.payload._id &&
-      isActive === false
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Un administrador no puede desactivar su propia cuenta.',
-        },
-        { status: 400 },
-      );
+    if (userToUpdate._id.toString() === verified.payload._id && isActive === false) {
+        return NextResponse.json({ success: false, message: 'Un administrador no puede desactivar su propia cuenta.' }, { status: 400 });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      new: true,
-    })
-      .select('-password')
-      .populate('team');
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-password').populate('team');
 
     return NextResponse.json({ success: true, data: updatedUser });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
-      {
-        success: false,
-        message: 'Error al actualizar el usuario',
-        error: errorMessage,
-      },
+      { success: false, message: 'Error al actualizar el usuario', error: errorMessage },
       { status: 500 },
     );
   }

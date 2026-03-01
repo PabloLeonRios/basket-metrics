@@ -17,10 +17,7 @@ export async function GET(request: NextRequest) {
       filter.player = playerId;
     } else {
       return NextResponse.json(
-        {
-          success: false,
-          message: 'Se requiere el ID de la sesión o del jugador.',
-        },
+        { success: false, message: 'Se requiere el ID de la sesión o del jugador.' },
         { status: 400 },
       );
     }

@@ -3,99 +3,60 @@
 
 import React from 'react';
 
-const HelpSection = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => (
+const HelpSection = ({ title, children }: { title: string, children: React.ReactNode }) => (
   <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
-    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 border-b-2 border-blue-500 pb-2">
-      {title}
-    </h2>
+    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 border-b-2 border-blue-500 pb-2">{title}</h2>
     {children}
   </div>
 );
 
-const Definition = ({
-  term,
-  definition,
-}: {
-  term: string;
-  definition: string;
-}) => (
+const Definition = ({ term, definition }: { term: string, definition: string }) => (
   <div className="mb-3">
-    <p className="font-semibold text-lg text-gray-800 dark:text-gray-100">
-      {term}
-    </p>
+    <p className="font-semibold text-lg text-gray-800 dark:text-gray-100">{term}</p>
     <p className="text-gray-600 dark:text-gray-300 ml-2">{definition}</p>
   </div>
 );
 
-const Formula = ({
-  name,
-  formula,
-  explanation,
-}: {
-  name: string;
-  formula: string;
-  explanation: string;
-}) => (
-  <div className="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-    <p className="font-mono text-lg font-semibold text-blue-600 dark:text-blue-400">
-      {name}
-    </p>
-    <p className="font-mono text-gray-800 dark:text-gray-200 my-2 bg-gray-200 dark:bg-gray-900 p-2 rounded-md inline-block">
-      {formula}
-    </p>
-    <p className="text-sm text-gray-500 dark:text-gray-400">{explanation}</p>
-  </div>
+const Formula = ({ name, formula, explanation }: { name: string, formula: string, explanation: string }) => (
+    <div className="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+      <p className="font-mono text-lg font-semibold text-blue-600 dark:text-blue-400">{name}</p>
+      <p className="font-mono text-gray-800 dark:text-gray-200 my-2 bg-gray-200 dark:bg-gray-900 p-2 rounded-md inline-block">{formula}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{explanation}</p>
+    </div>
 );
+
 
 export default function HelpContent() {
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
-        Glosario de Estadísticas y Ayuda
-      </h1>
+      <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-6">Glosario de Estadísticas y Ayuda</h1>
 
       <HelpSection title="Abreviaturas de Estadísticas Básicas">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div>
-            <Definition term="PTS" definition="Puntos Anotados Totales" />
-            <Definition term="REB" definition="Rebotes Totales" />
-            <Definition term="OREB" definition="Rebotes Ofensivos" />
-            <Definition term="DREB" definition="Rebotes Defensivos" />
-          </div>
-          <div>
-            <Definition term="AST" definition="Asistencias" />
-            <Definition term="STL" definition="Robos (Steals)" />
-            <Definition term="BLK" definition="Tapones (Blocks)" />
-            <Definition term="TOV" definition="Pérdidas de Balón (Turnovers)" />
-          </div>
-          <div>
-            <Definition term="PF" definition="Faltas Personales" />
-            <Definition
-              term="FGM / FGA"
-              definition="Tiros de Campo Anotados / Intentados"
-            />
-            <Definition
-              term="3PM / 3PA"
-              definition="Tiros de 3 Puntos Anotados / Intentados"
-            />
-            <Definition
-              term="FTM / FTA"
-              definition="Tiros Libres Anotados / Intentados"
-            />
-          </div>
+            <div>
+                <Definition term="PTS" definition="Puntos Anotados Totales" />
+                <Definition term="REB" definition="Rebotes Totales" />
+                <Definition term="OREB" definition="Rebotes Ofensivos" />
+                <Definition term="DREB" definition="Rebotes Defensivos" />
+            </div>
+            <div>
+                <Definition term="AST" definition="Asistencias" />
+                <Definition term="STL" definition="Robos (Steals)" />
+                <Definition term="BLK" definition="Tapones (Blocks)" />
+                <Definition term="TOV" definition="Pérdidas de Balón (Turnovers)" />
+            </div>
+            <div>
+                <Definition term="PF" definition="Faltas Personales" />
+                <Definition term="FGM / FGA" definition="Tiros de Campo Anotados / Intentados" />
+                <Definition term="3PM / 3PA" definition="Tiros de 3 Puntos Anotados / Intentados" />
+                <Definition term="FTM / FTA" definition="Tiros Libres Anotados / Intentados" />
+            </div>
         </div>
       </HelpSection>
 
       <HelpSection title="Fórmulas de Estadísticas Avanzadas">
         <p className="mb-6 text-gray-700 dark:text-gray-300">
-          Estas métricas ofrecen una visión más profunda del rendimiento de un
-          jugador o equipo, más allá de las estadísticas tradicionales.
+          Estas métricas ofrecen una visión más profunda del rendimiento de un jugador o equipo, más allá de las estadísticas tradicionales.
         </p>
 
         <Formula

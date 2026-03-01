@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
       ];
     }
 
@@ -60,19 +60,16 @@ export async function GET(request: NextRequest) {
       .skip(skip)
       .limit(limit);
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: users,
-        pagination: {
-          totalItems,
-          totalPages,
-          currentPage: page,
-          limit,
-        },
-      },
-      { status: 200 },
-    );
+    return NextResponse.json({
+      success: true,
+      data: users,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: page,
+        limit
+      }
+    }, { status: 200 });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error desconocido';

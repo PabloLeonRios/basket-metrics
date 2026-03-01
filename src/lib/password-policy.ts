@@ -5,10 +5,7 @@ export function isPasswordStrong(password: string): boolean {
   const hasNumber = /\d/.test(password);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  return (
-    password.length >= minLength && hasUppercase && hasNumber && hasSpecialChar
-  );
+  return password.length >= minLength && hasUppercase && hasNumber && hasSpecialChar;
 }
 
-export const passwordPolicyMessage =
-  'La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo especial.';
+export const passwordPolicyMessage = "La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo especial.";

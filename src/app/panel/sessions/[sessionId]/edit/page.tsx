@@ -16,8 +16,7 @@ export default async function EditSessionPage({
             Editar Sesión
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Modifica los jugadores de la sesión o elimínala si no tiene
-            movimientos.
+            Modifica los jugadores de la sesión o elimínala si no tiene movimientos.
           </p>
         </header>
 

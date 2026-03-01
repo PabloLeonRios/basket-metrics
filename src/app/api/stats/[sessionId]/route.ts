@@ -7,7 +7,7 @@ import TeamGameStats from '@/lib/models/TeamGameStats';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ sessionId: string }> },
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   await dbConnect();
 

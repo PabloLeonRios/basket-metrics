@@ -30,8 +30,7 @@ export const hoopX_svg = scale(HOOP_CENTER_X_M);
 export const hoopY_svg = scale(HOOP_CENTER_Y_M);
 export const threePointRadius_svg = scale(THREE_POINT_RADIUS_M);
 export const threePointSideLineXLeft_svg = scale(THREE_POINT_SIDE_DIST_M);
-export const threePointSideLineXRight_svg =
-  SVG_WIDTH - scale(THREE_POINT_SIDE_DIST_M);
+export const threePointSideLineXRight_svg = SVG_WIDTH - scale(THREE_POINT_SIDE_DIST_M);
 
 // Y-coordinate where the straight 3-point line meets the arc
 // (x - h)^2 + (y - k)^2 = r^2
@@ -41,6 +40,7 @@ const dx_squared = Math.pow(dx, 2);
 const y_offset = r_squared > dx_squared ? Math.sqrt(r_squared - dx_squared) : 0;
 // The intersection point's Y is further from the baseline (y=0) than the hoop center
 export const threePointArcStartY_svg = hoopY_svg + y_offset;
+
 
 /**
  * Determines if a shot taken at given SVG coordinates is a 3-pointer.
@@ -52,24 +52,22 @@ export function isThreePointer(x_svg: number, y_svg: number): boolean {
   }
 
   // Check if it's a 2-pointer by being inside the 3-point line
-  const isInsideVerticalLines =
-    x_svg >= threePointSideLineXLeft_svg &&
-    x_svg <= threePointSideLineXRight_svg;
+  const isInsideVerticalLines = x_svg >= threePointSideLineXLeft_svg && x_svg <= threePointSideLineXRight_svg;
 
   if (y_svg < threePointArcStartY_svg) {
     // If we are in the 'corner' area, a shot is a 2-pointer if it's between the vertical lines
     if (isInsideVerticalLines) {
-      return false; // 2-pointer
+        return false; // 2-pointer
     }
   }
 
   // Check against the arc
   const distanceToHoopCenter = Math.sqrt(
-    Math.pow(x_svg - hoopX_svg, 2) + Math.pow(y_svg - hoopY_svg, 2),
+    Math.pow(x_svg - hoopX_svg, 2) + Math.pow(y_svg - hoopY_svg, 2)
   );
 
   if (distanceToHoopCenter <= threePointRadius_svg) {
-    return false; // 2-pointer
+      return false; // 2-pointer
   }
 
   // If none of the 2-point conditions are met, it's a 3-pointer

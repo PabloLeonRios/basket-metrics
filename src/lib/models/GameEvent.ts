@@ -39,10 +39,10 @@ const GameEventSchema: Schema = new Schema(
       type: Schema.Types.Mixed,
     },
     quarter: {
-      type: Number,
-      required: true,
-      default: 1,
-    },
+        type: Number,
+        required: true,
+        default: 1,
+    }
   },
   {
     timestamps: true,

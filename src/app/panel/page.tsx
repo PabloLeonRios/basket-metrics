@@ -30,8 +30,7 @@ export default function PanelPage() {
     const fetchPlayerProfile = async () => {
       try {
         const playerProfileRes = await fetch('/api/me/player-profile');
-        if (!playerProfileRes.ok)
-          throw new Error('Perfil de jugador no encontrado.');
+        if (!playerProfileRes.ok) throw new Error('Perfil de jugador no encontrado.');
         const { data: playerProfileData } = await playerProfileRes.json();
         setPlayerId(playerProfileData._id);
       } catch (error) {
@@ -42,9 +41,9 @@ export default function PanelPage() {
     };
 
     if (user.role === 'jugador') {
-      fetchPlayerProfile();
+        fetchPlayerProfile();
     } else {
-      setLoading(false);
+        setLoading(false);
     }
   }, [user, authLoading, router]);
 
@@ -60,20 +59,18 @@ export default function PanelPage() {
   // Solo los jugadores se quedan en esta página. Si no se encuentra su perfil, se muestra un mensaje.
   return (
     <div className="space-y-6">
-      {user?.role === 'jugador' && playerId ? (
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
-            Mi Perfil de Jugador
-          </h1>
-          <PlayerProfile playerId={playerId} />
-        </div>
-      ) : (
-        <div className="text-center p-12 bg-white dark:bg-gray-900 rounded-2xl shadow-sm">
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            Cargando perfil o rol no reconocido.
-          </p>
-        </div>
-      )}
+        {user?.role === 'jugador' && playerId ? (
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Mi Perfil de Jugador</h1>
+                <PlayerProfile playerId={playerId} />
+            </div>
+        ) : (
+            <div className="text-center p-12 bg-white dark:bg-gray-900 rounded-2xl shadow-sm">
+                <p className="text-xl text-gray-600 dark:text-gray-400">
+                    Cargando perfil o rol no reconocido.
+                </p>
+            </div>
+        )}
     </div>
   );
 }

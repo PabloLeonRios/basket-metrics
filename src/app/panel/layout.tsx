@@ -41,23 +41,14 @@ export default function PanelLayout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex">
       {/* Sidebar */}
-      <aside
-        className={`flex-shrink-0 ${isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-md h-screen sticky top-0`}
-      >
+      <aside className={`flex-shrink-0 ${isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-md h-screen sticky top-0`}>
         <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
-          <Link
-            href="/panel"
-            className="flex items-center gap-2 font-bold text-xl text-orange-600"
-          >
+          <Link href="/panel" className="flex items-center gap-2 font-bold text-xl text-orange-600">
             <Dribbble className="w-6 h-6 text-orange-500" />
             <span>Basket-Metrics</span>
           </Link>
         </div>
-        <Sidebar
-          user={user}
-          isSidebarOpen={isSidebarOpen}
-          handleLogout={handleLogout}
-        />
+        <Sidebar user={user} isSidebarOpen={isSidebarOpen} handleLogout={handleLogout} />
       </aside>
 
       {/* Main Content */}
@@ -65,9 +56,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
         {/* Top Header */}
         <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-40">
           <div className="mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-              {' '}
-              {/* Changed to justify-between */}
+            <div className="flex h-16 items-center justify-between"> {/* Changed to justify-between */}
               {/* Sidebar Toggle Button */}
               <button
                 type="button"
@@ -81,20 +70,17 @@ export default function PanelLayout({ children }: PropsWithChildren) {
                   <Bars3Icon className="h-6 w-6" aria-hidden="true" />
                 )}
               </button>
+
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-gray-700 dark:text-gray-300">
-                    {' '}
-                    {/* Increased font size */}
-                    Hola, {user?.name}
-                  </span>
-                  {user?.role === 'entrenador' && user.team && (
-                    <span className="px-2.5 py-0.5 bg-orange-100 text-orange-800 text-base font-semibold rounded-full dark:bg-orange-900 dark:text-orange-200 shadow-sm">
-                      {' '}
-                      {/* Increased font size */}
-                      {user.team.name}
+                    <span className="text-base font-semibold text-gray-700 dark:text-gray-300"> {/* Increased font size */}
+                      Hola, {user?.name}
                     </span>
-                  )}
+                    {user?.role === 'entrenador' && user.team && (
+                        <span className="px-2.5 py-0.5 bg-orange-100 text-orange-800 text-base font-semibold rounded-full dark:bg-orange-900 dark:text-orange-200 shadow-sm"> {/* Increased font size */}
+                            {user.team.name}
+                        </span>
+                    )}
                 </div>
               </div>
             </div>

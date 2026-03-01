@@ -155,20 +155,16 @@ async function calculateAndSaveTeamStats(
 }
 
 function getTeamTotals(events: IGameEvent[]): TeamTotals {
-  let points = 0,
-    fga = 0,
-    orb = 0,
-    tov = 0,
-    fta = 0;
+  let points = 0, fga = 0, orb = 0, tov = 0, fta = 0;
   for (const event of events) {
     if (event.type === 'tiro') {
       const details = event.details as { made: boolean; value: number };
       if (details.made) points += details.value;
       fga++;
     } else if (event.type === 'tiro_libre') {
-      const details = event.details as { made: boolean };
-      if (details.made) points++;
-      fta++;
+        const details = event.details as { made: boolean };
+        if (details.made) points++;
+        fta++;
     } else if (event.type === 'rebote') {
       const details = event.details as { type: string };
       if (details.type === 'ofensivo') orb++;
@@ -182,20 +178,8 @@ function getTeamTotals(events: IGameEvent[]): TeamTotals {
 
 function calculatePlayerStats(playerEvents: IGameEvent[]): PlayerStats {
   const stats: PlayerStats = {
-    points: 0,
-    fga: 0,
-    fgm: 0,
-    '3pa': 0,
-    '3pm': 0,
-    fta: 0,
-    ftm: 0,
-    orb: 0,
-    drb: 0,
-    ast: 0,
-    stl: 0,
-    tov: 0,
-    blk: 0,
-    pf: 0,
+    points: 0, fga: 0, fgm: 0, '3pa': 0, '3pm': 0, fta: 0, ftm: 0,
+    orb: 0, drb: 0, ast: 0, stl: 0, tov: 0, blk: 0, pf: 0,
   };
   for (const event of playerEvents) {
     switch (event.type) {
@@ -209,12 +193,12 @@ function calculatePlayerStats(playerEvents: IGameEvent[]): PlayerStats {
           if (tiroDetails.value === 3) stats['3pm']++;
         }
         break;
-      case 'tiro_libre':
+    case 'tiro_libre':
         const ftDetails = event.details as { made: boolean };
         stats.fta++;
-        if (ftDetails.made) {
-          stats.ftm++;
-          stats.points++;
+        if(ftDetails.made) {
+            stats.ftm++;
+            stats.points++;
         }
         break;
       case 'rebote':
