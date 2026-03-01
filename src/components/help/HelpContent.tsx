@@ -100,6 +100,36 @@ export default function HelpContent() {
           formula="(Puntos Oponente / Posesiones Oponente) * 100"
           explanation="Puntos recibidos por un equipo o jugador por cada 100 posesiones. Mide la eficiencia defensiva."
         />
+
+        <Formula
+          name="Porcentaje de Uso (USG%)"
+          formula="100 * ((FGA + 0.44 * FTA + TOV) * (Team MIN / 5)) / (MIN * (Team FGA + 0.44 * Team FTA + Team TOV))"
+          explanation="Mide el porcentaje de jugadas de equipo que un jugador consumió mientras estaba en la pista."
+        />
+
+        <Formula
+          name="Porcentaje de Rebote Ofensivo (ORB%)"
+          formula="100 * (ORB * (Team MIN / 5)) / (MIN * (Team ORB + Opponent DRB))"
+          explanation="El porcentaje de rebotes ofensivos disponibles que un jugador obtuvo mientras estaba en la pista."
+        />
+
+        <Formula
+          name="Porcentaje de Rebote Defensivo (DRB%)"
+          formula="100 * (DRB * (Team MIN / 5)) / (MIN * (Team DRB + Opponent ORB))"
+          explanation="El porcentaje de rebotes defensivos disponibles que un jugador obtuvo mientras estaba en la pista."
+        />
+
+        <Formula
+          name="Porcentaje de Asistencias (AST%)"
+          formula="100 * AST / (((MIN / (Team MIN / 5)) * Team FGM) - FGM)"
+          explanation="Estimación del porcentaje de tiros de campo anotados por los compañeros que el jugador asistió mientras estaba en la pista."
+        />
+
+        <Formula
+          name="Porcentaje de Pérdidas (TOV%)"
+          formula="100 * TOV / (FGA + 0.44 * FTA + TOV)"
+          explanation="Estimación de pérdidas de balón por cada 100 jugadas."
+        />
       </HelpSection>
     </div>
   );

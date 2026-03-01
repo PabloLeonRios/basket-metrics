@@ -12,7 +12,7 @@ import { IGameEvent, IPlayer, ISession } from '@/types/definitions';
 import Button from '@/components/ui/Button';
 import PlayerStatsModal from './PlayerStatsModal';
 import { isThreePointer } from '@/lib/court-geometry';
-import { MagnifyingGlassIcon, FlagIcon, ArrowRightIcon, LightBulbIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FlagIcon, ArrowRightIcon, LightBulbIcon, ArrowsRightLeftIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { ProactiveSuggestion } from '@/lib/recommender/lineupRecommender';
 
 interface TrackerSessionData extends ISession { currentQuarter: number; teams: TeamData[]; }
@@ -207,13 +207,23 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 {team.players.map((player) => {
                   const isOnCourt = onCourtPlayerIds.has(player._id);
                   const isPartido = session.sessionType === 'Partido';
+                  const foulCount = gameEvents.filter(e => e.player === player._id && e.type === 'falta').length;
+                  const isFoulDanger = foulCount >= 4;
                   return (
                     <div key={player._id} className={`flex items-center justify-between ${!isOnCourt && isPartido ? 'opacity-50' : ''}`}>
-                      <button onClick={() => setSelectedPlayer({ id: player._id, name: player.name, teamName: team.name })} className={`flex-grow text-left p-2 rounded-md ${selectedPlayer?.id === player._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                      <button onClick={() => setSelectedPlayer({ id: player._id, name: player.name, teamName: team.name })} className={`flex-grow flex items-center text-left p-2 rounded-md ${selectedPlayer?.id === player._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {isPartido && <span className={`inline-block h-2.5 w-2.5 rounded-full mr-2 ${isOnCourt ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></span>}
-                        #{player.dorsal} - {player.name}
+                        <span className={`flex-grow ${isFoulDanger && selectedPlayer?.id !== player._id ? 'text-orange-600 font-semibold' : ''}`}>
+                          #{player.dorsal} - {player.name}
+                        </span>
+                        {isFoulDanger && (
+                            <ExclamationTriangleIcon
+                                className={`h-5 w-5 ml-2 ${selectedPlayer?.id === player._id ? 'text-white' : 'text-orange-500'}`}
+                                title={`${foulCount} faltas`}
+                            />
+                        )}
                       </button>
-                      <div className="flex">
+                      <div className="flex ml-1">
                         {isPartido && <button onClick={() => { setPlayerToSubOut(player); setShowSubModal(true); }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full" title="Sustituir"><ArrowsRightLeftIcon className="h-5 w-5" /></button>}
                         <button onClick={() => handleShowPlayerStats(player)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full" title="Ver Estadísticas"><MagnifyingGlassIcon className="h-5 w-5" /></button>
                       </div>
