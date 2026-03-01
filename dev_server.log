@@ -1,125 +1,67 @@
-$ next dev -H 0.0.0.0
+
+> basket-metrics@0.1.0 dev
+> next dev -H 0.0.0.0
+
 ▲ Next.js 16.1.6 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://0.0.0.0:3000
 
 ✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1489ms
+✓ Ready in 1569ms
 Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
-○ Compiling /panel/players/new ...
-⨯ ./src/app/panel/layout.tsx:10:1
-Module not found: Can't resolve 'lucide-react'
-[0m [90m  8 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'@/components/layout/Sidebar'[39m[33m;[39m
- [90m  9 |[39m [36mimport[39m { [33mBars3Icon[39m[33m,[39m [33mXMarkIcon[39m } [36mfrom[39m [32m'@heroicons/react/24/outline'[39m[33m;[39m [90m// For sidebar toggle icon[39m
-[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mDribbble[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 11 |[39m
- [90m 12 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mPanelLayout[39m({ children }[33m:[39m [33mPropsWithChildren[39m) {
- [90m 13 |[39m   [36mconst[39m { user[33m,[39m loading[33m,[39m isAuthenticated } [33m=[39m useAuth()[33m;[39m[0m
-
-
-
-Import traces:
-  Client Component Browser:
-    ./src/app/panel/layout.tsx [Client Component Browser]
-    ./src/app/panel/layout.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/panel/layout.tsx [Client Component SSR]
-    ./src/app/panel/layout.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
-
-./src/app/panel/layout.tsx:10:1
-Module not found: Can't resolve 'lucide-react'
-[0m [90m  8 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'@/components/layout/Sidebar'[39m[33m;[39m
- [90m  9 |[39m [36mimport[39m { [33mBars3Icon[39m[33m,[39m [33mXMarkIcon[39m } [36mfrom[39m [32m'@heroicons/react/24/outline'[39m[33m;[39m [90m// For sidebar toggle icon[39m
-[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mDribbble[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 11 |[39m
- [90m 12 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mPanelLayout[39m({ children }[33m:[39m [33mPropsWithChildren[39m) {
- [90m 13 |[39m   [36mconst[39m { user[33m,[39m loading[33m,[39m isAuthenticated } [33m=[39m useAuth()[33m;[39m[0m
-
-
-
-Import traces:
-  Client Component Browser:
-    ./src/app/panel/layout.tsx [Client Component Browser]
-    ./src/app/panel/layout.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/panel/layout.tsx [Client Component SSR]
-    ./src/app/panel/layout.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- GET /panel/players/new 500 in 10.4s (compile: 10.0s, proxy.ts: 150ms, render: 282ms)
+○ Compiling /panel/dashboard ...
+ GET /panel/dashboard 200 in 8.5s (compile: 8.0s, proxy.ts: 114ms, render: 411ms)
 Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
-⨯ ./src/app/panel/layout.tsx:10:1
-Module not found: Can't resolve 'lucide-react'
-[0m [90m  8 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'@/components/layout/Sidebar'[39m[33m;[39m
- [90m  9 |[39m [36mimport[39m { [33mBars3Icon[39m[33m,[39m [33mXMarkIcon[39m } [36mfrom[39m [32m'@heroicons/react/24/outline'[39m[33m;[39m [90m// For sidebar toggle icon[39m
-[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mDribbble[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 11 |[39m
- [90m 12 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mPanelLayout[39m({ children }[33m:[39m [33mPropsWithChildren[39m) {
- [90m 13 |[39m   [36mconst[39m { user[33m,[39m loading[33m,[39m isAuthenticated } [33m=[39m useAuth()[33m;[39m[0m
-
-
-
-Import traces:
-  Client Component Browser:
-    ./src/app/panel/layout.tsx [Client Component Browser]
-    ./src/app/panel/layout.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/panel/layout.tsx [Client Component SSR]
-    ./src/app/panel/layout.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
-
-./src/app/panel/layout.tsx:10:1
-Module not found: Can't resolve 'lucide-react'
-[0m [90m  8 |[39m [36mimport[39m [33mSidebar[39m [36mfrom[39m [32m'@/components/layout/Sidebar'[39m[33m;[39m
- [90m  9 |[39m [36mimport[39m { [33mBars3Icon[39m[33m,[39m [33mXMarkIcon[39m } [36mfrom[39m [32m'@heroicons/react/24/outline'[39m[33m;[39m [90m// For sidebar toggle icon[39m
-[31m[1m>[22m[39m[90m 10 |[39m [36mimport[39m { [33mDribbble[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 11 |[39m
- [90m 12 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mPanelLayout[39m({ children }[33m:[39m [33mPropsWithChildren[39m) {
- [90m 13 |[39m   [36mconst[39m { user[33m,[39m loading[33m,[39m isAuthenticated } [33m=[39m useAuth()[33m;[39m[0m
-
-
-
-Import traces:
-  Client Component Browser:
-    ./src/app/panel/layout.tsx [Client Component Browser]
-    ./src/app/panel/layout.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/app/panel/layout.tsx [Client Component SSR]
-    ./src/app/panel/layout.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
- GET /panel/players/new 500 in 35ms (compile: 15ms, proxy.ts: 7ms, render: 13ms)
-✓ Compiled in 84ms
+ GET /api/auth/me 200 in 751ms (compile: 703ms, render: 47ms)
 Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
- GET /panel/players/new 200 in 563ms (compile: 279ms, proxy.ts: 6ms, render: 278ms)
+ GET /api/auth/me 200 in 11ms (compile: 4ms, render: 7ms)
 Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
- GET /api/auth/me 200 in 516ms (compile: 488ms, render: 28ms)
+○ Compiling /panel/dashboard/[sessionId] ...
+ GET /panel/dashboard/session123 200 in 11.9s (compile: 11.2s, proxy.ts: 169ms, render: 514ms)
+⨯ Error: Por favor, define la variable de entorno MONGODB_URI dentro de .env.local
+    at module evaluation (src/lib/dbConnect.ts:7:9)
+    at module evaluation (src/app/api/stats/[sessionId]/route.ts:3:1)
+    at Object.<anonymous> (.next/dev/server/app/api/stats/[sessionId]/route.js:5:3)
+   5 |
+   6 | if (!MONGODB_URI) {
+>  7 |   throw new Error(
+     |         ^
+   8 |     'Por favor, define la variable de entorno MONGODB_URI dentro de .env.local',
+   9 |   );
+  10 | } {
+  page: '/api/stats/session123'
+}
+⨯ Error: Por favor, define la variable de entorno MONGODB_URI dentro de .env.local
+    at module evaluation (src/lib/dbConnect.ts:7:9)
+    at module evaluation (src/app/api/stats/[sessionId]/route.ts:3:1)
+    at Object.<anonymous> (.next/dev/server/app/api/stats/[sessionId]/route.js:5:3)
+   5 |
+   6 | if (!MONGODB_URI) {
+>  7 |   throw new Error(
+     |         ^
+   8 |     'Por favor, define la variable de entorno MONGODB_URI dentro de .env.local',
+   9 |   );
+  10 | } {
+  page: '/api/stats/session123'
+}
+ GET /api/stats/session123 500 in 4.0s (compile: 3.6s, render: 328ms)
+ GET /api/stats/session123 500 in 4.0s (compile: 3.9s, render: 43ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /api/auth/me 200 in 15ms (compile: 4ms, render: 11ms)
 Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
  GET /api/auth/me 200 in 11ms (compile: 3ms, render: 8ms)
-Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
- GET /api/auth/me 200 in 9ms (compile: 3ms, render: 6ms)
+⨯ Error: Por favor, define la variable de entorno MONGODB_URI dentro de .env.local
+    at module evaluation (src/lib/dbConnect.ts:7:9)
+    at module evaluation (src/app/api/stats/top-players/route.ts:3:1)
+    at Object.<anonymous> (.next/dev/server/app/api/stats/top-players/route.js:5:3)
+   5 |
+   6 | if (!MONGODB_URI) {
+>  7 |   throw new Error(
+     |         ^
+   8 |     'Por favor, define la variable de entorno MONGODB_URI dentro de .env.local',
+   9 |   );
+  10 | } {
+  page: '/api/stats/top-players'
+}
+ GET /api/stats/top-players?coachId=12345 500 in 679ms

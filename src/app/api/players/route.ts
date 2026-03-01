@@ -34,6 +34,9 @@ export async function GET(request: NextRequest) {
       );
     }
     
+    const teamType = searchParams.get('teamType');
+    const userTeamName = searchParams.get('userTeamName');
+
     // Build the query object
     const query: Record<string, unknown> = {};
     if (coachId) {
@@ -41,28 +44,57 @@ export async function GET(request: NextRequest) {
     }
 
     if (status === 'inactive') {
-      // If status is 'inactive', we only want players where isActive is false.
       query.isActive = false;
     } else {
-      // By default, show active players. This now includes players where `isActive` is true
-      // AND players where the `isActive` field does not exist (for backward compatibility).
       query.isActive = { $ne: false };
     }
 
-    if (showRivals) {
-      query.isRival = true;
-    } else {
-      query.isRival = { $ne: true };
-    }
+    const andConditions: Record<string, unknown>[] = [];
 
     if (search) {
-      const orConditions: any[] = [
+      const searchOr: Record<string, unknown>[] = [
         { name: { $regex: search, $options: 'i' } }
       ];
       if (!isNaN(Number(search))) {
-        orConditions.push({ dorsal: Number(search) });
+        searchOr.push({ dorsal: Number(search) });
+      }
+      andConditions.push({ $or: searchOr });
+    }
+
+    if (teamType === 'mine') {
+      if (userTeamName) {
+        andConditions.push({
+          $or: [
+            { team: userTeamName },
+            { team: { $exists: false } },
+            { team: null },
+            { team: '' }
+          ]
+        });
+      } else {
+         andConditions.push({
+           $or: [
+             { team: { $exists: false } },
+             { team: null },
+             { team: '' }
+           ]
+         });
+      }
+    } else if (teamType === 'rivals') {
+      if (userTeamName) {
+        andConditions.push({
+          team: { $ne: userTeamName, $exists: true, $nin: [null, ''] }
+        });
+      } else {
+        andConditions.push({
+          team: { $exists: true, $nin: [null, ''] }
+        });
       }
       query.$or = orConditions;
+    }
+
+    if (andConditions.length > 0) {
+      query.$and = andConditions;
     }
 
     const skip = (page - 1) * limit;
