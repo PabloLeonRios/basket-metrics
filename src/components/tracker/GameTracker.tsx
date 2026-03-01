@@ -60,6 +60,16 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const playerIdToName = useMemo(() => Object.fromEntries(allPlayers.map(p => [p._id, p.name])), [allPlayers]);
   const benchPlayers = useMemo(() => allPlayers.filter(p => !onCourtPlayerIds.has(p._id)), [allPlayers, onCourtPlayerIds]);
 
+  const playerFouls = useMemo(() => {
+    const fouls: Record<string, number> = {};
+    for (const event of gameEvents) {
+      if (event.type === 'falta') {
+        fouls[event.player] = (fouls[event.player] || 0) + 1;
+      }
+    }
+    return fouls;
+  }, [gameEvents]);
+
   const teamScores = useMemo(() => {
     const scores: Record<string, number> = {};
     if (session) {

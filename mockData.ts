@@ -11,7 +11,7 @@ async function createMockData() {
     const playersB = [];
     for (let i = 1; i <= 10; i++) {
         const p = await Player.create({
-            user: new mongoose.Types.ObjectId(),
+            user: new mongoose.Types.ObjectId().toHexString(),
             coach: "65b93d0f0000000000000001",
             name: `Player ${i}`,
             position: "Base",
@@ -26,7 +26,7 @@ async function createMockData() {
     const s = await Session.create({
         coach: "65b93d0f0000000000000001",
         name: "Test Session",
-        date: new Date(),
+        date: new Date().toISOString(),
         sessionType: "Partido",
         teams: [
             { name: "Team A", players: playersA },
