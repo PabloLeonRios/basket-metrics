@@ -216,14 +216,14 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <span className="text-blue-500 text-sm font-medium truncate ml-2">{selectedPlayer?.name || '...'}</span>
               </div>
               <div className="grid grid-cols-4 gap-2 text-xs sm:text-sm">
-                <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>AST</Button>
-                <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>ROBO</Button>
-                <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>TAP</Button>
-                <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>PER</Button>
-                <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-O</Button>
-                <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-D</Button>
-                <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>FALTA</Button>
-                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>LIBRE</Button>
+                <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('asistencia')}>AST</Button>
+                <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('robo')}>ROBO</Button>
+                <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('tapon')}>TAP</Button>
+                <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('perdida')}>PER</Button>
+                <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('rebote_ofensivo')}>REB-O</Button>
+                <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('rebote_defensivo')}>REB-D</Button>
+                <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('falta')}>FALTA</Button>
+                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('tiro_libre')}>LIBRE</Button>
               </div>
             </div>
             <FloatingStats events={gameEvents} />

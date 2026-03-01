@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     if (!isMatch) {
       const attempts = (user.failedLoginAttempts || 0) + 1;
-      let updateFields: any = { failedLoginAttempts: attempts };
+      const updateFields: any = { failedLoginAttempts: attempts };
 
       if (attempts >= 5) {
         // Bloquear por 10 minutos
