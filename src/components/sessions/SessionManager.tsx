@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { ISession } from '@/types/definitions';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
+import { utils, writeFile } from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 export default function SessionManager() {
   const { user, loading: authLoading } = useAuth();
@@ -21,6 +26,50 @@ export default function SessionManager() {
   const [sessionsPerPage] = useState(9);
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  // Export methods
+  const exportToExcel = () => {
+    if (sessions.length === 0) {
+      toast.info('No hay sesiones para exportar.');
+      return;
+    }
+    const data = sessions.map(s => ({
+      Nombre: s.name,
+      Fecha: new Date(s.date).toLocaleDateString(),
+      Tipo: s.sessionType,
+      Equipos: s.teams?.map(t => t.name).join(', ') || '-',
+    }));
+
+    const worksheet = utils.json_to_sheet(data);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Sesiones');
+    writeFile(workbook, 'sesiones.xlsx');
+  };
+
+  const exportToPDF = () => {
+    if (sessions.length === 0) {
+      toast.info('No hay sesiones para exportar.');
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text('Listado de Sesiones', 14, 15);
+
+    const tableData = sessions.map(s => [
+      s.name,
+      new Date(s.date).toLocaleDateString(),
+      s.sessionType,
+      s.teams?.map(t => t.name).join(', ') || '-',
+    ]);
+
+    autoTable(doc, {
+      startY: 20,
+      head: [['Nombre', 'Fecha', 'Tipo', 'Equipos']],
+      body: tableData,
+    });
+
+    doc.save('sesiones.pdf');
+  };
 
   useEffect(() => {
     async function fetchSessions() {
@@ -85,19 +134,31 @@ export default function SessionManager() {
     <div className="space-y-8">
       {/* Lista de Sesiones */}
       <div className="space-y-4">
-        <div className="flex items-center border-b border-gray-200 dark:border-gray-700">
-            <button 
-                onClick={() => { setActiveTab('open'); setCurrentPage(1); }}
-                className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-                Abiertas ({activeTab === 'open' ? totalSessions : '...'})
-            </button>
-            <button 
-                onClick={() => { setActiveTab('closed'); setCurrentPage(1); }}
-                className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-                Cerradas ({activeTab === 'closed' ? totalSessions : '...'})
-            </button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <div className="flex items-center border-b border-gray-200 dark:border-gray-700">
+              <button
+                  onClick={() => { setActiveTab('open'); setCurrentPage(1); }}
+                  className={`px-4 py-2 text-sm font-medium ${activeTab === 'open' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                  Abiertas ({activeTab === 'open' ? totalSessions : '...'})
+              </button>
+              <button
+                  onClick={() => { setActiveTab('closed'); setCurrentPage(1); }}
+                  className={`px-4 py-2 text-sm font-medium ${activeTab === 'closed' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                  Cerradas ({activeTab === 'closed' ? totalSessions : '...'})
+              </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" onClick={exportToExcel} className="flex items-center gap-2">
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              Excel
+            </Button>
+            <Button variant="secondary" onClick={exportToPDF} className="flex items-center gap-2">
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              PDF
+            </Button>
+          </div>
         </div>
 
         {sessions.length === 0 && totalSessions === 0 && <p>No hay sesiones en esta categoría.</p>}
