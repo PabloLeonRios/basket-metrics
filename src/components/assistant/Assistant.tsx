@@ -25,17 +25,6 @@ const situations: { value: GameSituation; label: string }[] = [
   { value: 'NEEDS_DEFENSE', label: 'Necesito Defensa y Rebote' },
 ];
 
-const StatTooltip = ({ stats }: { stats: CareerAverages | null }) => {
-    if (!stats) return null;
-    return (
-      <div className="absolute bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-        <p>PTS: {stats.avgPoints.toFixed(1)}</p>
-        <p>AST: {stats.avgAst.toFixed(1)}</p>
-        <p>REB: {(stats.avgOrb + stats.avgDrb).toFixed(1)}</p>
-      </div>
-    );
-};
-
 export default function Assistant() {
   const { user, loading: authLoading } = useAuth();
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
@@ -56,7 +45,7 @@ export default function Assistant() {
     async function fetchPlayers() {
       if (!user) return;
       try {
-        const teamQuery = user.team ? `&userTeamName=${encodeURIComponent(user.team as string)}` : '';
+        const teamQuery = user.team ? `&userTeamName=${encodeURIComponent(user.team.name)}` : '';
         const response = await fetch(`/api/players?coachId=${user._id}&teamType=mine${teamQuery}`);
         if (!response.ok) throw new Error('No se pudieron cargar los jugadores.');
         const { data } = await response.json();
