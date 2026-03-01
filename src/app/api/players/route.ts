@@ -61,6 +61,11 @@ export async function GET(request: NextRequest) {
       andConditions.push({ $or: searchOr });
     }
 
+    // Si showRivals es explícitamente true, no filtramos por equipo rival.
+    // Si es falso o no se provee, queremos filtrar a los rivales usando isRival: { $ne: true }.
+    // Notemos que el frontend ahora maneja 'Mi Equipo' y 'Rivales' con la pestaña teamType,
+    // y showRivals se usa combinadamente, así que implementamos el orConditions correctamente.
+
     if (teamType === 'mine') {
       if (userTeamName) {
         andConditions.push({
@@ -80,17 +85,29 @@ export async function GET(request: NextRequest) {
            ]
          });
       }
-    } else if (teamType === 'rivals') {
-      if (userTeamName) {
+
+      if (!showRivals) {
         andConditions.push({
+           isRival: { $ne: true }
+        });
+      }
+    } else if (teamType === 'rivals') {
+      const orConditionsRivals: Record<string, unknown>[] = [];
+      if (userTeamName) {
+        orConditionsRivals.push({
           team: { $ne: userTeamName, $exists: true, $nin: [null, ''] }
         });
       } else {
-        andConditions.push({
+        orConditionsRivals.push({
           team: { $exists: true, $nin: [null, ''] }
         });
       }
-      query.$or = orConditions;
+
+      orConditionsRivals.push({
+         isRival: true
+      });
+
+      query.$or = orConditionsRivals;
     }
 
     if (andConditions.length > 0) {
@@ -174,11 +191,11 @@ export async function POST(request: NextRequest) {
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user (direct insert with driver)...');
-    const newUserPlain: any = newUser.toObject();
+    const newUserPlain: Record<string, unknown> = newUser.toObject() as Record<string, unknown>;
     delete newUserPlain._id;
     delete newUserPlain.__v;
     const result = await User.collection.insertOne(newUserPlain);
-    newUser._id = result.insertedId as any; // Assign the newly generated _id back to the Mongoose document for subsequent use
+    newUser._id = result.insertedId as unknown as typeof newUser._id; // Assign the newly generated _id back to the Mongoose document for subsequent use
     console.log('Step 5 Complete: New user saved (direct insert). Inserted ID:', result.insertedId);
 
     console.log('Step 6: Creating new player object...');

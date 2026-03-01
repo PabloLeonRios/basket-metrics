@@ -59,21 +59,10 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const currentQuarter = useMemo(() => session?.currentQuarter || 1, [session]);
   const allPlayers = useMemo(() => session?.teams.flatMap(t => t.players) || [], [session]);
   const playerIdToName = useMemo(() => Object.fromEntries(allPlayers.map(p => [p._id, p.name])), [allPlayers]);
-  const benchPlayers = useMemo(() => allPlayers.filter(p => !onCourtPlayerIds.has(p._id)), [allPlayers, onCourtPlayerIds]);
 
   const extraPlayers = useMemo(() => {
     return coachPlayers.filter(cp => !allPlayers.some(ap => ap._id === cp._id));
   }, [coachPlayers, allPlayers]);
-
-  const playerFouls = useMemo(() => {
-    const fouls: Record<string, number> = {};
-    for (const event of gameEvents) {
-      if (event.type === 'falta') {
-        fouls[event.player] = (fouls[event.player] || 0) + 1;
-      }
-    }
-    return fouls;
-  }, [gameEvents]);
 
   const teamScores = useMemo(() => {
     const scores: Record<string, number> = {};
@@ -203,9 +192,9 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     const stats = { FGM: 0, FGA: 0, '3PM': 0, '3PA': 0, FTM: 0, FTA: 0, ORB: 0, DRB: 0, AST: 0, STL: 0, BLK: 0, TOV: 0, PF: 0, PTS: 0 };
     for (const event of gameEvents) {
         if (event.player !== playerId) continue;
-        const details = event.details as any;
+        const details = event.details as Record<string, unknown>;
         switch (event.type) {
-            case 'tiro': stats.FGA++; if (details.value === 3) stats['3PA']++; if (details.made) { stats.FGM++; stats.PTS += details.value; if (details.value === 3) stats['3PM']++; } break;
+            case 'tiro': stats.FGA++; if (details.value === 3) stats['3PA']++; if (details.made) { stats.FGM++; stats.PTS += details.value as number; if (details.value === 3) stats['3PM']++; } break;
             case 'tiro_libre': stats.FTA++; if (details.made) { stats.FTM++; stats.PTS++; } break;
             case 'rebote': if (details.type === 'ofensivo') stats.ORB++; else stats.DRB++; break;
             case 'asistencia': stats.AST++; break;
@@ -342,8 +331,8 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                                 <div className="flex justify-end gap-4 mt-6">
                                     <Button variant="secondary" onClick={() => setShowAISuggestionModal(false)}>Ignorar</Button>
                                     <Button onClick={() => {
-                                        const playerOutObj = allPlayers.find(p => p._id === (aiSuggestion.playerOut as any).playerId);
-                                        const playerInObj = allPlayers.find(p => p._id === (aiSuggestion.playerIn as any).playerId);
+                                        const playerOutObj = allPlayers.find(p => p._id === (aiSuggestion.playerOut as { playerId: string }).playerId);
+                                        const playerInObj = allPlayers.find(p => p._id === (aiSuggestion.playerIn as { playerId: string }).playerId);
                                         if (playerOutObj && playerInObj) handleSubstitution(playerOutObj, playerInObj);
                                     }}><ArrowsRightLeftIcon className="h-5 w-5 mr-2" />Aceptar Cambio</Button>
                                 </div>
