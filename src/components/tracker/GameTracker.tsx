@@ -144,6 +144,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   
   const handleCourtClick = useCallback((x: number, y: number) => { if (!selectedPlayer) { toast.error('Selecciona un jugador en cancha.'); return; } if (!onCourtPlayerIds.has(selectedPlayer.id)) { toast.error('El jugador seleccionado no está en la cancha.'); return; } if (isSessionFinished) { toast.warn('Sesión finalizada.'); return; } setShotValue(isThreePointer(x, y) ? 3 : 2); setShotCoordinates({ x, y }); setShowShotModal(true); }, [selectedPlayer, isSessionFinished, onCourtPlayerIds]);
   const handleShot = (made: boolean) => { if (!shotCoordinates) return; logEvent('tiro', { made, value: shotValue, x: shotCoordinates.x, y: shotCoordinates.y }); setShowShotModal(false); setShotCoordinates(null); };
+  const handleFreeThrow = (made: boolean) => { logEvent('tiro_libre', { made }); setShowFreeThrowModal(false); };
 
   const calculateStatsForPlayer = useCallback((playerId: string) => {
     const stats = { FGM: 0, FGA: 0, '3PM': 0, '3PA': 0, FTM: 0, FTA: 0, ORB: 0, DRB: 0, AST: 0, STL: 0, BLK: 0, TOV: 0, PF: 0, PTS: 0 };
@@ -222,7 +223,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-O</Button>
                 <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-D</Button>
                 <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>FALTA</Button>
-                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished}>LIBRE</Button>
+                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>LIBRE</Button>
               </div>
             </div>
             <FloatingStats events={gameEvents} />
@@ -254,6 +255,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         </div>
       )}
       {showShotModal && ( <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20"><div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4"><h3 className="text-2xl font-bold text-center">{`Tiro de ${shotValue} Puntos`}</h3><div className="flex justify-center gap-4"><Button onClick={() => handleShot(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button><Button onClick={() => handleShot(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button></div><button onClick={() => setShowShotModal(false)} className="mt-4 text-sm text-gray-500">Cancelar</button></div></div> )}
+      {showFreeThrowModal && ( <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20"><div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4"><h3 className="text-2xl font-bold text-center">Tiro Libre</h3><div className="flex justify-center gap-4"><Button onClick={() => handleFreeThrow(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button><Button onClick={() => handleFreeThrow(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button></div><button onClick={() => setShowFreeThrowModal(false)} className="mt-4 text-sm text-gray-500">Cancelar</button></div></div> )}
       {showPlayerStatsModal && statsPlayer && ( <PlayerStatsModal isOpen={showPlayerStatsModal} onClose={() => setShowPlayerStatsModal(false)} player={statsPlayer.player} stats={statsPlayer.stats}/>)}
     </>
   );
