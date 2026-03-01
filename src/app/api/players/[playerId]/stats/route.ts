@@ -87,10 +87,10 @@ export async function GET(
 
     if (playerCareerAverages) {
       // 3. Encontrar al jugador para obtener su equipo
-      const player = await Player.findById(playerId).select('team');
-      if (player && player.team) {
+      const player = await Player.findById(playerId).select('team isRival');
+      if (player && player.team && !player.isRival) {
         // 4. Encontrar a todos los jugadores del mismo equipo
-        const teamPlayers = await Player.find({ team: player.team }).select('_id');
+        const teamPlayers = await Player.find({ team: player.team, isRival: { $ne: true } }).select('_id');
         const teamPlayerIds = teamPlayers.map(p => p._id);
 
         // 5. Calcular el GameScore promedio para todo el equipo

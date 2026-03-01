@@ -34,6 +34,10 @@ const PlayerSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
+    isRival: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
