@@ -33,6 +33,7 @@ const navigation = [
     items: [
       { name: 'Gestionar Jugadores', href: '/panel/players' },
       { name: 'Añadir Jugador', href: '/panel/players/new' },
+      { name: 'Importación', href: '/panel/players/import' },
     ],
   },
   {
