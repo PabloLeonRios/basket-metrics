@@ -277,6 +277,7 @@ export function getProactiveSuggestion(
                 if (weakestDefender && weakestDefender.playerId !== bestDefender.playerId) {
                     return {
                         type: 'SUSTITUCION',
+                        type: 'TACTICA',
                         playerOut: weakestDefender,
                         playerIn: bestDefender,
                         reason: `el partido está ajustado (${activeTeamScore}-${opposingTeamScore}) y vas ganando. Asegura la defensa y el rebote en los momentos finales.`
@@ -296,6 +297,7 @@ export function getProactiveSuggestion(
                 if (weakestScorer && weakestScorer.playerId !== bestShooter.playerId) {
                     return {
                         type: 'SUSTITUCION',
+                        type: 'TACTICA',
                         playerOut: weakestScorer,
                         playerIn: bestShooter,
                         reason: `el partido está ajustado (${activeTeamScore}-${opposingTeamScore}) y necesitas anotar. Busca amenaza exterior o puntos rápidos.`
@@ -319,10 +321,14 @@ export function getProactiveSuggestion(
 
         if (bestPlayerOnCourt && benchReplacement) {
              return {
-                 type: 'SUSTITUCION',
+                  type: 'SUSTITUCION',
                  playerOut: bestPlayerOnCourt,
                  playerIn: benchReplacement,
                  reason: `el partido parece resuelto (diferencia de ${Math.abs(scoreDifference)} puntos). Es buen momento para dar descanso a tus titulares y evitar lesiones.`
+                  type: 'TACTICA',
+                  playerOut: bestPlayerOnCourt,
+                  playerIn: benchReplacement,
+                  reason: `el partido parece resuelto (diferencia de ${Math.abs(scoreDifference)} puntos). Es buen momento para dar descanso a tus titulares y evitar lesiones.`
              };
         }
     }
@@ -351,6 +357,10 @@ export function getProactiveSuggestion(
                      playerOut: playerOut,
                      playerIn: organizerOrDefender,
                      reason: `el equipo rival tiene una racha de ${opposingRun}-0. Un cambio puede ayudar a frenar su ritmo y organizar el ataque.`
+                      type: 'TACTICA',
+                      playerOut: playerOut,
+                      playerIn: organizerOrDefender,
+                      reason: `el equipo rival tiene una racha de ${opposingRun}-0. Un cambio puede ayudar a frenar su ritmo y organizar el ataque.`
                  };
              }
         }

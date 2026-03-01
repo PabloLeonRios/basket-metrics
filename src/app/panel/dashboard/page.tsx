@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import TopPlayers from '@/components/dashboard/TopPlayers';
+import UpcomingMatches from '@/components/dashboard/UpcomingMatches';
 
 export default function DashboardPage() {
     const { user, loading } = useAuth();
@@ -31,6 +32,8 @@ export default function DashboardPage() {
             </div>
             
             <TopPlayers />
+
+            <UpcomingMatches />
 
             <div className="space-y-4">
               <h2 className="text-xl font-bold">Acciones Rápidas</h2>

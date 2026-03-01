@@ -217,7 +217,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 {team.players.map((player) => {
                   const isOnCourt = onCourtPlayerIds.has(player._id);
                   const isPartido = session.sessionType === 'Partido';
-                  const foulCount = playerFouls[player._id] || 0;
+                  const foulCount = gameEvents.filter(e => e.player === player._id && e.type === 'falta').length;
                   const isFoulDanger = foulCount >= 4;
                   return (
                     <div key={player._id} className={`flex items-center justify-between ${!isOnCourt && isPartido ? 'opacity-50' : ''}`}>

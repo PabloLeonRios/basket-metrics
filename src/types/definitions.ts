@@ -35,6 +35,7 @@ export interface IPlayer {
 // --- SESSION ---
 export const sessionTypes = [
   'Partido',
+  'Partido de Temporada',
   'Técnica',
   'Lanzamiento',
   'Otro',

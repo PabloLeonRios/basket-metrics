@@ -11,7 +11,7 @@ async function createMockData() {
     const playersB = [];
     for (let i = 1; i <= 10; i++) {
         const p = await Player.create({
-            user: new mongoose.Types.ObjectId().toHexString(),
+            user: new mongoose.Types.ObjectId().toString(),
             coach: "65b93d0f0000000000000001",
             name: `Player ${i}`,
             position: "Base",

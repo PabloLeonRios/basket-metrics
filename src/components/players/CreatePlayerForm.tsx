@@ -73,7 +73,14 @@ export default function CreatePlayerForm() {
           </div>
           <div>
             <label htmlFor="position" className={labelStyles}>Posición</label>
-            <Input id="position" type="text" value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Escolta" />
+            <Input id="position" type="text" list="position-options" value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Escolta" />
+            <datalist id="position-options">
+              <option value="Base" />
+              <option value="Escolta" />
+              <option value="Alero" />
+              <option value="Ala-Pívot" />
+              <option value="Pívot" />
+            </datalist>
           </div>
           <div>
             <label htmlFor="team" className={labelStyles}>Equipo (Opcional)</label>
