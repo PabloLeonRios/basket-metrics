@@ -47,7 +47,7 @@ export default function LoginPage() {
   };
 
   const inputStyles =
-    'w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500';
+    'w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-shadow';
   const labelStyles =
     'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
 
@@ -89,17 +89,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:bg-gray-400"
+              className="w-full px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400"
             >
               {loading ? 'Iniciando...' : 'Iniciar Sesión'}
             </button>
           </div>
         </form>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
           ¿No tienes una cuenta?{' '}
           <Link
             href="/register"
-            className="font-medium text-blue-600 hover:underline"
+            className="font-medium text-orange-600 hover:text-orange-500 hover:underline"
           >
             Regístrate
           </Link>

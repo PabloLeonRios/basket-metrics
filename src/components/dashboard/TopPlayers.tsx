@@ -58,9 +58,9 @@ export default function TopPlayers() {
   }
   
   const cardColors = [
-    'bg-blue-100 dark:bg-blue-900', // 1st place
-    'bg-gray-100 dark:bg-gray-800', // 2nd place
-    'bg-amber-100 dark:bg-amber-900' // 3rd place
+    'bg-gradient-to-br from-yellow-100 to-yellow-300 dark:from-yellow-900 dark:to-yellow-700', // 1st place
+    'bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-600', // 2nd place
+    'bg-gradient-to-br from-orange-100 to-orange-300 dark:from-orange-900 dark:to-orange-700' // 3rd place
   ];
 
   return (

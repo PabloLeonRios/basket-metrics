@@ -43,7 +43,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
       {/* Sidebar */}
       <aside className={`flex-shrink-0 ${isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-md h-screen sticky top-0`}>
         <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
-          <Link href="/panel" className="flex items-center gap-2 font-bold text-xl text-blue-600">
+          <Link href="/panel" className="flex items-center gap-2 font-bold text-xl text-orange-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -54,7 +54,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-blue-500"
+              className="text-orange-500"
             >
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M4.93 4.93l14.14 14.14"></path>
@@ -78,7 +78,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
               {/* Sidebar Toggle Button */}
               <button
                 type="button"
-                className="-ml-2 flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:text-gray-400 dark:hover:text-gray-200"
+                className="-ml-2 flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               >
                 <span className="sr-only">Toggle sidebar</span>
@@ -95,7 +95,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
                       Hola, {user?.name}
                     </span>
                     {user?.role === 'entrenador' && user.team && (
-                        <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-base font-semibold rounded-full dark:bg-blue-900 dark:text-blue-200"> {/* Increased font size */}
+                        <span className="px-2.5 py-0.5 bg-orange-100 text-orange-800 text-base font-semibold rounded-full dark:bg-orange-900 dark:text-orange-200 shadow-sm"> {/* Increased font size */}
                             {user.team.name}
                         </span>
                     )}
