@@ -35,8 +35,9 @@ export interface StrategicOption {
 
 // Interfaz para la nueva sugerencia proactiva
 export interface ProactiveSuggestion {
-    playerOut: PlayerProfile;
-    playerIn: PlayerProfile;
+    type: 'SUSTITUCION' | 'TACTICA' | 'POSITIVA';
+    playerOut?: PlayerProfile;
+    playerIn?: PlayerProfile;
     reason: string;
 }
 
@@ -227,6 +228,7 @@ export function getProactiveSuggestion(
             const replacement = findBestReplacement(player, benchProfiles);
             if (replacement) {
                 return {
+                    type: 'SUSTITUCION',
                     playerOut: player,
                     playerIn: replacement,
                     reason: `está en problemas de faltas (${foulCount} acumuladas).`
@@ -246,6 +248,7 @@ export function getProactiveSuggestion(
                 const replacement = findBestReplacement(player, benchProfiles);
                 if (replacement) {
                     return {
+                        type: 'SUSTITUCION',
                         playerOut: player,
                         playerIn: replacement,
                         reason: 'ha fallado sus últimos 3 tiros. Un cambio podría refrescar el ataque.'
@@ -255,7 +258,58 @@ export function getProactiveSuggestion(
         }
     }
 
-    return null; // No hay sugerencias por ahora
+    // Criterio 3: Pérdidas de Balón
+    for (const player of onCourtProfiles) {
+        const turnovers = gameEvents
+            .filter(e => e.player === player.playerId && e.type === 'perdida')
+            .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+
+        if (turnovers.length >= 3) {
+            const replacement = findBestReplacement(player, benchProfiles);
+            if (replacement) {
+                return {
+                    type: 'SUSTITUCION',
+                    playerOut: player,
+                    playerIn: replacement,
+                    reason: 'ha acumulado 3 o más pérdidas de balón recientes. Un descanso podría ayudarle a enfocarse.'
+                };
+            }
+        }
+    }
+
+    // Criterio 4: Estadísticas globales (Táctica)
+    // Extraer los eventos de tu equipo (filtrando aquellos que coinciden con los IDs de todos tus jugadores)
+    const teamPlayerIds = allPlayerProfiles.map(p => p.playerId);
+    const teamEvents = gameEvents.filter(e => teamPlayerIds.includes(e.player));
+
+    const last20Events = teamEvents.slice(0, 20); // Mirar los eventos recientes
+
+    // Evaluar porcentaje de triples recientes
+    const recent3PTShots = last20Events.filter(e => e.type === 'tiro' && e.details.value === 3);
+    if (recent3PTShots.length >= 4) {
+        const made3PT = recent3PTShots.filter(e => e.details.made).length;
+        if (made3PT === 0) {
+            return {
+                type: 'TACTICA',
+                reason: 'El equipo ha fallado los últimos intentos de triples. Consideren buscar opciones más cerca del aro o realizar jugadas de penetración y pase.'
+            };
+        }
+    }
+
+    // Evaluar acumulación de pérdidas recientes en el equipo
+    const recentTurnovers = last20Events.filter(e => e.type === 'perdida').length;
+    if (recentTurnovers >= 5) {
+        return {
+            type: 'TACTICA',
+            reason: 'Se están acumulando muchas pérdidas de balón en poco tiempo. Pidan calma en ataque y aseguren los pases.'
+        };
+    }
+
+    // Retorno positivo por defecto
+    return {
+        type: 'POSITIVA',
+        reason: 'El equipo está manteniendo un ritmo de juego sólido, rotaciones y toma de decisiones equilibradas. Mantengan la intensidad actual y la concentración en defensa.'
+    };
 }
 
 /**
