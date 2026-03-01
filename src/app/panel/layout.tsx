@@ -5,7 +5,6 @@ import { useEffect, PropsWithChildren, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import Button from '@/components/ui/Button';
 import Sidebar from '@/components/layout/Sidebar';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; // For sidebar toggle icon
 import { Dribbble } from 'lucide-react';
@@ -49,7 +48,7 @@ export default function PanelLayout({ children }: PropsWithChildren) {
             <span>Basket-Metrics</span>
           </Link>
         </div>
-        <Sidebar user={user} isSidebarOpen={isSidebarOpen} />
+        <Sidebar user={user} isSidebarOpen={isSidebarOpen} handleLogout={handleLogout} />
       </aside>
 
       {/* Main Content */}
@@ -83,9 +82,6 @@ export default function PanelLayout({ children }: PropsWithChildren) {
                         </span>
                     )}
                 </div>
-                <Button onClick={handleLogout} variant="danger" size="sm">
-                  Cerrar Sesión
-                </Button>
               </div>
             </div>
           </div>
