@@ -33,8 +33,6 @@ export default function DashboardPage() {
             
             <TopPlayers />
 
-            <UpcomingMatches />
-
             <div className="space-y-4">
               <h2 className="text-xl font-bold">Acciones Rápidas</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -52,6 +50,8 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </div>
+
+            <UpcomingMatches />
         </div>
     );
 }
