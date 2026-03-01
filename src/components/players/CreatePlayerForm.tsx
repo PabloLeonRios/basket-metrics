@@ -15,6 +15,7 @@ export default function CreatePlayerForm() {
   const [name, setName] = useState('');
   const [dorsal, setDorsal] = useState('');
   const [position, setPosition] = useState('');
+  const [team, setTeam] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const labelStyles = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
@@ -31,7 +32,7 @@ export default function CreatePlayerForm() {
         name, 
         dorsal: Number(dorsal), 
         position, 
-        team: user.team?.name, 
+        team: team || user.team?.name,
         coach: user._id 
       };
       const response = await fetch('/api/players', {
@@ -61,7 +62,7 @@ export default function CreatePlayerForm() {
     <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-4">Añadir Nuevo Jugador</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label htmlFor="name" className={labelStyles}>Nombre del Jugador</label>
             <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Michael Jordan" />
@@ -74,9 +75,13 @@ export default function CreatePlayerForm() {
             <label htmlFor="position" className={labelStyles}>Posición</label>
             <Input id="position" type="text" value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Escolta" />
           </div>
+          <div>
+            <label htmlFor="team" className={labelStyles}>Equipo (Opcional)</label>
+            <Input id="team" type="text" value={team} onChange={(e) => setTeam(e.target.value)} placeholder={user?.team?.name || "Ej: Equipo Rival"} />
+          </div>
         </div>
-        <Button type="submit" disabled={!user?.team || isSubmitting} variant="primary" size="md" className="w-full sm:w-auto">
-          {isSubmitting ? 'Creando...' : (user?.team ? 'Guardar Jugador' : 'Asigna un equipo a tu perfil')}
+        <Button type="submit" disabled={isSubmitting} variant="primary" size="md" className="w-full sm:w-auto">
+          {isSubmitting ? 'Creando...' : 'Guardar Jugador'}
         </Button>
       </form>
     </div>

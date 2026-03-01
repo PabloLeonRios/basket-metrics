@@ -30,6 +30,7 @@ export default function PlayerManager() {
   const [editName, setEditName] = useState('');
   const [editDorsal, setEditDorsal] = useState('');
   const [editPosition, setEditPosition] = useState('');
+  const [editTeam, setEditTeam] = useState('');
 
   // Debounce search term
   useEffect(() => {
@@ -84,7 +85,7 @@ export default function PlayerManager() {
     if (!editingPlayer) return;
 
     try {
-      const updatedData = { name: editName, dorsal: Number(editDorsal), position: editPosition };
+      const updatedData = { name: editName, dorsal: Number(editDorsal), position: editPosition, team: editTeam };
       const response = await fetch(`/api/players/${editingPlayer._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -124,6 +125,7 @@ export default function PlayerManager() {
     setEditName(player.name);
     setEditDorsal(String(player.dorsal || ''));
     setEditPosition(player.position || '');
+    setEditTeam(player.team || '');
   };
 
   const handlePageChange = (page: number) => {
@@ -159,6 +161,7 @@ export default function PlayerManager() {
                 <div className="flex-grow">
                   <p className="text-lg font-bold text-gray-900 dark:text-gray-50">{player.name}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{player.position || 'Sin posición'}</p>
+                  {player.team && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Equipo: {player.team}</p>}
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-end gap-2">
@@ -209,6 +212,10 @@ export default function PlayerManager() {
               <div>
                 <label htmlFor="editPosition" className={labelStyles}>Posición</label>
                 <Input id="editPosition" type="text" value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="editTeam" className={labelStyles}>Equipo</label>
+                <Input id="editTeam" type="text" value={editTeam} onChange={(e) => setEditTeam(e.target.value)} placeholder="Ej: Equipo Rival" />
               </div>
               <div className="flex justify-between items-center pt-4">
                 <Button type="submit" variant="primary">Guardar Cambios</Button>
