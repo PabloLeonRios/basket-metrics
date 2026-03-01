@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string; // Para mostrar un texto al lado del checkbox
@@ -10,7 +10,8 @@ const Checkbox: React.FC<CheckboxProps> = ({
   id, // Aseguramos que id se pase para htmlFor del label
   ...props
 }) => {
-  const generatedId = id || `checkbox-${Math.random().toString(36).substr(2, 9)}`; // Generar ID si no se proporciona
+  const internalId = useId();
+  const generatedId = id || internalId; // Generar ID si no se proporciona
 
   return (
     <div className="flex items-center">

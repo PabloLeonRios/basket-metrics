@@ -12,6 +12,7 @@ import {
   CalendarIcon,
   SparklesIcon,
   QuestionMarkCircleIcon,
+  TrophyIcon,
   Cog8ToothIcon,
   ArrowLeftOnRectangleIcon,
 } from '@heroicons/react/24/outline';
@@ -44,6 +45,7 @@ const navigation = [
     ],
   },
   { name: 'Asistente IA', href: '/panel/assistant', basePath: '/panel/assistant', icon: SparklesIcon },
+  { name: 'Temporadas (Próximamente)', href: '/panel/seasons', basePath: '/panel/seasons', icon: TrophyIcon },
   { name: 'Ayuda', href: '/panel/help', basePath: '/panel/help', icon: QuestionMarkCircleIcon },
   {
     name: 'Administración', // Changed name from 'Admin' for better UX
