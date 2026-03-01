@@ -20,10 +20,22 @@ export default function UserList() {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const limit = 10;
+
     useEffect(() => {
-        const handler = setTimeout(() => { setDebouncedSearchTerm(searchTerm); }, 500);
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+            setCurrentPage(1); // Reset page on new search
+        }, 500);
         return () => clearTimeout(handler);
     }, [searchTerm]);
+
+    // Reset page when team changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedTeam]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,7 +44,7 @@ export default function UserList() {
             setLoading(true);
             const [teamsRes, usersRes] = await Promise.all([
                 fetch('/api/teams'),
-                fetch(`/api/users?teamId=${selectedTeam}&search=${debouncedSearchTerm}`)
+                fetch(`/api/users?teamId=${selectedTeam}&search=${debouncedSearchTerm}&page=${currentPage}&limit=${limit}`)
             ]);
 
             if (!teamsRes.ok) throw new Error('Error al cargar equipos.');
@@ -44,6 +56,10 @@ export default function UserList() {
             setTeams(teamsData.data || []);
             setUsers(usersData.data || []);
 
+            if (usersData.pagination) {
+                setTotalPages(usersData.pagination.totalPages || 1);
+            }
+
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido.');
         } finally {
@@ -54,7 +70,7 @@ export default function UserList() {
         if (!authLoading) {
         fetchData();
         }
-    }, [adminUser, authLoading, selectedTeam, debouncedSearchTerm]);
+    }, [adminUser, authLoading, selectedTeam, debouncedSearchTerm, currentPage]);
 
     const handleUpdateUser = async (userId: string, payload: object, successMessage: string) => {
         if (payload.hasOwnProperty('isActive') && adminUser?._id === userId) {
@@ -137,6 +153,29 @@ export default function UserList() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Controles de Paginación */}
+            {totalPages > 1 && (
+                <div className="flex justify-between items-center mt-4">
+                    <Button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        variant="secondary"
+                    >
+                        Anterior
+                    </Button>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Página {currentPage} de {totalPages}
+                    </span>
+                    <Button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        variant="secondary"
+                    >
+                        Siguiente
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
