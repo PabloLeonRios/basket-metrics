@@ -1,0 +1,68 @@
+$ eslint
+
+/app/generate_token.js
+  2:18  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/app/src/app/api/auth/login/route.ts
+  17:6   warning  'PopulatedTeam' is defined but never used  @typescript-eslint/no-unused-vars
+  69:27  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+/app/src/app/api/players/route.ts
+   25:11  warning  'showRivals' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  177:25  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  181:40  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+/app/src/app/api/sessions/[sessionId]/route.ts
+  45:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src/app/api/sessions/route.ts
+  31:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src/app/api/stats/top-players/route.ts
+  6:10  warning  'IPlayer' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/src/app/api/teams/[teamId]/route.ts
+    2:8   warning  'mongoose' is defined but never used      @typescript-eslint/no-unused-vars
+   62:17  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:65  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src/app/api/teams/route.ts
+  198:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src/components/admin/UserCreateForm.tsx
+  86:102  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/src/components/assistant/Assistant.tsx
+   28:7   warning  'StatTooltip' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  165:43  warning  'index' is defined but never used                 @typescript-eslint/no-unused-vars
+
+/app/src/components/players/PlayerManager.tsx
+  26:10  warning  'totalPlayers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/app/src/components/players/PlayerProfile.tsx
+  3:31  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/src/components/sessions/EditSessionForm.tsx
+  18:10  warning  'session' is assigned a value but never used                           @typescript-eslint/no-unused-vars
+  60:72  error    Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  64:72  error    Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  83:9   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  90:9   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+/app/src/components/tracker/GameTracker.tsx
+   53:75   error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+   62:9    warning  'benchPlayers' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   68:9    warning  'playerFouls' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  206:42   error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  345:120  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+  346:118  error    Unexpected any. Specify a different type           @typescript-eslint/no-explicit-any
+
+/app/src/components/tracker/LivePlayerStatsModal.tsx
+  45:11  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+
+/app/src/middleware.ts
+  24:16  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 31 problems (16 errors, 15 warnings)
+
+error: script "lint" exited with code 1

@@ -23,11 +23,11 @@ export default function PlayerManager() {
   // Pagination and Search states
   const [currentPage, setCurrentPage] = useState(1);
   const [playersPerPage] = useState(9);
-  const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [showInactive, setShowInactive] = useState(false);
+  const [showRivals, setShowRivals] = useState(false);
   const [activeTab, setActiveTab] = useState<'mine' | 'rivals'>('mine');
 
   // Edit Modal state
@@ -128,9 +128,8 @@ export default function PlayerManager() {
         const response = await fetch(url);
         if (!response.ok) throw new Error('No se pudieron cargar los jugadores.');
         
-        const { data, totalCount, totalPages: apiTotalPages } = await response.json();
+        const { data, totalPages: apiTotalPages } = await response.json();
         setPlayers(data);
-        setTotalPlayers(totalCount);
         setTotalPages(apiTotalPages);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -142,7 +141,7 @@ export default function PlayerManager() {
     if (!authLoading && user) {
       fetchPlayers();
     }
-  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive, activeTab]);
+  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive, showRivals, activeTab]);
 
   const handleUpdatePlayer = async (e: FormEvent) => {
     e.preventDefault();

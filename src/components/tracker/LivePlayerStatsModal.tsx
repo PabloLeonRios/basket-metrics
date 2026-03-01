@@ -42,7 +42,7 @@ export default function LivePlayerStatsModal({
             }
             break;
         case 'rebote':
-          event.details.type === 'ofensivo' ? orb++ : drb++;
+          if (event.details.type === 'ofensivo') { orb++; } else { drb++; }
           break;
         case 'asistencia':
           ast++;

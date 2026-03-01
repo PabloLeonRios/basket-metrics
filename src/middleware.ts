@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
         if (originUrl.host !== host) {
           return NextResponse.json({ success: false, message: 'Invalid origin (CSRF protection)' }, { status: 403 });
         }
-      } catch (e) {
+      } catch {
         return NextResponse.json({ success: false, message: 'Invalid origin format (CSRF protection)' }, { status: 400 });
       }
     }
