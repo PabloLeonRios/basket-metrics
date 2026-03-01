@@ -247,18 +247,35 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         <div className="flex-1 lg:max-w-2xl mx-auto flex flex-col gap-4">
             {/* Scoreboard */}
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex justify-between items-center text-center">
-                <div className="w-1/3">
-                    <div className="text-xl font-bold truncate">{session.teams[0]?.name || 'Equipo A'}</div>
-                    <div className="text-4xl font-black text-orange-600 dark:text-orange-400">{teamScores[session.teams[0]?.name] || 0}</div>
-                </div>
-                <div className="w-1/3 text-gray-500">
-                    <div className="text-sm font-semibold uppercase tracking-widest">Cuarto</div>
-                    <div className="text-2xl font-bold">{currentQuarter}</div>
-                </div>
-                <div className="w-1/3">
-                    <div className="text-xl font-bold truncate">{session.teams[1]?.name || 'Equipo B'}</div>
-                    <div className="text-4xl font-black text-orange-600 dark:text-orange-400">{teamScores[session.teams[1]?.name] || 0}</div>
-                </div>
+                {(session.sessionType === 'Partido' || session.sessionType === 'Partido de Temporada') ? (
+                    <>
+                        <div className="w-1/3">
+                            <div className="text-xl font-bold truncate">{session.teams[0]?.name || 'Equipo A'}</div>
+                            <div className="text-4xl font-black text-orange-600 dark:text-orange-400">{teamScores[session.teams[0]?.name] || 0}</div>
+                        </div>
+                        <div className="w-1/3 text-gray-500">
+                            <div className="text-sm font-semibold uppercase tracking-widest">Cuarto</div>
+                            <div className="text-2xl font-bold">{currentQuarter}</div>
+                        </div>
+                        <div className="w-1/3">
+                            <div className="text-xl font-bold truncate">{session.teams[1]?.name || 'Equipo B'}</div>
+                            <div className="text-4xl font-black text-orange-600 dark:text-orange-400">{teamScores[session.teams[1]?.name] || 0}</div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="w-1/2">
+                            <div className="text-xl font-bold truncate">Puntos Totales</div>
+                            <div className="text-4xl font-black text-orange-600 dark:text-orange-400">
+                                {Object.values(teamScores).reduce((a, b) => a + b, 0)}
+                            </div>
+                        </div>
+                        <div className="w-1/2 text-gray-500 border-l border-gray-200 dark:border-gray-700">
+                            <div className="text-sm font-semibold uppercase tracking-widest">Cuarto</div>
+                            <div className="text-2xl font-bold">{currentQuarter}</div>
+                        </div>
+                    </>
+                )}
             </div>
 
             <Court onClick={handleCourtClick} shotCoordinates={shotCoordinates} />
