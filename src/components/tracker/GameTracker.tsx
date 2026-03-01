@@ -40,6 +40,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<SelectedPlayer | null>(null);
   const [gameEvents, setGameEvents] = useState<IGameEvent[]>([]);
+  const [coachPlayers, setCoachPlayers] = useState<IPlayer[]>([]);
   const [onCourtPlayerIds, setOnCourtPlayerIds] = useState<Set<string>>(new Set());
   
   const [showSubModal, setShowSubModal] = useState(false);
@@ -59,6 +60,10 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const allPlayers = useMemo(() => session?.teams.flatMap(t => t.players) || [], [session]);
   const playerIdToName = useMemo(() => Object.fromEntries(allPlayers.map(p => [p._id, p.name])), [allPlayers]);
   const benchPlayers = useMemo(() => allPlayers.filter(p => !onCourtPlayerIds.has(p._id)), [allPlayers, onCourtPlayerIds]);
+
+  const extraPlayers = useMemo(() => {
+    return coachPlayers.filter(cp => !allPlayers.some(ap => ap._id === cp._id));
+  }, [coachPlayers, allPlayers]);
 
   const playerFouls = useMemo(() => {
     const fouls: Record<string, number> = {};
@@ -98,9 +103,17 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         setSession(sessionData);
         setGameEvents(eventsData);
 
+        if (sessionData.coach) {
+          const playersRes = await fetch(`/api/players?coachId=${sessionData.coach}&limit=1000`);
+          if (playersRes.ok) {
+            const { data: playersData } = await playersRes.json();
+            setCoachPlayers(playersData || []);
+          }
+        }
+
         const onCourtIds = new Set<string>();
         const allPlayersCurrent = sessionData.teams.flatMap((t: TeamData) => t.players);
-        if (sessionData.sessionType === 'Partido') {
+        if (sessionData.sessionType === 'Partido' || sessionData.sessionType === 'Partido de Temporada') {
             const onCourtStarters = new Set<string>();
             sessionData.teams.forEach((team: TeamData) => { team.players.slice(0, 5).forEach((p: IPlayer) => onCourtStarters.add(p._id)); });
             const subs = eventsData.filter((e: IGameEvent) => e.type === 'substitution').sort((a: IGameEvent, b: IGameEvent) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
@@ -148,6 +161,20 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
 
   const handleSubstitution = (playerOut: IPlayer, playerIn: IPlayer) => {
     if (isSessionFinished) return;
+
+    // Check if playerIn is from extraPlayers and not in the current team
+    const teamIndex = session?.teams.findIndex(t => t.players.some(p => p._id === playerOut._id));
+    if (session && teamIndex !== undefined && teamIndex !== -1) {
+        const team = session.teams[teamIndex];
+        if (!team.players.some(p => p._id === playerIn._id)) {
+            const updatedTeams = [...session.teams];
+            updatedTeams[teamIndex] = { ...team, players: [...team.players, playerIn] };
+
+            // This will update both local state and backend
+            handleUpdateSession({ teams: updatedTeams });
+        }
+    }
+
     setOnCourtPlayerIds(prev => { const newSet = new Set(prev); newSet.delete(playerOut._id); newSet.add(playerIn._id); return newSet; });
     logEvent('substitution', { playerIn: { _id: playerIn._id, name: playerIn.name }, playerOut: { _id: playerOut._id, name: playerOut.name } });
     toast.success(`${playerIn.name} entra por ${playerOut.name}.`);
@@ -216,7 +243,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
               <div className="space-y-1">
                 {team.players.map((player) => {
                   const isOnCourt = onCourtPlayerIds.has(player._id);
-                  const isPartido = session.sessionType === 'Partido';
+                  const isPartido = session.sessionType === 'Partido' || session.sessionType === 'Partido de Temporada';
                   const foulCount = gameEvents.filter(e => e.player === player._id && e.type === 'falta').length;
                   const isFoulDanger = foulCount >= 4;
                   return (
@@ -301,7 +328,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={() => {}} isSessionFinished={isSessionFinished} sessionId={sessionId} />
         </div>
       </div>
-      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} teamPlayers={session?.teams.find(t => t.players.some(p => p._id === playerToSubOut?._id))?.players || []} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
+      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} teamPlayers={session?.teams.find(t => t.players.some(p => p._id === playerToSubOut?._id))?.players || []} extraPlayers={extraPlayers} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
       {showAISuggestionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setShowAISuggestionModal(false)}>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
