@@ -276,6 +276,7 @@ export function getProactiveSuggestion(
                 })[0];
                 if (weakestDefender && weakestDefender.playerId !== bestDefender.playerId) {
                     return {
+                        type: 'SUSTITUCION',
                         playerOut: weakestDefender,
                         playerIn: bestDefender,
                         reason: `el partido está ajustado (${activeTeamScore}-${opposingTeamScore}) y vas ganando. Asegura la defensa y el rebote en los momentos finales.`
@@ -294,6 +295,7 @@ export function getProactiveSuggestion(
                 })[0];
                 if (weakestScorer && weakestScorer.playerId !== bestShooter.playerId) {
                     return {
+                        type: 'SUSTITUCION',
                         playerOut: weakestScorer,
                         playerIn: bestShooter,
                         reason: `el partido está ajustado (${activeTeamScore}-${opposingTeamScore}) y necesitas anotar. Busca amenaza exterior o puntos rápidos.`
@@ -317,6 +319,7 @@ export function getProactiveSuggestion(
 
         if (bestPlayerOnCourt && benchReplacement) {
              return {
+                  type: 'SUSTITUCION',
                  playerOut: bestPlayerOnCourt,
                  playerIn: benchReplacement,
                  reason: `el partido parece resuelto (diferencia de ${Math.abs(scoreDifference)} puntos). Es buen momento para dar descanso a tus titulares y evitar lesiones.`
@@ -344,6 +347,7 @@ export function getProactiveSuggestion(
              if (organizerOrDefender) {
                  const playerOut = onCourtProfiles[0]; // Arbitrario o el de peor rendimiento reciente
                  return {
+                     type: 'SUSTITUCION',
                      playerOut: playerOut,
                      playerIn: organizerOrDefender,
                      reason: `el equipo rival tiene una racha de ${opposingRun}-0. Un cambio puede ayudar a frenar su ritmo y organizar el ataque.`
