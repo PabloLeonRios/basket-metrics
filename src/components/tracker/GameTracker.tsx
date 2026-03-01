@@ -60,6 +60,22 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const playerIdToName = useMemo(() => Object.fromEntries(allPlayers.map(p => [p._id, p.name])), [allPlayers]);
   const benchPlayers = useMemo(() => allPlayers.filter(p => !onCourtPlayerIds.has(p._id)), [allPlayers, onCourtPlayerIds]);
 
+  const teamScores = useMemo(() => {
+    const scores: Record<string, number> = {};
+    if (session) {
+      session.teams.forEach(t => { scores[t.name] = 0; });
+    }
+
+    for (const event of gameEvents) {
+      if ((event.type === 'tiro' || event.type === 'tiro_libre') && event.details.made) {
+        if (scores[event.team] !== undefined) {
+          scores[event.team] += (event.details.value as number) || 1;
+        }
+      }
+    }
+    return scores;
+  }, [gameEvents, session]);
+
   useEffect(() => {
     async function fetchSessionData() {
       try {
@@ -209,6 +225,22 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           ))}
         </div>
         <div className="flex-1 lg:max-w-2xl mx-auto flex flex-col gap-4">
+            {/* Scoreboard */}
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex justify-between items-center text-center">
+                <div className="w-1/3">
+                    <div className="text-xl font-bold truncate">{session.teams[0]?.name || 'Equipo A'}</div>
+                    <div className="text-4xl font-black text-orange-600 dark:text-orange-400">{teamScores[session.teams[0]?.name] || 0}</div>
+                </div>
+                <div className="w-1/3 text-gray-500">
+                    <div className="text-sm font-semibold uppercase tracking-widest">Cuarto</div>
+                    <div className="text-2xl font-bold">{currentQuarter}</div>
+                </div>
+                <div className="w-1/3">
+                    <div className="text-xl font-bold truncate">{session.teams[1]?.name || 'Equipo B'}</div>
+                    <div className="text-4xl font-black text-orange-600 dark:text-orange-400">{teamScores[session.teams[1]?.name] || 0}</div>
+                </div>
+            </div>
+
             <Court onClick={handleCourtClick} shotCoordinates={shotCoordinates} />
             <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
               <div className="mb-2 flex items-center justify-between">
@@ -239,16 +271,29 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-2"><LightBulbIcon className="h-6 w-6 text-yellow-400" />Sugerencia de la IA</h3>
                 {loadingAISuggestion ? ( <p>Pensando...</p> ) : aiSuggestion ? (
                     <div>
-                        <p className="mb-4">La IA sugiere cambiar a <strong className="text-red-500">{aiSuggestion.playerOut.name}</strong> porque {aiSuggestion.reason}</p>
-                        <p className="mb-4">El reemplazo recomendado es <strong className="text-green-500">{aiSuggestion.playerIn.name}</strong>.</p>
-                        <div className="flex justify-end gap-4 mt-6">
-                            <Button variant="secondary" onClick={() => setShowAISuggestionModal(false)}>Ignorar</Button>
-                            <Button onClick={() => {
-                                const playerOutObj = allPlayers.find(p => p._id === (aiSuggestion.playerOut as any).playerId);
-                                const playerInObj = allPlayers.find(p => p._id === (aiSuggestion.playerIn as any).playerId);
-                                if (playerOutObj && playerInObj) handleSubstitution(playerOutObj, playerInObj);
-                            }}><ArrowsRightLeftIcon className="h-5 w-5 mr-2" />Aceptar Cambio</Button>
-                        </div>
+                        {aiSuggestion.type === 'SUSTITUCION' && aiSuggestion.playerOut && aiSuggestion.playerIn ? (
+                            <>
+                                <p className="mb-4">La IA sugiere cambiar a <strong className="text-red-500">{aiSuggestion.playerOut.name}</strong> porque {aiSuggestion.reason}</p>
+                                <p className="mb-4">El reemplazo recomendado es <strong className="text-green-500">{aiSuggestion.playerIn.name}</strong>.</p>
+                                <div className="flex justify-end gap-4 mt-6">
+                                    <Button variant="secondary" onClick={() => setShowAISuggestionModal(false)}>Ignorar</Button>
+                                    <Button onClick={() => {
+                                        const playerOutObj = allPlayers.find(p => p._id === (aiSuggestion.playerOut as any).playerId);
+                                        const playerInObj = allPlayers.find(p => p._id === (aiSuggestion.playerIn as any).playerId);
+                                        if (playerOutObj && playerInObj) handleSubstitution(playerOutObj, playerInObj);
+                                    }}><ArrowsRightLeftIcon className="h-5 w-5 mr-2" />Aceptar Cambio</Button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className={`mb-4 ${aiSuggestion.type === 'POSITIVA' ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                                    {aiSuggestion.reason}
+                                </p>
+                                <div className="flex justify-end mt-6">
+                                    <Button onClick={() => setShowAISuggestionModal(false)}>Entendido</Button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 ) : ( <p>La IA no tiene ninguna sugerencia por el momento.</p> )}
             </div>
