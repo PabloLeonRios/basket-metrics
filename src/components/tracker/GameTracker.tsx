@@ -21,15 +21,15 @@ interface SelectedPlayer { id: string; name: string; teamName: string; }
 
 const getActionButtonClass = (eventType: string) => {
     switch (eventType) {
-        case 'asistencia': return 'bg-blue-600 hover:bg-blue-700';
-        case 'robo': return 'bg-teal-600 hover:bg-teal-700';
-        case 'tapon': return 'bg-purple-600 hover:bg-purple-700';
-        case 'perdida': return 'bg-yellow-600 hover:bg-yellow-700';
-        case 'rebote_ofensivo': return 'bg-cyan-600 hover:bg-cyan-700';
-        case 'rebote_defensivo': return 'bg-pink-600 hover:bg-pink-700';
-        case 'falta': return 'bg-orange-600 hover:bg-orange-700';
-        case 'tiro_libre': return 'bg-indigo-600 hover:bg-indigo-700';
-        default: return 'bg-gray-600 hover:bg-gray-700';
+        case 'asistencia': return '!bg-blue-600 hover:!bg-blue-700';
+        case 'robo': return '!bg-teal-600 hover:!bg-teal-700';
+        case 'tapon': return '!bg-purple-600 hover:!bg-purple-700';
+        case 'perdida': return '!bg-yellow-600 hover:!bg-yellow-700';
+        case 'rebote_ofensivo': return '!bg-cyan-600 hover:!bg-cyan-700';
+        case 'rebote_defensivo': return '!bg-pink-600 hover:!bg-pink-700';
+        case 'falta': return '!bg-orange-600 hover:!bg-orange-700';
+        case 'tiro_libre': return '!bg-indigo-600 hover:!bg-indigo-700';
+        default: return '!bg-gray-600 hover:!bg-gray-700';
     }
 }
 
