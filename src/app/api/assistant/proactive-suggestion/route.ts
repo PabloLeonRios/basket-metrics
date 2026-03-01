@@ -17,7 +17,8 @@ export async function POST(request: Request) {
       allPlayerIds,
       onCourtPlayerIds,
       sessionId,
-    }: { allPlayerIds: string[]; onCourtPlayerIds: string[], sessionId: string } = await request.json();
+      currentQuarter,
+    }: { allPlayerIds: string[]; onCourtPlayerIds: string[]; sessionId: string; currentQuarter?: number } = await request.json();
 
     if (!allPlayerIds || !onCourtPlayerIds || !sessionId || onCourtPlayerIds.length !== 5) {
       return NextResponse.json(
@@ -54,7 +55,12 @@ export async function POST(request: Request) {
     const gameEvents = await GameEvent.find({ sessionId }).sort({ createdAt: -1 });
 
     // 3. Obtener la sugerencia proactiva
-    const suggestion = getProactiveSuggestion(onCourtPlayerIds, allProfiles, gameEvents);
+    const suggestion = getProactiveSuggestion(
+      onCourtPlayerIds,
+      allProfiles,
+      gameEvents,
+      currentQuarter || 1
+    );
 
     if (!suggestion) {
         return NextResponse.json({ success: true, data: null, message: 'La IA no tiene sugerencias por el momento.' });

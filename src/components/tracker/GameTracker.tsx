@@ -135,7 +135,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const handleGetProactiveSuggestion = async () => {
     setLoadingAISuggestion(true); setShowAISuggestionModal(true); setAiSuggestion(null);
     try {
-        const response = await fetch('/api/assistant/proactive-suggestion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allPlayerIds: allPlayers.map(p => p._id), onCourtPlayerIds: Array.from(onCourtPlayerIds), sessionId: sessionId, }), });
+        const response = await fetch('/api/assistant/proactive-suggestion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ allPlayerIds: allPlayers.map(p => p._id), onCourtPlayerIds: Array.from(onCourtPlayerIds), sessionId: sessionId, currentQuarter: currentQuarter }), });
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Error al obtener sugerencia.');
         setAiSuggestion(data.data);

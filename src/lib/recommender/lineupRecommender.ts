@@ -216,9 +216,140 @@ export function getProactiveSuggestion(
     onCourtPlayerIds: string[],
     allPlayerProfiles: PlayerProfile[],
     gameEvents: IGameEvent[],
+    currentQuarter: number = 1
 ): ProactiveSuggestion | null {
     const onCourtProfiles = allPlayerProfiles.filter(p => onCourtPlayerIds.includes(p.playerId));
-    const benchProfiles = allPlayerProfiles.filter(p => !onCourtPlayerIds.includes(p.playerId));
+
+    // Asumimos que los jugadores en cancha pertenecen todos al mismo equipo (el equipo activo o de foco)
+    const activeTeamName = gameEvents.find(e => e.player && onCourtPlayerIds.includes(e.player.toString()))?.team;
+
+    // Filtrar el banquillo para que solo incluya jugadores del equipo activo (si se puede determinar)
+    let benchProfiles = allPlayerProfiles.filter(p => !onCourtPlayerIds.includes(p.playerId));
+    if (activeTeamName) {
+        // Encontrar qué jugadores en allPlayerProfiles pertenecen al activeTeamName basado en gameEvents,
+        // o si no han jugado, es más difícil. Mejor: asumimos que allPlayerProfiles vienen todos juntos,
+        // pero en un tracker de 2 equipos, allPlayerProfiles incluye a TODOS.
+        // Vamos a deducir el equipo de cada jugador por los eventos, o usar el equipo activo.
+        const teamPlayersMap = new Map<string, string>();
+        for (const ev of gameEvents) {
+            if (ev.player && ev.team) teamPlayersMap.set(ev.player.toString(), ev.team);
+        }
+        benchProfiles = benchProfiles.filter(p => {
+            const team = teamPlayersMap.get(p.playerId);
+            // Si el jugador no tiene eventos, no podemos estar 100% seguros de su equipo por eventos.
+            // Para ser seguros, si tiene equipo y es el activo, o si no tiene equipo lo dejamos pasar por ahora.
+            return !team || team === activeTeamName;
+        });
+    }
+
+    // Calcular el marcador actual
+    let activeTeamScore = 0;
+    let opposingTeamScore = 0;
+
+    gameEvents.forEach((ev) => {
+        if ((ev.type === 'tiro' || ev.type === 'tiro_libre') && ev.details.made) {
+            const points = ev.details.value as number || 1;
+            if (activeTeamName && ev.team === activeTeamName) {
+                activeTeamScore += points;
+            } else if (activeTeamName && ev.team !== activeTeamName) {
+                opposingTeamScore += points;
+            }
+        }
+    });
+
+    const scoreDifference = activeTeamScore - opposingTeamScore;
+
+    // --- Criterios de Contexto de Partido ---
+
+    // 1. "Clutch Time": Último cuarto, partido ajustado (diferencia de 5 o menos)
+    if (currentQuarter >= 4 && Math.abs(scoreDifference) <= 5 && benchProfiles.length > 0) {
+        if (scoreDifference > 0) {
+            // Vamos ganando: priorizar defensa y rebote
+            const bestDefender = benchProfiles.find(p => p.tags.has('DEFENSOR') || p.tags.has('REBOTEADOR_DEF'));
+            if (bestDefender) {
+                // Sacar al peor defensor en cancha
+                const weakestDefender = [...onCourtProfiles].sort((a, b) => {
+                    const aDef = (a.careerAverages?.avgStl || 0) + (a.careerAverages?.avgDrb || 0);
+                    const bDef = (b.careerAverages?.avgStl || 0) + (b.careerAverages?.avgDrb || 0);
+                    return aDef - bDef;
+                })[0];
+                if (weakestDefender && weakestDefender.playerId !== bestDefender.playerId) {
+                    return {
+                        playerOut: weakestDefender,
+                        playerIn: bestDefender,
+                        reason: `el partido está ajustado (${activeTeamScore}-${opposingTeamScore}) y vas ganando. Asegura la defensa y el rebote en los momentos finales.`
+                    };
+                }
+            }
+        } else {
+            // Vamos perdiendo: priorizar tiro exterior o anotación rápida
+            const bestShooter = benchProfiles.find(p => p.tags.has('TIRADOR_3P') || p.tags.has('ANOTADOR'));
+            if (bestShooter) {
+                // Sacar al que menos aporta ofensivamente
+                const weakestScorer = [...onCourtProfiles].sort((a, b) => {
+                    const aPts = a.careerAverages?.avgPoints || 0;
+                    const bPts = b.careerAverages?.avgPoints || 0;
+                    return aPts - bPts;
+                })[0];
+                if (weakestScorer && weakestScorer.playerId !== bestShooter.playerId) {
+                    return {
+                        playerOut: weakestScorer,
+                        playerIn: bestShooter,
+                        reason: `el partido está ajustado (${activeTeamScore}-${opposingTeamScore}) y necesitas anotar. Busca amenaza exterior o puntos rápidos.`
+                    };
+                }
+            }
+        }
+    }
+
+    // 2. "Garbage Time": Último cuarto, diferencia de más de 15 puntos
+    if (currentQuarter >= 4 && Math.abs(scoreDifference) >= 15 && benchProfiles.length > 0) {
+        // Sacar al mejor jugador para darle descanso
+        const bestPlayerOnCourt = [...onCourtProfiles].sort((a, b) => {
+            const aPts = a.careerAverages?.avgPoints || 0;
+            const bPts = b.careerAverages?.avgPoints || 0;
+            return bPts - aPts; // Orden descendente
+        })[0];
+
+        // Meter al jugador con menos minutos/estadísticas o simplemente uno del banquillo
+        const benchReplacement = benchProfiles[benchProfiles.length - 1]; // O el que sea
+
+        if (bestPlayerOnCourt && benchReplacement) {
+             return {
+                 playerOut: bestPlayerOnCourt,
+                 playerIn: benchReplacement,
+                 reason: `el partido parece resuelto (diferencia de ${Math.abs(scoreDifference)} puntos). Es buen momento para dar descanso a tus titulares y evitar lesiones.`
+             };
+        }
+    }
+
+    // 3. Freno de Rachas (Momentum)
+    // Miramos los últimos 10 eventos de tiro/tiro libre para ver si hay una racha rival
+    if (activeTeamName && currentQuarter < 4) {
+        const recentScoringEvents = gameEvents
+            .filter(e => (e.type === 'tiro' || e.type === 'tiro_libre') && e.details.made)
+            .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+            .slice(0, 5); // Últimos 5 tiros anotados
+
+        // Si los últimos 3 o 4 tiros anotados son TODOS del equipo rival
+        let opposingRun = 0;
+        for (const ev of recentScoringEvents) {
+            if (ev.team !== activeTeamName) opposingRun += (ev.details.value as number) || 1;
+            else break; // Racha rota
+        }
+
+        if (opposingRun >= 8) {
+             const organizerOrDefender = benchProfiles.find(p => p.tags.has('ORGANIZADOR') || p.tags.has('DEFENSOR'));
+             if (organizerOrDefender) {
+                 const playerOut = onCourtProfiles[0]; // Arbitrario o el de peor rendimiento reciente
+                 return {
+                     playerOut: playerOut,
+                     playerIn: organizerOrDefender,
+                     reason: `el equipo rival tiene una racha de ${opposingRun}-0. Un cambio puede ayudar a frenar su ritmo y organizar el ataque.`
+                 };
+             }
+        }
+    }
 
     // Criterio 1: Problemas de Faltas
     for (const player of onCourtProfiles) {
