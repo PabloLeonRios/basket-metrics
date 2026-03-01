@@ -53,6 +53,14 @@ const getEventRowClass = (event: IGameEvent): string => {
         return `${baseClass} bg-yellow-50 dark:bg-yellow-900/50 ${colorClass} border-yellow-500`;
       case 'falta':
           return `${baseClass} bg-orange-50 dark:bg-orange-900/50 ${colorClass} border-orange-500`;
+      case 'robo':
+        return `${baseClass} bg-teal-50 dark:bg-teal-900/50 ${colorClass} border-teal-500`;
+      case 'tapon':
+        return `${baseClass} bg-purple-50 dark:bg-purple-900/50 ${colorClass} border-purple-500`;
+      case 'rebote':
+        return event.details.type === 'ofensivo'
+          ? `${baseClass} bg-cyan-50 dark:bg-cyan-900/50 ${colorClass} border-cyan-500`
+          : `${baseClass} bg-pink-50 dark:bg-pink-900/50 ${colorClass} border-pink-500`;
       default:
         return `${baseClass} bg-white dark:bg-gray-700`;
     }
