@@ -211,7 +211,14 @@ export default function PlayerManager() {
               </div>
               <div>
                 <label htmlFor="editPosition" className={labelStyles}>Posición</label>
-                <Input id="editPosition" type="text" value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
+                <Input id="editPosition" type="text" list="edit-position-options" value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
+                <datalist id="edit-position-options">
+                  <option value="Base" />
+                  <option value="Escolta" />
+                  <option value="Alero" />
+                  <option value="Ala-Pívot" />
+                  <option value="Pívot" />
+                </datalist>
               </div>
               <div>
                 <label htmlFor="editTeam" className={labelStyles}>Equipo</label>

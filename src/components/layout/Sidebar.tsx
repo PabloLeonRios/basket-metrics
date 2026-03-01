@@ -12,6 +12,7 @@ import {
   CalendarIcon,
   SparklesIcon,
   QuestionMarkCircleIcon,
+  TrophyIcon,
   Cog8ToothIcon,
   ArrowLeftOnRectangleIcon,
 } from '@heroicons/react/24/outline';
@@ -44,6 +45,7 @@ const navigation = [
     ],
   },
   { name: 'Asistente IA', href: '/panel/assistant', basePath: '/panel/assistant', icon: SparklesIcon },
+  { name: 'Temporadas (Próximamente)', href: '/panel/seasons', basePath: '/panel/seasons', icon: TrophyIcon },
   { name: 'Ayuda', href: '/panel/help', basePath: '/panel/help', icon: QuestionMarkCircleIcon },
   {
     name: 'Administración', // Changed name from 'Admin' for better UX
@@ -147,8 +149,8 @@ export default function Sidebar({ user, isSidebarOpen, handleLogout }: SidebarPr
               )})}
             </ul>
           </li>
-          {handleLogout && (
-            <li className="-mx-2 mt-auto">
+          <li className="mt-auto -mx-2">
+            {handleLogout && (
               <button
                 onClick={handleLogout}
                 className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-900 dark:text-gray-50 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors"
@@ -156,8 +158,11 @@ export default function Sidebar({ user, isSidebarOpen, handleLogout }: SidebarPr
                 <ArrowLeftOnRectangleIcon className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-orange-600" aria-hidden="true" />
                 Cerrar Sesión
               </button>
-            </li>
-          )}
+            )}
+            <div className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4 pb-2">
+              Versión - Basket-Metrics 0.8
+            </div>
+          </li>
         </ul>
       </nav>
     </div>
