@@ -3,6 +3,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import ShotChart from '@/components/charts/ShotChart';
 import { IGameEvent } from '@/types/definitions';
+import { utils, writeFile } from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import Button from '@/components/ui/Button';
+import { toast } from 'react-toastify';
+
 
 // Deberíamos centralizar estos tipos
 interface CareerAverages {
@@ -40,6 +47,63 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
   const [globalValue, setGlobalValue] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const exportToExcel = () => {
+    if (games.length === 0) {
+      toast.info('No hay partidos finalizados para exportar.');
+      return;
+    }
+    const data = games.map(g => ({
+      Partido: g.session.name,
+      Inicio: new Date(g.session.date).toLocaleString(),
+      Fin: g.session.finishedAt ? new Date(g.session.finishedAt).toLocaleString() : '-',
+      'Game Score': g.gameScore.toFixed(1),
+      PTS: g.points,
+      AST: g.ast,
+      REB: g.orb + g.drb,
+      STL: g.stl,
+      BLK: g.blk,
+      TOV: g.tov,
+      PF: g.pf,
+    }));
+
+    const worksheet = utils.json_to_sheet(data);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Estadísticas Jugador');
+    writeFile(workbook, `estadisticas_jugador_${playerId}.xlsx`);
+  };
+
+  const exportToPDF = () => {
+    if (games.length === 0) {
+      toast.info('No hay partidos finalizados para exportar.');
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text('Estadísticas del Jugador (Partido a Partido)', 14, 15);
+
+    const tableData = games.map(g => [
+      g.session.name,
+      new Date(g.session.date).toLocaleDateString(),
+      g.gameScore.toFixed(1),
+      g.points,
+      g.ast,
+      g.orb + g.drb,
+      g.stl,
+      g.blk,
+      g.tov,
+      g.pf,
+    ]);
+
+    autoTable(doc, {
+      startY: 20,
+      head: [['Partido', 'Fecha', 'Game Score', 'PTS', 'AST', 'REB', 'STL', 'BLK', 'TOV', 'PF']],
+      body: tableData,
+    });
+
+    doc.save(`estadisticas_jugador_${playerId}.pdf`);
+  };
+
 
   useEffect(() => {
     async function fetchStats() {
@@ -124,7 +188,19 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Tabla de Partidos */}
         <div className="lg:col-span-2 bg-white dark:bg-gray-900 shadow-md rounded-lg overflow-hidden">
-          <h3 className="text-xl font-bold p-4">Rendimiento Partido a Partido</h3>
+          <div className="flex justify-between items-center p-4">
+            <h3 className="text-xl font-bold">Rendimiento Partido a Partido</h3>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={exportToExcel} className="flex items-center gap-2">
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                Excel
+              </Button>
+              <Button variant="secondary" onClick={exportToPDF} className="flex items-center gap-2">
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                PDF
+              </Button>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-800">
