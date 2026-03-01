@@ -60,7 +60,7 @@ export default function Assistant() {
       if (!user) return;
       try {
         const teamQuery = user.team
-          ? `&userTeamName=${encodeURIComponent(user.team as string)}`
+          ? `&userTeamName=${encodeURIComponent(user.team.name)}`
           : '';
         const response = await fetch(
           `/api/players?coachId=${user._id}&teamType=mine${teamQuery}`,

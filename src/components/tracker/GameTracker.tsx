@@ -86,7 +86,22 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [showPlayerStatsModal, setShowPlayerStatsModal] = useState(false);
   const [statsPlayer, setStatsPlayer] = useState<{
     player: IPlayer;
-    stats: Record<string, number>;
+    stats: {
+      FGM: number;
+      FGA: number;
+      '3PM': number;
+      '3PA': number;
+      FTM: number;
+      FTA: number;
+      ORB: number;
+      DRB: number;
+      AST: number;
+      STL: number;
+      BLK: number;
+      TOV: number;
+      PF: number;
+      PTS: number;
+    };
   } | null>(null);
   const [showAISuggestionModal, setShowAISuggestionModal] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<ProactiveSuggestion | null>(
