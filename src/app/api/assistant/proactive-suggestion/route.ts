@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       currentQuarter,
     }: { allPlayerIds: string[]; onCourtPlayerIds: string[]; sessionId: string; currentQuarter?: number } = await request.json();
 
-    if (!allPlayerIds || !onCourtPlayerIds || !sessionId || onCourtPlayerIds.length !== 5) {
+    if (!allPlayerIds || !onCourtPlayerIds || !sessionId || onCourtPlayerIds.length === 0) {
       return NextResponse.json(
         { success: false, message: 'Datos incompletos para la sugerencia.' },
         { status: 400 },
