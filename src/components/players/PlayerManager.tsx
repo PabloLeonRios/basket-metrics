@@ -24,6 +24,7 @@ export default function PlayerManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [showInactive, setShowInactive] = useState(false);
+  const [activeTab, setActiveTab] = useState<'mine' | 'rivals'>('mine');
 
   // Edit Modal state
   const [editingPlayer, setEditingPlayer] = useState<IPlayer | null>(null);
@@ -41,6 +42,11 @@ export default function PlayerManager() {
     return () => clearTimeout(handler);
   }, [searchTerm]);
   
+  // Reset page to 1 when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
   useEffect(() => {
     async function fetchPlayers() {
       // The guard `if (!authLoading && user)` is now outside.
@@ -60,6 +66,10 @@ export default function PlayerManager() {
         if (debouncedSearchTerm) {
           url += `&search=${debouncedSearchTerm}`;
         }
+        url += `&teamType=${activeTab}`;
+        if (user?.team?.name) {
+          url += `&userTeamName=${encodeURIComponent(user.team.name)}`;
+        }
         
         const response = await fetch(url);
         if (!response.ok) throw new Error('No se pudieron cargar los jugadores.');
@@ -78,7 +88,7 @@ export default function PlayerManager() {
     if (!authLoading && user) {
       fetchPlayers();
     }
-  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive]);
+  }, [user, authLoading, currentPage, playersPerPage, debouncedSearchTerm, showInactive, activeTab]);
 
   const handleUpdatePlayer = async (e: FormEvent) => {
     e.preventDefault();
@@ -136,6 +146,34 @@ export default function PlayerManager() {
 
   return (
     <div className="space-y-8">
+      {/* Pestañas (Tabs) */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          <button
+            onClick={() => setActiveTab('mine')}
+            className={`
+              whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'mine'
+                ? 'border-orange-500 text-orange-600 dark:text-orange-500'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}
+            `}
+          >
+            Mi Equipo
+          </button>
+          <button
+            onClick={() => setActiveTab('rivals')}
+            className={`
+              whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+              ${activeTab === 'rivals'
+                ? 'border-orange-500 text-orange-600 dark:text-orange-500'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}
+            `}
+          >
+            Rivales
+          </button>
+        </nav>
+      </div>
+
       {/* Lista de Jugadores */}
       <div className="space-y-4">
         <div className="flex justify-between items-center flex-wrap gap-4">
