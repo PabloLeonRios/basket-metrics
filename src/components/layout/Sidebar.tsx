@@ -6,18 +6,29 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Disclosure, Transition } from '@headlessui/react';
 import { ChevronUpIcon } from '@heroicons/react/20/solid';
+import {
+  HomeIcon,
+  UsersIcon,
+  CalendarIcon,
+  SparklesIcon,
+  QuestionMarkCircleIcon,
+  Cog8ToothIcon,
+  ArrowLeftOnRectangleIcon,
+} from '@heroicons/react/24/outline';
 import { IUser } from '@/types/definitions';
 
 interface SidebarProps {
   user: IUser | null;
   isSidebarOpen?: boolean; // Added isSidebarOpen prop
+  handleLogout?: () => void; // Added handleLogout prop
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/panel/dashboard', basePath: '/panel/dashboard' },
+  { name: 'Dashboard', href: '/panel/dashboard', basePath: '/panel/dashboard', icon: HomeIcon },
   {
     name: 'Jugadores',
     basePath: '/panel/players',
+    icon: UsersIcon,
     items: [
       { name: 'Gestionar Jugadores', href: '/panel/players' },
       { name: 'Añadir Jugador', href: '/panel/players/new' },
@@ -26,18 +37,20 @@ const navigation = [
   {
     name: 'Sesiones',
     basePath: '/panel/sessions',
+    icon: CalendarIcon,
     items: [
       { name: 'Gestionar Sesiones', href: '/panel/sessions' },
       { name: 'Crear Sesión', href: '/panel/sessions/new' },
     ],
   },
-  { name: 'Asistente IA', href: '/panel/assistant', basePath: '/panel/assistant' },
-  { name: 'Ayuda', href: '/panel/help', basePath: '/panel/help' },
+  { name: 'Asistente IA', href: '/panel/assistant', basePath: '/panel/assistant', icon: SparklesIcon },
+  { name: 'Ayuda', href: '/panel/help', basePath: '/panel/help', icon: QuestionMarkCircleIcon },
   {
     name: 'Administración', // Changed name from 'Admin' for better UX
     adminOnly: true,
     href: '/panel/admin',
     basePath: '/panel/admin',
+    icon: Cog8ToothIcon,
     items: [
       { name: 'Usuarios', href: '/panel/admin/users' },
       { name: 'Equipos', href: '/panel/admin/teams' },
@@ -49,7 +62,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
+export default function Sidebar({ user, isSidebarOpen, handleLogout }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -76,6 +89,7 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
                         'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                       )}
                     >
+                      {item.icon && <item.icon className={classNames(isActiveParent ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600', 'h-6 w-6 shrink-0')} aria-hidden="true" />}
                       {item.name}
                     </Link>
                   ) : (
@@ -85,9 +99,10 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
                           <Disclosure.Button
                             className={classNames(
                               isActiveParent ? 'bg-orange-50 dark:bg-gray-800 text-orange-600' : 'text-gray-900 dark:text-gray-50 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors', // Changed text color
-                              'flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold'
+                              'flex items-center w-full text-left rounded-md p-2 gap-x-3 text-sm leading-6 font-semibold group'
                             )}
                           >
+                            {item.icon && <item.icon className={classNames(isActiveParent ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600', 'h-6 w-6 shrink-0')} aria-hidden="true" />}
                             {item.name}
                             <ChevronUpIcon
                               className={classNames(
@@ -132,6 +147,17 @@ export default function Sidebar({ user, isSidebarOpen }: SidebarProps) {
               )})}
             </ul>
           </li>
+          {handleLogout && (
+            <li className="-mx-2 mt-auto">
+              <button
+                onClick={handleLogout}
+                className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-900 dark:text-gray-50 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <ArrowLeftOnRectangleIcon className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-orange-600" aria-hidden="true" />
+                Cerrar Sesión
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
     </div>

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const teamId = searchParams.get('teamId');
     const search = searchParams.get('search');
 
-    let query: any = {};
+    const query: any = {};
 
     if (teamId) {
       query.team = teamId;
