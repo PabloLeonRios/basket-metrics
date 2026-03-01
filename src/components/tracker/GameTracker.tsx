@@ -8,6 +8,7 @@ import GameLog from './GameLog';
 import FloatingStats from './FloatingStats';
 import SubstitutionModal from './SubstitutionModal';
 import { toast } from 'react-toastify';
+import { PlayerStats } from "./PlayerStatsModal";
 import { IGameEvent, IPlayer, ISession } from '@/types/definitions';
 import Button from '@/components/ui/Button';
 import PlayerStatsModal from './PlayerStatsModal';
@@ -50,7 +51,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [shotCoordinates, setShotCoordinates] = useState<{ x: number; y: number } | null>(null);
   const [shotValue, setShotValue] = useState<2 | 3>(2);
   const [showPlayerStatsModal, setShowPlayerStatsModal] = useState(false);
-  const [statsPlayer, setStatsPlayer] = useState<{player: IPlayer, stats: any} | null>(null);
+  const [statsPlayer, setStatsPlayer] = useState<{player: IPlayer, stats: PlayerStats} | null>(null);
   const [showAISuggestionModal, setShowAISuggestionModal] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<ProactiveSuggestion | null>(null);
   const [loadingAISuggestion, setLoadingAISuggestion] = useState(false);

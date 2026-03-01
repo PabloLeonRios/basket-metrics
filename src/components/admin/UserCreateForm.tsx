@@ -83,7 +83,7 @@ export default function UserCreateForm() {
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rol de Usuario</label>
-                    <Dropdown options={roleOptions} value={role} onChange={value => setRole(value as any)} />
+                    <Dropdown options={roleOptions} value={role} onChange={value => setRole(value as "entrenador" | "admin")} />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Equipo</label>

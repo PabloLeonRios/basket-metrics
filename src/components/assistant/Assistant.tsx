@@ -7,7 +7,6 @@ import {
   PlayerProfile,
   PlayerProfileWithScore,
   StrategicOption,
-  CareerAverages,
 } from '@/lib/recommender/lineupRecommender';
 import { useAuth } from '@/hooks/useAuth';
 import { SparklesIcon, ScaleIcon, BoltIcon } from '@heroicons/react/24/solid';
@@ -152,7 +151,7 @@ export default function Assistant() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Strategic Options */}
-            {recommendations.map((option, index) => (
+            {recommendations.map((option) => (
               <div key={option.title} className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg">
                 <h2 className="text-2xl font-bold flex items-center gap-3 mb-2">
                     {option.title.includes('Especialistas') ? <BoltIcon className="h-7 w-7 text-red-500"/> : <ScaleIcon className="h-7 w-7 text-blue-500" />}

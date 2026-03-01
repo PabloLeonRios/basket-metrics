@@ -10,11 +10,9 @@ import * as jose from 'jose';
 import { COOKIE_NAME, EXPIRATION_TIME, MAX_AGE_COOKIE } from '@/lib/constants';
 import { getJwtSecretKey } from '@/lib/auth-secret';
 
-import { ITeam } from '@/types/definitions';
 
 // Tipo local para informar a TypeScript que esperamos la contraseña aquí
 type UserWithPassword = IUser & Document & { password?: string, failedLoginAttempts: number, lockUntil: Date | null };
-type PopulatedTeam = ITeam & { toObject: () => ITeam };
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -66,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     if (!isMatch) {
       const attempts = (user.failedLoginAttempts || 0) + 1;
-      const updateFields: any = { failedLoginAttempts: attempts };
+      const updateFields: Record<string, unknown> = { failedLoginAttempts: attempts };
 
       if (attempts >= 5) {
         // Bloquear por 10 minutos

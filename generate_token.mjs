@@ -1,5 +1,5 @@
 
-    const jose = require('jose');
+    import * as jose from "jose";
 
     async function run() {
         const secret = new TextEncoder().encode('secreto_inseguro_por_defecto_para_dev');

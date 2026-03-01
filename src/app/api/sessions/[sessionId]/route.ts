@@ -42,7 +42,7 @@ export async function PUT(
     const { sessionId } = await params;
     const body = await request.json();
 
-    const updateData: { [key: string]: any } = {};
+    const updateData: Record<string, unknown> = {};
     if (body.finishedAt) updateData.finishedAt = new Date(body.finishedAt);
     if (body.currentQuarter) updateData.currentQuarter = body.currentQuarter;
     if (body.name) updateData.name = body.name;

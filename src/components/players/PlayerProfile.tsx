@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, } from 'react';
 import ShotChart from '@/components/charts/ShotChart';
 import { IGameEvent } from '@/types/definitions';
 import { utils, writeFile } from 'xlsx';

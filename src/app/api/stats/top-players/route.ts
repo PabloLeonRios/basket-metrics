@@ -3,7 +3,6 @@ import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import PlayerGameStats from '@/lib/models/PlayerGameStats';
 import Player from '@/lib/models/Player';
-import { IPlayer } from '@/types/definitions';
 
 export async function GET(request: NextRequest) {
   await dbConnect();
