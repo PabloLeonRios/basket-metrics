@@ -107,9 +107,9 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             sessionData.teams.forEach((team: TeamData) => { team.players.slice(0, 5).forEach((p: IPlayer) => onCourtStarters.add(p._id)); });
             const subs = eventsData.filter((e: IGameEvent) => e.type === 'substitution').sort((a: IGameEvent, b: IGameEvent) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
             subs.forEach((event: IGameEvent) => {
-                const details = event.details as { playerIn: string, playerOut: string };
-                onCourtStarters.delete(details.playerOut);
-                onCourtStarters.add(details.playerIn);
+                const details = event.details as { playerIn: { _id: string, name: string }, playerOut: { _id: string, name: string } };
+                onCourtStarters.delete(details.playerOut._id);
+                onCourtStarters.add(details.playerIn._id);
             });
             onCourtStarters.forEach(id => onCourtIds.add(id));
         } else {
