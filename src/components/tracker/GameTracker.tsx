@@ -144,6 +144,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   
   const handleCourtClick = useCallback((x: number, y: number) => { if (!selectedPlayer) { toast.error('Selecciona un jugador en cancha.'); return; } if (!onCourtPlayerIds.has(selectedPlayer.id)) { toast.error('El jugador seleccionado no está en la cancha.'); return; } if (isSessionFinished) { toast.warn('Sesión finalizada.'); return; } setShotValue(isThreePointer(x, y) ? 3 : 2); setShotCoordinates({ x, y }); setShowShotModal(true); }, [selectedPlayer, isSessionFinished, onCourtPlayerIds]);
   const handleShot = (made: boolean) => { if (!shotCoordinates) return; logEvent('tiro', { made, value: shotValue, x: shotCoordinates.x, y: shotCoordinates.y }); setShowShotModal(false); setShotCoordinates(null); };
+  const handleFreeThrow = (made: boolean) => { logEvent('tiro_libre', { made }); setShowFreeThrowModal(false); };
 
   const calculateStatsForPlayer = useCallback((playerId: string) => {
     const stats = { FGM: 0, FGA: 0, '3PM': 0, '3PA': 0, FTM: 0, FTA: 0, ORB: 0, DRB: 0, AST: 0, STL: 0, BLK: 0, TOV: 0, PF: 0, PTS: 0 };
@@ -178,9 +179,9 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
             <h3 className="font-bold text-lg mb-3">Control del Partido</h3>
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-lg"><span>Cuarto:</span><span className="font-bold text-blue-500">{currentQuarter}</span></div>
-                <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center"><ArrowRightIcon className="h-5 w-5 mr-2"/>Siguiente Cuarto</Button>
-                <Button onClick={handleGetProactiveSuggestion} disabled={isSessionFinished || loadingAISuggestion} className="w-full justify-center bg-blue-600 text-white hover:bg-blue-700"><LightBulbIcon className="h-5 w-5 mr-2" />Sugerencia IA</Button>
-                <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center"><FlagIcon className="h-5 w-5 mr-2"/>Finalizar Sesión</Button>
+                <Button onClick={handleAdvanceQuarter} disabled={isSessionFinished || currentQuarter >= 10} className="w-full justify-center flex items-center"><ArrowRightIcon className="h-5 w-5 mr-2"/>Siguiente Cuarto</Button>
+                <Button onClick={handleGetProactiveSuggestion} disabled={isSessionFinished || loadingAISuggestion} className="w-full justify-center bg-blue-600 text-white hover:bg-blue-700 flex items-center"><LightBulbIcon className="h-5 w-5 mr-2" />Sugerencia IA</Button>
+                <Button onClick={handleFinishSession} disabled={isSessionFinished} variant="danger" className="w-full justify-center flex items-center"><FlagIcon className="h-5 w-5 mr-2"/>Finalizar Sesión</Button>
             </div>
           </div>
           {session.teams.map(team => (
@@ -215,14 +216,14 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <span className="text-blue-500 text-sm font-medium truncate ml-2">{selectedPlayer?.name || '...'}</span>
               </div>
               <div className="grid grid-cols-4 gap-2 text-xs sm:text-sm">
-                <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('asistencia')}>AST</Button>
-                <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('robo')}>ROBO</Button>
-                <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('tapon')}>TAP</Button>
-                <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('perdida')}>PER</Button>
-                <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('rebote_ofensivo')}>REB-O</Button>
-                <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('rebote_defensivo')}>REB-D</Button>
-                <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('falta')}>FALTA</Button>
-                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || isSessionFinished} className={getActionButtonClass('tiro_libre')}>LIBRE</Button>
+                <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>AST</Button>
+                <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>ROBO</Button>
+                <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>TAP</Button>
+                <Button onClick={() => logEvent('perdida', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>PER</Button>
+                <Button onClick={() => logEvent('rebote', { type: 'ofensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-O</Button>
+                <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>REB-D</Button>
+                <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>FALTA</Button>
+                <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished}>LIBRE</Button>
               </div>
             </div>
             <FloatingStats events={gameEvents} />
@@ -231,7 +232,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={() => {}} isSessionFinished={isSessionFinished} sessionId={sessionId} />
         </div>
       </div>
-      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} allPlayers={allPlayers} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
+      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} teamPlayers={session?.teams.find(t => t.players.some(p => p._id === playerToSubOut?._id))?.players || []} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
       {showAISuggestionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setShowAISuggestionModal(false)}>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
@@ -254,6 +255,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         </div>
       )}
       {showShotModal && ( <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20"><div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4"><h3 className="text-2xl font-bold text-center">{`Tiro de ${shotValue} Puntos`}</h3><div className="flex justify-center gap-4"><Button onClick={() => handleShot(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button><Button onClick={() => handleShot(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button></div><button onClick={() => setShowShotModal(false)} className="mt-4 text-sm text-gray-500">Cancelar</button></div></div> )}
+      {showFreeThrowModal && ( <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20"><div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl space-y-4"><h3 className="text-2xl font-bold text-center">Tiro Libre</h3><div className="flex justify-center gap-4"><Button onClick={() => handleFreeThrow(true)} variant="primary" className="bg-green-500 px-8 py-4 text-xl">Anotado</Button><Button onClick={() => handleFreeThrow(false)} variant="danger" className="px-8 py-4 text-xl">Fallado</Button></div><button onClick={() => setShowFreeThrowModal(false)} className="mt-4 text-sm text-gray-500">Cancelar</button></div></div> )}
       {showPlayerStatsModal && statsPlayer && ( <PlayerStatsModal isOpen={showPlayerStatsModal} onClose={() => setShowPlayerStatsModal(false)} player={statsPlayer.player} stats={statsPlayer.stats}/>)}
     </>
   );

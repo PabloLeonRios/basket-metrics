@@ -8,7 +8,7 @@ interface SubstitutionModalProps {
   isOpen: boolean;
   onClose: () => void;
   playerToSubOut: IPlayer | null;
-  allPlayers: IPlayer[]; 
+  teamPlayers: IPlayer[];
   onCourtPlayerIds: Set<string>; 
   onSubstitute: (playerIn: IPlayer) => void;
 }
@@ -17,14 +17,13 @@ export default function SubstitutionModal({
   isOpen,
   onClose,
   playerToSubOut,
-  allPlayers, 
+  teamPlayers,
   onCourtPlayerIds, 
   onSubstitute,
 }: SubstitutionModalProps) {
   if (!isOpen || !playerToSubOut) return null;
 
-  const eligiblePlayers = allPlayers.filter(p => 
-      p.team === playerToSubOut.team && 
+  const eligiblePlayers = teamPlayers.filter(p =>
       !onCourtPlayerIds.has(p._id)
   );
 

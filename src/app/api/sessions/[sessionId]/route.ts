@@ -56,8 +56,11 @@ export async function PUT(
     const updatedSession = await Session.findByIdAndUpdate(
       sessionId,
       { $set: updateData },
-      { new: true, runValidators: true },
-    );
+      { returnDocument: 'after', runValidators: true },
+    ).populate({
+      path: 'teams.players',
+      model: Player,
+    });
 
     if (!updatedSession) {
       return NextResponse.json({ success: false, message: 'Sesión no encontrada.' }, { status: 404 });
