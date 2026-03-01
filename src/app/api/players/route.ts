@@ -56,12 +56,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query.$or = [
+      const orConditions: any[] = [
         { name: { $regex: search, $options: 'i' } }
       ];
       if (!isNaN(Number(search))) {
-        query.$or.push({ dorsal: Number(search) });
+        orConditions.push({ dorsal: Number(search) });
       }
+      query.$or = orConditions;
     }
 
     const skip = (page - 1) * limit;
@@ -141,11 +142,11 @@ export async function POST(request: NextRequest) {
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user (direct insert with driver)...');
-    const newUserPlain: Record<string, unknown> = newUser.toObject();
+    const newUserPlain: any = newUser.toObject();
     delete newUserPlain._id;
     delete newUserPlain.__v;
     const result = await User.collection.insertOne(newUserPlain);
-    newUser._id = result.insertedId as unknown; // Assign the newly generated _id back to the Mongoose document for subsequent use
+    newUser._id = result.insertedId as any; // Assign the newly generated _id back to the Mongoose document for subsequent use
     console.log('Step 5 Complete: New user saved (direct insert). Inserted ID:', result.insertedId);
 
     console.log('Step 6: Creating new player object...');
