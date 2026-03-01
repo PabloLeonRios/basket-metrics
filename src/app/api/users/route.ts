@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     if (teamId) {
       query.team = teamId;
     }
-    
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },

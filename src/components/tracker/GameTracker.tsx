@@ -42,7 +42,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const [gameEvents, setGameEvents] = useState<IGameEvent[]>([]);
   const [coachPlayers, setCoachPlayers] = useState<IPlayer[]>([]);
   const [onCourtPlayerIds, setOnCourtPlayerIds] = useState<Set<string>>(new Set());
-  
+
   const [showSubModal, setShowSubModal] = useState(false);
   const [playerToSubOut, setPlayerToSubOut] = useState<IPlayer | null>(null);
   const [showShotModal, setShowShotModal] = useState(false);
@@ -63,6 +63,11 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   const extraPlayers = useMemo(() => {
     return coachPlayers.filter(cp => !allPlayers.some(ap => ap._id === cp._id));
   }, [coachPlayers, allPlayers]);
+
+  const filteredExtraPlayers = useMemo(() => {
+    if (!playerToSubOut) return [];
+    return extraPlayers.filter(p => !!p.isRival === !!playerToSubOut.isRival);
+  }, [extraPlayers, playerToSubOut]);
 
   const teamScores = useMemo(() => {
     const scores: Record<string, number> = {};
@@ -170,10 +175,10 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
     if(showSubModal) { setShowSubModal(false); setPlayerToSubOut(null); }
     if(showAISuggestionModal) setShowAISuggestionModal(false);
   };
-  
+
   const handleAdvanceQuarter = () => { if (!isSessionFinished && currentQuarter < 10 && confirm(`¿Avanzar al cuarto ${currentQuarter + 1}?`)) { handleUpdateSession({ currentQuarter: currentQuarter + 1 }); } };
   const handleFinishSession = async () => { if (!isSessionFinished && confirm('¿Finalizar esta sesión?')) { const updated = await handleUpdateSession({ finishedAt: new Date().toISOString() }); if (updated) { toast.success('Sesión finalizada.'); router.push(`/panel/dashboard/${sessionId}`); } } };
-  
+
   const handleGetProactiveSuggestion = async () => {
     setLoadingAISuggestion(true); setShowAISuggestionModal(true); setAiSuggestion(null);
     try {
@@ -187,7 +192,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
         setAiSuggestion(data.data);
     } catch (err) { toast.error(err instanceof Error ? err.message : 'No se pudo obtener la sugerencia.'); setShowAISuggestionModal(false); } finally { setLoadingAISuggestion(false); }
   };
-  
+
   const handleCourtClick = useCallback((x: number, y: number) => { if (!selectedPlayer) { toast.error('Selecciona un jugador en cancha.'); return; } if (!onCourtPlayerIds.has(selectedPlayer.id)) { toast.error('El jugador seleccionado no está en la cancha.'); return; } if (isSessionFinished) { toast.warn('Sesión finalizada.'); return; } setShotValue(isThreePointer(x, y) ? 3 : 2); setShotCoordinates({ x, y }); setShowShotModal(true); }, [selectedPlayer, isSessionFinished, onCourtPlayerIds]);
   const handleShot = (made: boolean) => { if (!shotCoordinates) return; logEvent('tiro', { made, value: shotValue, x: shotCoordinates.x, y: shotCoordinates.y }); setShowShotModal(false); setShotCoordinates(null); };
   const handleFreeThrow = (made: boolean) => { logEvent('tiro_libre', { made }); setShowFreeThrowModal(false); };
@@ -216,7 +221,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   if (loading) return <div className="p-8 text-center">Cargando tracker...</div>;
   if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
   if (!session) return <div className="p-8 text-center">No se encontraron datos de la sesión.</div>;
-  
+
   return (
     <>
       <div className="flex flex-col lg:flex-row gap-4 p-4">
@@ -321,7 +326,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
           <GameLog events={gameEvents} playerIdToName={playerIdToName} onUndo={() => {}} isSessionFinished={isSessionFinished} sessionId={sessionId} />
         </div>
       </div>
-      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} teamPlayers={session?.teams.find(t => t.players.some(p => p._id === playerToSubOut?._id))?.players || []} extraPlayers={extraPlayers} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
+      <SubstitutionModal isOpen={showSubModal} onClose={() => setShowSubModal(false)} playerToSubOut={playerToSubOut} teamPlayers={session?.teams.find(t => t.players.some(p => p._id === playerToSubOut?._id))?.players || []} extraPlayers={filteredExtraPlayers} onCourtPlayerIds={onCourtPlayerIds} onSubstitute={(playerIn) => handleSubstitution(playerToSubOut!, playerIn)} />
       {showAISuggestionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setShowAISuggestionModal(false)}>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>

@@ -120,7 +120,7 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
         setAverages(statsData.careerAverages);
         setGames(statsData.gameByGameStats);
         setGlobalValue(statsData.globalValue);
-        
+
         if (!eventsResponse.ok) throw new Error('No se pudieron cargar los eventos de tiro.');
         const { data: eventsData } = await eventsResponse.json();
         const shots = eventsData
@@ -165,9 +165,9 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
     <div className="space-y-8">
       {/* Tarjetas de Promedios */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard 
-          title="Valor Global" 
-          value={globalValue || '--'} 
+        <StatCard
+          title="Valor Global"
+          value={globalValue || '--'}
           className="bg-blue-100 dark:bg-blue-900"
         />
         <StatCard title="Partidos Jugados" value={averages?.totalGames || 0} />

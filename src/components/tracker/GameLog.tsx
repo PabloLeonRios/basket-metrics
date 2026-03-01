@@ -43,11 +43,11 @@ const formatEventDetails = (event: IGameEvent): string => {
 const getEventRowClass = (event: IGameEvent): string => {
     const baseClass = "p-2 rounded-md text-sm";
     const colorClass = "border-l-4";
-  
+
     switch (event.type) {
       case 'tiro':
       case 'tiro_libre':
-        return event.details.made 
+        return event.details.made
           ? `${baseClass} bg-green-50 dark:bg-green-900/50 ${colorClass} border-green-500`
           : `${baseClass} bg-red-50 dark:bg-red-900/50 ${colorClass} border-red-500`;
       case 'asistencia':

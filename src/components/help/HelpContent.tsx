@@ -59,43 +59,43 @@ export default function HelpContent() {
           Estas métricas ofrecen una visión más profunda del rendimiento de un jugador o equipo, más allá de las estadísticas tradicionales.
         </p>
 
-        <Formula 
+        <Formula
           name="Idoneidad (Suitability Score)"
           formula="Σ (Puntos por Tag) + Bonus"
           explanation="Puntuación generada por la IA para una situación de partido. Suma puntos por cada 'Tag' (perfil) que un jugador posee, y aplica un bonus por estadísticas de carrera. El resultado se normaliza en una escala de 1 a 10 para indicar qué tan adecuado es el jugador."
         />
-        
-        <Formula 
+
+        <Formula
           name="eFG% (Effective Field Goal Percentage)"
           formula="(FGM + 0.5 * 3PM) / FGA"
           explanation="Ajusta el porcentaje de tiros de campo para darle el valor adicional a los triples. Un triple anotado vale 1.5 veces un tiro de dos puntos en esta métrica, reflejando su impacto real en el marcador."
         />
 
-        <Formula 
+        <Formula
           name="TS% (True Shooting Percentage)"
           formula="Puntos / (2 * (FGA + 0.44 * FTA))"
           explanation="Mide la eficiencia de un jugador al anotar, teniendo en cuenta tiros de campo, triples y tiros libres. Es una de las mejores métricas para evaluar la eficiencia ofensiva global de un jugador."
         />
-        
-        <Formula 
+
+        <Formula
           name="Game Score (Hollinger)"
           formula="(PTS) + (0.4*FGM) - (0.7*FGA) - (0.4*(FTA-FTM)) + (0.7*OREB) + (0.3*DREB) + STL + (0.7*AST) + (0.7*BLK) - (0.4*PF) - TOV"
           explanation="Una métrica creada por John Hollinger para dar una valoración en un solo número del rendimiento de un jugador en un partido específico. Valora positivamente las acciones ofensivas y defensivas eficientes y resta las ineficiencias."
         />
 
-        <Formula 
+        <Formula
           name="Posesiones (Estimación de Dean Oliver)"
           formula="FGA - OREB + TOV + (0.44 * FTA)"
           explanation="Una estimación del número de posesiones que un equipo o jugador ha utilizado. Es la base para calcular los Ratings Ofensivo y Defensivo, ya que permite analizar la eficiencia por cada 100 posesiones."
         />
 
-        <Formula 
+        <Formula
           name="Rating Ofensivo (ORtg)"
           formula="(Puntos / Posesiones) * 100"
           explanation="Puntos anotados por un equipo o jugador por cada 100 posesiones. Mide la eficiencia ofensiva independientemente del ritmo de juego."
         />
-        
-        <Formula 
+
+        <Formula
           name="Rating Defensivo (DRtg)"
           formula="(Puntos Oponente / Posesiones Oponente) * 100"
           explanation="Puntos recibidos por un equipo o jugador por cada 100 posesiones. Mide la eficiencia defensiva."

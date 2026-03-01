@@ -30,7 +30,7 @@ export default function Assistant() {
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Set<string>>(new Set());
   const [situation, setSituation] = useState<GameSituation>('BALANCED');
-  
+
   // Updated states for new data structure
   const [recommendations, setRecommendations] = useState<StrategicOption[]>([]);
   const [allProfiles, setAllProfiles] = useState<PlayerProfileWithScore[]>([]);
@@ -150,7 +150,7 @@ export default function Assistant() {
       {recommendations.length > 0 && (
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
+
             {/* Strategic Options */}
             {recommendations.map((option, index) => (
               <div key={option.title} className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg">

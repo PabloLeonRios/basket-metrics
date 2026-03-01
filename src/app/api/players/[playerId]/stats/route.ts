@@ -107,11 +107,11 @@ export async function GET(
         if (teamAverages.length > 0 && teamAverages[0].teamAvgGameScore > 0) {
           const teamAvgGameScore = teamAverages[0].teamAvgGameScore;
           const playerAvgGameScore = playerCareerAverages.avgGameScore;
-          
+
           // Fórmula de normalización: 50 es la media. Un jugador promedio tendrá 50.
           // El valor se escala para que esté en un rango visible.
           let calculatedValue = (playerAvgGameScore / teamAvgGameScore) * 50;
-          
+
           // Limitar el valor entre 1 y 99 para mantenerlo en un rango razonable.
           calculatedValue = Math.max(1, Math.min(calculatedValue, 99));
           globalValue = Math.round(calculatedValue);

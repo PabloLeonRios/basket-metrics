@@ -61,7 +61,7 @@ export default function LivePlayerStatsModal({
           break;
       }
     });
-    
+
     const eFG = fga > 0 ? (fgm + 0.5 * (threePm)) / fga : 0;
     const tsAttempts = fga + 0.44 * fta;
     const TS = tsAttempts > 0 ? points / (2 * tsAttempts) : 0;

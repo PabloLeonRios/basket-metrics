@@ -200,7 +200,7 @@ export function recommendLineups(
       reasoning: 'Esta opción sacrifica un poco de especialización pura a cambio de mayor versatilidad, añadiendo perfiles de defensa y organización para un mejor control del juego.',
       xFactor: balancedXFactor,
   };
-  
+
   const isLineupSame = JSON.stringify(optionA.lineup.map(p => p.playerId).sort()) === JSON.stringify(optionB.lineup.map(p => p.playerId).sort());
 
   return {
@@ -470,6 +470,6 @@ function findBestReplacement(playerOut: PlayerProfile, bench: PlayerProfile[]): 
     if (!bestFit && bench.length > 0) {
         return bench[0];
     }
-    
+
     return bestFit;
 }

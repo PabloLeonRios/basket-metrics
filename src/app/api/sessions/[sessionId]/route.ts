@@ -107,4 +107,3 @@ export async function DELETE(
     return NextResponse.json({ success: false, message: 'Error al eliminar la sesión', error: errorMessage }, { status: 500 });
   }
 }
-

@@ -47,7 +47,7 @@ export default function PlayerStatsModal({ player, stats, isOpen, onClose }: Pla
           <h2 className="text-2xl font-bold">{player.name}</h2>
           <p className="text-gray-500 dark:text-gray-400">#{player.dorsal}</p>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-x-8 gap-y-2">
             <StatItem label="Puntos" value={stats.PTS} />
             <StatItem label="Asistencias" value={stats.AST} />

@@ -30,7 +30,7 @@ export default function DashboardPage() {
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Panel de Entrenador</h1>
                 <p className="mt-1 text-lg text-gray-600 dark:text-gray-400">Bienvenido de nuevo, {user.name}.</p>
             </div>
-            
+
             <TopPlayers />
 
             <div className="space-y-4">

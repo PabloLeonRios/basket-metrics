@@ -48,7 +48,7 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
         const { data: playersData } = await playersRes.json();
         const { data: sessionData } = await sessionRes.json();
         const { data: eventsData } = await eventsRes.json();
-        
+
         setAllPlayers(playersData);
         setSession(sessionData);
         setHasGameEvents(eventsData.length > 0);
@@ -93,10 +93,10 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
       setTeamAPlayers((prev) => { const newSet = new Set(prev); newSet.delete(playerId); return newSet; });
     }
   };
-  
+
   const handleSaveChanges = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     const teams = [{ name: teamAName, players: Array.from(teamAPlayers) }];
     if (sessionType === 'Partido') {
       teams.push({ name: teamBName, players: Array.from(teamBPlayers) });
@@ -134,7 +134,7 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
       }
     }
   };
-  
+
   const inputStyles = 'w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500';
   const labelStyles = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
 

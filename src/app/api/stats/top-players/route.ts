@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         { status: 400 },
       );
     }
-    
+
     // Find all players for the given coach to ensure we only consider them
     const coachPlayers = await Player.find({ coach: coachId, isRival: { $ne: true } }).select('_id');
     const coachPlayerIds = coachPlayers.map(p => p._id);

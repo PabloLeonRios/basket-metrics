@@ -77,7 +77,7 @@ export default function UserList() {
             toast.error('No puedes desactivar tu propia cuenta.');
             return;
         }
-        
+
         try {
             const response = await fetch(`/api/users/${userId}`, {
                 method: 'PUT',
@@ -93,7 +93,7 @@ export default function UserList() {
             toast.error(err instanceof Error ? err.message : 'Error al actualizar.');
         }
     };
-    
+
     if (authLoading || loading) return <div className="p-8 text-center">Cargando...</div>;
     if (error) return <div className="p-8 text-red-500">{error}</div>;
 

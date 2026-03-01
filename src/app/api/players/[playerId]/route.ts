@@ -58,7 +58,7 @@ export async function PUT(
         { status: 404 },
       );
     }
-    
+
     // Also update the associated User's name if it has changed
     if (name) {
         await User.findByIdAndUpdate(updatedPlayer.user, { name });

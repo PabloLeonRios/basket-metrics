@@ -3,13 +3,13 @@
 // --- Constants ---
 // All dimensions in meters, based on FIBA half-court
 export const COURT_WIDTH_M = 15;
-export const COURT_HEIGHT_M = 14; 
+export const COURT_HEIGHT_M = 14;
 export const HOOP_RADIUS_M = 0.225;
 export const HOOP_CENTER_X_M = COURT_WIDTH_M / 2; // 7.5m
 export const HOOP_CENTER_Y_M = 1.575; // Distance from baseline
 export const BACKBOARD_WIDTH_M = 1.8;
 export const BACKBOARD_Y_M = 1.2; // Distance from baseline
-export const THREE_POINT_RADIUS_M = 6.75; 
+export const THREE_POINT_RADIUS_M = 6.75;
 export const THREE_POINT_SIDE_DIST_M = 0.9;
 export const KEY_WIDTH_M = 4.9;
 export const KEY_HEIGHT_M = 5.8;
@@ -50,10 +50,10 @@ export function isThreePointer(x_svg: number, y_svg: number): boolean {
   if (y_svg < scale(BACKBOARD_Y_M)) {
     return false;
   }
-  
+
   // Check if it's a 2-pointer by being inside the 3-point line
   const isInsideVerticalLines = x_svg >= threePointSideLineXLeft_svg && x_svg <= threePointSideLineXRight_svg;
-  
+
   if (y_svg < threePointArcStartY_svg) {
     // If we are in the 'corner' area, a shot is a 2-pointer if it's between the vertical lines
     if (isInsideVerticalLines) {
