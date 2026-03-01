@@ -85,12 +85,6 @@ export async function GET(request: NextRequest) {
            ]
          });
       }
-
-      if (!showRivals) {
-        andConditions.push({
-           isRival: { $ne: true }
-        });
-      }
     } else if (teamType === 'rivals') {
       const orConditionsRivals: Record<string, unknown>[] = [];
       if (userTeamName) {
@@ -108,6 +102,12 @@ export async function GET(request: NextRequest) {
       });
 
       query.$or = orConditionsRivals;
+    }
+
+    if (teamType !== 'rivals' && !showRivals) {
+      andConditions.push({
+         isRival: { $ne: true }
+      });
     }
 
     if (andConditions.length > 0) {
