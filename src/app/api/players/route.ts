@@ -28,12 +28,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Se requiere el ID del entrenador (coachId) para usuarios no administradores.',
+          message:
+            'Se requiere el ID del entrenador (coachId) para usuarios no administradores.',
         },
         { status: 400 },
       );
     }
-    
+
     const teamType = searchParams.get('teamType');
     const userTeamName = searchParams.get('userTeamName');
 
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       const searchOr: Record<string, unknown>[] = [
-        { name: { $regex: search, $options: 'i' } }
+        { name: { $regex: search, $options: 'i' } },
       ];
       if (!isNaN(Number(search))) {
         searchOr.push({ dorsal: Number(search) });
@@ -73,32 +74,28 @@ export async function GET(request: NextRequest) {
             { team: userTeamName },
             { team: { $exists: false } },
             { team: null },
-            { team: '' }
-          ]
+            { team: '' },
+          ],
         });
       } else {
-         andConditions.push({
-           $or: [
-             { team: { $exists: false } },
-             { team: null },
-             { team: '' }
-           ]
-         });
+        andConditions.push({
+          $or: [{ team: { $exists: false } }, { team: null }, { team: '' }],
+        });
       }
     } else if (teamType === 'rivals') {
       const orConditionsRivals: Record<string, unknown>[] = [];
       if (userTeamName) {
         orConditionsRivals.push({
-          team: { $ne: userTeamName, $exists: true, $nin: [null, ''] }
+          team: { $ne: userTeamName, $exists: true, $nin: [null, ''] },
         });
       } else {
         orConditionsRivals.push({
-          team: { $exists: true, $nin: [null, ''] }
+          team: { $exists: true, $nin: [null, ''] },
         });
       }
 
       orConditionsRivals.push({
-         isRival: true
+        isRival: true,
       });
 
       query.$or = orConditionsRivals;
@@ -106,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     if (teamType !== 'rivals' && !showRivals) {
       andConditions.push({
-         isRival: { $ne: true }
+        isRival: { $ne: true },
       });
     }
 
@@ -150,7 +147,8 @@ export async function POST(request: NextRequest) {
   console.log('--- PLAYER CREATION REQUEST START ---');
   await dbConnect();
   try {
-    const { name, dorsal, position, team, coach, isRival } = await request.json();
+    const { name, dorsal, position, team, coach, isRival } =
+      await request.json();
     console.log('Step 1: Payload received:', { name, team, coach, isRival });
 
     if (!name || !coach) {
@@ -168,12 +166,15 @@ export async function POST(request: NextRequest) {
     const placeholderPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
     console.log('Step 2 Complete: Password hashed.');
-    
+
     console.log('Step 3: Finding coach user...');
     const coachUser = await User.findById(coach).select('team');
     if (!coachUser) {
-        console.error('Coach not found!');
-        return NextResponse.json({ success: false, message: 'Entrenador no encontrado.' }, { status: 404 });
+      console.error('Coach not found!');
+      return NextResponse.json(
+        { success: false, message: 'Entrenador no encontrado.' },
+        { status: 404 },
+      );
     }
     console.log('Step 3 Complete: Coach found.');
 
@@ -191,12 +192,16 @@ export async function POST(request: NextRequest) {
     console.log('Step 4 Complete: User object created.');
 
     console.log('Step 5: Saving new user (direct insert with driver)...');
-    const newUserPlain: Record<string, unknown> = newUser.toObject() as unknown as Record<string, unknown>;
+    const newUserPlain: Record<string, unknown> =
+      newUser.toObject() as unknown as Record<string, unknown>;
     delete newUserPlain._id;
     delete newUserPlain.__v;
     const result = await User.collection.insertOne(newUserPlain);
     newUser._id = result.insertedId as unknown as typeof newUser._id; // Assign the newly generated _id back to the Mongoose document for subsequent use
-    console.log('Step 5 Complete: New user saved (direct insert). Inserted ID:', result.insertedId);
+    console.log(
+      'Step 5 Complete: New user saved (direct insert). Inserted ID:',
+      result.insertedId,
+    );
 
     console.log('Step 6: Creating new player object...');
     const newPlayer = new Player({

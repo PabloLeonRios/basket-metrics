@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Se requiere el ID del entrenador (coachId) para usuarios no administradores.',
+          message:
+            'Se requiere el ID del entrenador (coachId) para usuarios no administradores.',
         },
         { status: 400 },
       );

@@ -24,31 +24,43 @@ export async function GET(
 
     // --- CÁLCULO JUST-IN-TIME ---
     // 1. Encontrar todas las sesiones en las que participó el jugador.
-    const playerSessions = await Session.find({ "teams.players": playerId }).select('_id');
-    const playerSessionIds = playerSessions.map(s => s._id);
+    const playerSessions = await Session.find({
+      'teams.players': playerId,
+    }).select('_id');
+    const playerSessionIds = playerSessions.map((s) => s._id);
 
     // 2. Encontrar todas las stats ya calculadas para este jugador.
-    const existingStats = await PlayerGameStats.find({ player: playerId }).select('session');
-    const calculatedSessionIds = new Set(existingStats.map(stat => stat.session.toString()));
+    const existingStats = await PlayerGameStats.find({
+      player: playerId,
+    }).select('session');
+    const calculatedSessionIds = new Set(
+      existingStats.map((stat) => stat.session.toString()),
+    );
 
     // 3. Determinar qué sesiones necesitan ser calculadas.
-    const sessionsToCalculate = playerSessionIds.filter(id => !calculatedSessionIds.has(id.toString()));
+    const sessionsToCalculate = playerSessionIds.filter(
+      (id) => !calculatedSessionIds.has(id.toString()),
+    );
 
     // 4. Calcular las stats para las sesiones pendientes.
     if (sessionsToCalculate.length > 0) {
-      console.log(`Calculando stats para ${sessionsToCalculate.length} sesiones pendientes para el jugador ${playerId}...`);
+      console.log(
+        `Calculando stats para ${sessionsToCalculate.length} sesiones pendientes para el jugador ${playerId}...`,
+      );
       for (const sessionId of sessionsToCalculate) {
         // Envolvemos en try/catch para que un error en una sesión no detenga todo
         try {
           await calculateStatsForSession(sessionId.toString());
         } catch (calcError) {
-          console.error(`Error calculando stats para la sesión ${sessionId}:`, calcError);
+          console.error(
+            `Error calculando stats para la sesión ${sessionId}:`,
+            calcError,
+          );
         }
       }
       console.log('Cálculo de sesiones pendientes finalizado.');
     }
     // --- FIN CÁLCULO JUST-IN-TIME ---
-
 
     // 1. Obtener todas las estadísticas partido a partido del jugador
     const gameByGameStats = await PlayerGameStats.find({
@@ -90,8 +102,11 @@ export async function GET(
       const player = await Player.findById(playerId).select('team isRival');
       if (player && player.team && !player.isRival) {
         // 4. Encontrar a todos los jugadores del mismo equipo
-        const teamPlayers = await Player.find({ team: player.team, isRival: { $ne: true } }).select('_id');
-        const teamPlayerIds = teamPlayers.map(p => p._id);
+        const teamPlayers = await Player.find({
+          team: player.team,
+          isRival: { $ne: true },
+        }).select('_id');
+        const teamPlayerIds = teamPlayers.map((p) => p._id);
 
         // 5. Calcular el GameScore promedio para todo el equipo
         const teamAverages = await PlayerGameStats.aggregate([
@@ -107,11 +122,11 @@ export async function GET(
         if (teamAverages.length > 0 && teamAverages[0].teamAvgGameScore > 0) {
           const teamAvgGameScore = teamAverages[0].teamAvgGameScore;
           const playerAvgGameScore = playerCareerAverages.avgGameScore;
-          
+
           // Fórmula de normalización: 50 es la media. Un jugador promedio tendrá 50.
           // El valor se escala para que esté en un rango visible.
           let calculatedValue = (playerAvgGameScore / teamAvgGameScore) * 50;
-          
+
           // Limitar el valor entre 1 y 99 para mantenerlo en un rango razonable.
           calculatedValue = Math.max(1, Math.min(calculatedValue, 99));
           globalValue = Math.round(calculatedValue);

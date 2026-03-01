@@ -195,7 +195,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await User.updateMany({ team: new mongoose.Types.ObjectId(teamId) as any }, { $unset: { team: '' } });
+    await User.updateMany(
+      { team: new mongoose.Types.ObjectId(teamId) as any },
+      { $unset: { team: '' } },
+    );
 
     return NextResponse.json(
       { success: true, message: 'Equipo eliminado correctamente.' },

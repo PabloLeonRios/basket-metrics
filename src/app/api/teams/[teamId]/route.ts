@@ -113,7 +113,10 @@ export async function DELETE(
     }
 
     // Adicionalmente, desasignar este equipo de cualquier usuario que lo tuviera
-    await User.updateMany({ team: new Types.ObjectId(teamId) as any }, { $unset: { team: '' } });
+    await User.updateMany(
+      { team: new Types.ObjectId(teamId) as any },
+      { $unset: { team: '' } },
+    );
 
     return NextResponse.json(
       { success: true, message: 'Equipo eliminado correctamente.' },

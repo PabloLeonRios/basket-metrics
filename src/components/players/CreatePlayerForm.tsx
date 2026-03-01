@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 export default function CreatePlayerForm() {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   // Form state
   const [name, setName] = useState('');
   const [dorsal, setDorsal] = useState('');
@@ -20,23 +20,24 @@ export default function CreatePlayerForm() {
   const [isRival, setIsRival] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const labelStyles = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  const labelStyles =
+    'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!user) {
-        toast.error('Debes estar autenticado para crear un jugador.');
-        return;
+      toast.error('Debes estar autenticado para crear un jugador.');
+      return;
     }
     setIsSubmitting(true);
     try {
-      const newPlayerData = { 
-        name, 
-        dorsal: Number(dorsal), 
-        position, 
+      const newPlayerData = {
+        name,
+        dorsal: Number(dorsal),
+        position,
         team: team || (isRival ? 'Equipo Rival' : user.team?.name),
         coach: user._id,
-        isRival
+        isRival,
       };
       const response = await fetch('/api/players', {
         method: 'POST',
@@ -48,16 +49,17 @@ export default function CreatePlayerForm() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'No se pudo crear el jugador.');
       }
-      
+
       toast.success('Jugador creado con éxito. Redirigiendo a la lista...');
-      
+
       // Redirect to the player list page
       router.push('/panel/players');
-      
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al crear el jugador.');
+      toast.error(
+        err instanceof Error ? err.message : 'Error al crear el jugador.',
+      );
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -67,16 +69,42 @@ export default function CreatePlayerForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label htmlFor="name" className={labelStyles}>Nombre del Jugador</label>
-            <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Michael Jordan" />
+            <label htmlFor="name" className={labelStyles}>
+              Nombre del Jugador
+            </label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Ej: Michael Jordan"
+            />
           </div>
           <div>
-            <label htmlFor="dorsal" className={labelStyles}>Dorsal</label>
-            <Input id="dorsal" type="number" value={dorsal} onChange={(e) => setDorsal(e.target.value)} placeholder="Ej: 23" />
+            <label htmlFor="dorsal" className={labelStyles}>
+              Dorsal
+            </label>
+            <Input
+              id="dorsal"
+              type="number"
+              value={dorsal}
+              onChange={(e) => setDorsal(e.target.value)}
+              placeholder="Ej: 23"
+            />
           </div>
           <div>
-            <label htmlFor="position" className={labelStyles}>Posición</label>
-            <Input id="position" type="text" list="position-options" value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Escolta" />
+            <label htmlFor="position" className={labelStyles}>
+              Posición
+            </label>
+            <Input
+              id="position"
+              type="text"
+              list="position-options"
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
+              placeholder="Ej: Escolta"
+            />
             <datalist id="position-options">
               <option value="Base" />
               <option value="Escolta" />
@@ -86,14 +114,36 @@ export default function CreatePlayerForm() {
             </datalist>
           </div>
           <div>
-            <label htmlFor="team" className={labelStyles}>Equipo (Opcional)</label>
-            <Input id="team" type="text" value={team} onChange={(e) => setTeam(e.target.value)} placeholder={isRival ? "Ej: Equipo Rival" : (user?.team?.name || "Ej: Mi Equipo")} />
+            <label htmlFor="team" className={labelStyles}>
+              Equipo (Opcional)
+            </label>
+            <Input
+              id="team"
+              type="text"
+              value={team}
+              onChange={(e) => setTeam(e.target.value)}
+              placeholder={
+                isRival
+                  ? 'Ej: Equipo Rival'
+                  : user?.team?.name || 'Ej: Mi Equipo'
+              }
+            />
           </div>
         </div>
         <div className="py-2">
-            <Checkbox label="Es jugador rival" checked={isRival} onChange={(e) => setIsRival(e.target.checked)} />
+          <Checkbox
+            label="Es jugador rival"
+            checked={isRival}
+            onChange={(e) => setIsRival(e.target.checked)}
+          />
         </div>
-        <Button type="submit" disabled={isSubmitting} variant="primary" size="md" className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          variant="primary"
+          size="md"
+          className="w-full sm:w-auto"
+        >
           {isSubmitting ? 'Creando...' : 'Guardar Jugador'}
         </Button>
       </form>
