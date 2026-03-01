@@ -1,0 +1,32 @@
+
+> basket-metrics@0.1.0 dev
+> next dev -H 0.0.0.0
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://0.0.0.0:3000
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1640ms
+○ Compiling /login ...
+ GET /login 200 in 4.8s (compile: 4.6s, render: 267ms)
+ GET /login 200 in 97ms (compile: 10ms, render: 87ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /login 200 in 61ms (compile: 4ms, render: 57ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /login 200 in 62ms (compile: 4ms, render: 58ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /login 200 in 55ms (compile: 4ms, render: 52ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /panel/tracker/mock_session_id 200 in 3.4s (compile: 3.2s, proxy.ts: 9ms, render: 158ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /api/auth/me 200 in 739ms (compile: 700ms, render: 40ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /panel/tracker/mock_session_id 200 in 117ms (compile: 37ms, proxy.ts: 8ms, render: 72ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /api/auth/me 200 in 15ms (compile: 5ms, render: 10ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /panel/tracker/mock_session_id 200 in 136ms (compile: 34ms, proxy.ts: 6ms, render: 96ms)
+Advertencia: JWT_SECRET no está definido, usando valor por defecto inseguro.
+ GET /api/auth/me 200 in 12ms (compile: 4ms, render: 8ms)
