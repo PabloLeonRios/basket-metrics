@@ -74,6 +74,9 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
         <rect width="100%" height="100%" fill="url(#lighting)" pointerEvents="none" />
 
         <g stroke="#FFFFFF" strokeWidth="0.4" fill="none" className="opacity-90">
+          {/* 2-Point Zone Fill (inside the 3-point line) */}
+          <path d={threePointLinePath} fill="#D4A373" fillOpacity="0.5" strokeWidth="1" />
+
           {/* Paint area (Key) */}
           <rect
             x={keyX_svg}
@@ -84,8 +87,6 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
             fillOpacity="0.8"
             strokeWidth="0.4"
           />
-          {/* Three-point line */}
-          <path d={threePointLinePath} strokeWidth="0.5" />
 
           {/* Free throw circle (top half solid) */}
           <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} />
