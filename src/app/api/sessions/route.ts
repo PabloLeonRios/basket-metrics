@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (coachId) {
       query.coach = coachId;
     }

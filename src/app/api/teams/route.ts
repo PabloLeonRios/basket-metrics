@@ -1,5 +1,4 @@
 // src/app/api/teams/route.ts
-import mongoose from 'mongoose';
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Team from '@/lib/models/Team';
@@ -68,7 +67,7 @@ export async function POST(request: NextRequest) {
       error instanceof Error &&
       error.name === 'MongoServerError' &&
       'code' in error &&
-      (error as { code: unknown }).code === 11000
+      (error as unknown as {code: number}).code === 11000
     ) {
       return NextResponse.json(
         { success: false, message: 'Ya existe un equipo con ese nombre.' },
@@ -142,7 +141,7 @@ export async function PUT(request: NextRequest) {
       error instanceof Error &&
       error.name === 'MongoServerError' &&
       'code' in error &&
-      (error as { code: unknown }).code === 11000
+      (error as unknown as {code: number}).code === 11000
     ) {
       return NextResponse.json(
         { success: false, message: 'Ya existe un equipo con ese nombre.' },
@@ -195,7 +194,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await User.updateMany({ team: new mongoose.Types.ObjectId(teamId) as any }, { $unset: { team: '' } });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await User.updateMany({ team: teamId }, { $unset: { team: '' } });
 
     return NextResponse.json(
       { success: true, message: 'Equipo eliminado correctamente.' },

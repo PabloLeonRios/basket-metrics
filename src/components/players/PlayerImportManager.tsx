@@ -218,7 +218,7 @@ export default function PlayerImportManager() {
         <h2 className="text-xl font-bold mb-4">Paso 2: Subir Archivo</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
           Una vez hayas completado la plantilla (máximo 30 jugadores), súbela aquí.
-          <strong> Nota:</strong> Los jugadores importados se crearán por defecto en estado "Desactivado".
+          <strong> Nota:</strong> Los jugadores importados se crearán por defecto en estado &quot;Desactivado&quot;.
         </p>
         <form onSubmit={handleImport} className="space-y-4">
           <div className="flex items-center justify-center w-full">

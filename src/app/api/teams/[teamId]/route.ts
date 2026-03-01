@@ -1,5 +1,4 @@
 // src/app/api/teams/[teamId]/route.ts
-import mongoose, { Types } from 'mongoose';
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Team from '@/lib/models/Team';
@@ -59,7 +58,7 @@ export async function PUT(
     if (
       error instanceof Error &&
       error.name === 'MongoServerError' &&
-      (error as any).code === 11000
+      (error as unknown as {code: number}).code === 11000
     ) {
       return NextResponse.json(
         { success: false, message: 'Ya existe un equipo con ese nombre.' },
@@ -113,7 +112,9 @@ export async function DELETE(
     }
 
     // Adicionalmente, desasignar este equipo de cualquier usuario que lo tuviera
-    await User.updateMany({ team: new Types.ObjectId(teamId) as any }, { $unset: { team: '' } });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    await User.updateMany({ team: teamId }, { $unset: { team: '' } });
 
     return NextResponse.json(
       { success: true, message: 'Equipo eliminado correctamente.' },

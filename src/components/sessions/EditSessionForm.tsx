@@ -15,6 +15,7 @@ interface EditSessionFormProps {
 export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [session, setSession] = useState<ISession | null>(null);
   const [allPlayers, setAllPlayers] = useState<IPlayer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,11 +58,11 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
         setSessionType(sessionData.sessionType);
         if (sessionData.teams[0]) {
           setTeamAName(sessionData.teams[0].name);
-          setTeamAPlayers(new Set(sessionData.teams[0].players.map((p: any) => p._id || p)));
+          setTeamAPlayers(new Set(sessionData.teams[0].players.map((p: { _id?: string }) => p._id || p)));
         }
         if (sessionData.teams[1]) {
           setTeamBName(sessionData.teams[1].name);
-          setTeamBPlayers(new Set(sessionData.teams[1].players.map((p: any) => p._id || p)));
+          setTeamBPlayers(new Set(sessionData.teams[1].players.map((p: { _id?: string }) => p._id || p)));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -80,14 +81,14 @@ export default function EditSessionForm({ sessionId }: EditSessionFormProps) {
     if (team === 'A') {
       setTeamAPlayers((prev) => {
         const newSet = new Set(prev);
-        newSet.has(playerId) ? newSet.delete(playerId) : newSet.add(playerId);
+        if (newSet.has(playerId)) { newSet.delete(playerId); } else { newSet.add(playerId); }
         return newSet;
       });
       if (isPartido) setTeamBPlayers((prev) => { const newSet = new Set(prev); newSet.delete(playerId); return newSet; });
     } else if (isPartido && team === 'B') {
       setTeamBPlayers((prev) => {
         const newSet = new Set(prev);
-        newSet.has(playerId) ? newSet.delete(playerId) : newSet.add(playerId);
+        if (newSet.has(playerId)) { newSet.delete(playerId); } else { newSet.add(playerId); }
         return newSet;
       });
       setTeamAPlayers((prev) => { const newSet = new Set(prev); newSet.delete(playerId); return newSet; });

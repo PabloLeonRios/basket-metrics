@@ -4,7 +4,7 @@
 import { IPlayer } from '@/types/definitions';
 import Button from '@/components/ui/Button';
 
-interface PlayerStats {
+export interface PlayerStats {
     FGM: number;
     FGA: number;
     '3PM': number;
@@ -21,7 +21,7 @@ interface PlayerStats {
     PTS: number;
 }
 
-interface PlayerStatsModalProps {
+export interface PlayerStatsModalProps {
   player: IPlayer | null;
   stats: PlayerStats;
   isOpen: boolean;
