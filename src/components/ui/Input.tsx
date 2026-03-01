@@ -2,7 +2,7 @@ import React from 'react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   // Opcional: para manejar estados de error visualmente
-  error?: boolean; 
+  error?: boolean;
   // Opcional: variante de tamaño si se necesita
   inputSize?: 'sm' | 'md' | 'lg';
 }
@@ -14,7 +14,7 @@ const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   const baseStyles = 'w-full rounded-lg border focus:outline-none transition-colors duration-150 ease-in-out';
-  
+
   const sizeStyles = {
     sm: 'px-2 py-1 text-sm',
     md: 'px-3 py-2 text-base',

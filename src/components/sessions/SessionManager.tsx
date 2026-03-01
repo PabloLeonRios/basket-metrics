@@ -78,13 +78,13 @@ export default function SessionManager() {
         setLoading(true);
         const isAdmin = user.role === 'admin';
         const statusParam = activeTab === 'open' ? 'open' : 'closed';
-        
+
         let sessionsUrl = `/api/sessions?page=${currentPage}&limit=${sessionsPerPage}&status=${statusParam}`;
 
         if (!isAdmin) {
           sessionsUrl += `&coachId=${user._id}`;
         }
-        
+
         const sessionsRes = await fetch(sessionsUrl);
 
         if (!sessionsRes.ok) {
@@ -123,7 +123,7 @@ export default function SessionManager() {
 
   if (loading) return <p>Cargando datos...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
-  
+
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);

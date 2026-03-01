@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 export default function CreatePlayerForm() {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   // Form state
   const [name, setName] = useState('');
   const [dorsal, setDorsal] = useState('');
@@ -30,10 +30,10 @@ export default function CreatePlayerForm() {
     }
     setIsSubmitting(true);
     try {
-      const newPlayerData = { 
-        name, 
-        dorsal: Number(dorsal), 
-        position, 
+      const newPlayerData = {
+        name,
+        dorsal: Number(dorsal),
+        position,
         team: team || (isRival ? 'Equipo Rival' : user.team?.name),
         coach: user._id,
         isRival
@@ -48,12 +48,12 @@ export default function CreatePlayerForm() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'No se pudo crear el jugador.');
       }
-      
+
       toast.success('Jugador creado con éxito. Redirigiendo a la lista...');
-      
+
       // Redirect to the player list page
       router.push('/panel/players');
-      
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al crear el jugador.');
     } finally {

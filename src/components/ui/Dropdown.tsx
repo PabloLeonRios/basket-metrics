@@ -43,7 +43,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   const disabledStyles = disabled
     ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed'
     : 'bg-white dark:bg-gray-800';
-  
+
   const buttonClasses = `relative w-full cursor-default rounded-lg border text-left focus:outline-none transition-colors duration-150 ease-in-out border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${disabledStyles} ${sizeStyles[inputSize]}`;
 
   return (

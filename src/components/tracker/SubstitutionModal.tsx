@@ -10,7 +10,7 @@ interface SubstitutionModalProps {
   playerToSubOut: IPlayer | null;
   teamPlayers: IPlayer[];
   extraPlayers?: IPlayer[];
-  onCourtPlayerIds: Set<string>; 
+  onCourtPlayerIds: Set<string>;
   onSubstitute: (playerIn: IPlayer) => void;
 }
 
@@ -20,7 +20,7 @@ export default function SubstitutionModal({
   playerToSubOut,
   teamPlayers,
   extraPlayers = [],
-  onCourtPlayerIds, 
+  onCourtPlayerIds,
   onSubstitute,
 }: SubstitutionModalProps) {
   if (!isOpen || !playerToSubOut) return null;
@@ -48,12 +48,12 @@ export default function SubstitutionModal({
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-4">No hay jugadores en el banquillo de este equipo.</p>
+            <p className="text-center text-gray-500 py-4">Banquillo vacío (ningún jugador disponible en la sesión).</p>
           )}
 
           {extraPlayers.length > 0 && (
             <div className="mt-4 border-t border-gray-100 dark:border-gray-800 pt-4">
-              <h4 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400">Jugadores fuera de la sesión:</h4>
+              <h4 className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400">Añadir a la sesión (Fuera de la convocatoria):</h4>
               <div className="space-y-1">
                 {extraPlayers.map(player => (
                   <button

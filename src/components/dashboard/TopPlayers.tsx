@@ -56,7 +56,7 @@ export default function TopPlayers() {
   if (topPlayers.length === 0) {
     return null;
   }
-  
+
   const cardColors = [
     'bg-gradient-to-br from-yellow-100 to-yellow-300 dark:from-yellow-900 dark:to-yellow-700', // 1st place
     'bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-600', // 2nd place

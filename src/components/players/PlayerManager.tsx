@@ -92,7 +92,7 @@ export default function PlayerManager() {
     }, 500);
     return () => clearTimeout(handler);
   }, [searchTerm]);
-  
+
   // Reset page to 1 when tab changes
   useEffect(() => {
     setCurrentPage(1);
@@ -124,10 +124,10 @@ export default function PlayerManager() {
         if (user?.team?.name) {
           url += `&userTeamName=${encodeURIComponent(user.team.name)}`;
         }
-        
+
         const response = await fetch(url);
         if (!response.ok) throw new Error('No se pudieron cargar los jugadores.');
-        
+
         const { data, totalPages: apiTotalPages } = await response.json();
         setPlayers(data);
         setTotalPages(apiTotalPages);
@@ -174,7 +174,7 @@ export default function PlayerManager() {
         body: JSON.stringify(updatedData),
       });
       if (!response.ok) throw new Error('No se pudo cambiar el estado del jugador.');
-      
+
       toast.info(`Jugador ${player.isActive ? 'desactivado' : 'activado'}.`);
       setPlayers(players.filter(p => p._id !== player._id)); // Remove from current list
       setEditingPlayer(null);
@@ -182,7 +182,7 @@ export default function PlayerManager() {
       toast.error(err instanceof Error ? err.message : 'Error al cambiar estado.');
     }
   };
-  
+
   const openEditModal = (player: IPlayer) => {
     setEditingPlayer(player);
     setEditName(player.name);
@@ -248,7 +248,7 @@ export default function PlayerManager() {
               </div>
             </div>
         </div>
-        
+
         {loading && <p>Cargando jugadores...</p>}
         {error && <p className="text-red-500">{error}</p>}
         {!loading && !error && players.length === 0 && (

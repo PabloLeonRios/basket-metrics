@@ -32,7 +32,7 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
   const hoopRadius_svg = scale(HOOP_RADIUS_M);
   const freeThrowCircleRadius_svg = scale(FREE_THROW_CIRCLE_RADIUS_M);
   const noChargeRadius_svg = scale(NO_CHARGE_SEMI_CIRCLE_RADIUS_M);
-  
+
   const threePointLinePath = `
     M ${threePointSideLineXRight_svg},0
     L ${threePointSideLineXRight_svg},${threePointArcStartY_svg}
@@ -61,7 +61,7 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
             <rect x="5" y="30" width="5" height="1" fill="rgba(0,0,0,0.05)" />
             <line x1="5" y1="0" x2="5" y2="40" stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
           </pattern>
-          
+
           {/* Subtle lighting gradient */}
           <radialGradient id="lighting" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="white" stopOpacity="0.25" />
@@ -88,16 +88,16 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
             fillOpacity="0.8"
             strokeWidth="0.8"
           />
-          
+
           {/* Free throw circle (top half solid) */}
           <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 1 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} />
-          
+
           {/* Free throw circle (bottom half dashed) */}
           <path d={`M ${keyX_svg} ${keyHeight_svg} A ${freeThrowCircleRadius_svg} ${freeThrowCircleRadius_svg} 0 0 0 ${keyX_svg + keyWidth_svg} ${keyHeight_svg}`} strokeDasharray="1.5,1.5" />
-          
+
           {/* Restricted area (no charge semi-circle) */}
           <path d={`M ${hoopX_svg - noChargeRadius_svg} ${hoopY_svg} A ${noChargeRadius_svg} ${noChargeRadius_svg} 0 0 0 ${hoopX_svg + noChargeRadius_svg} ${hoopY_svg}`} />
-          
+
           {/* Post marks along the key */}
           <line x1={keyX_svg - 0.5} y1={keyHeight_svg * 0.4} x2={keyX_svg} y2={keyHeight_svg * 0.4} strokeWidth="0.6" />
           <line x1={keyX_svg + keyWidth_svg} y1={keyHeight_svg * 0.4} x2={keyX_svg + keyWidth_svg + 0.5} y2={keyHeight_svg * 0.4} strokeWidth="0.6" />
@@ -152,7 +152,7 @@ const Court = memo(function Court({ onClick, shotCoordinates }: CourtProps) {
             fill="none"
           />
         </g>
-        
+
         {/* Render shot coordinate */}
         {shotCoordinates && (
           <g>

@@ -16,13 +16,13 @@ export default function UserManagement() {
         <div className="flex items-center justify-between">
             <h1 className="text-2xl md:text-3xl font-bold">Administración de Usuarios</h1>
             <div className="flex gap-2">
-                <button 
+                <button
                     onClick={() => setView('list')}
                     className={`px-4 py-2 rounded-md text-sm font-medium ${view === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
                 >
                     Gestión
                 </button>
-                <button 
+                <button
                     onClick={() => setView('create')}
                     className={`px-4 py-2 rounded-md text-sm font-medium ${view === 'create' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}
                 >
@@ -31,7 +31,7 @@ export default function UserManagement() {
             </div>
         </div>
         <p className="mt-2 text-sm text-gray-500">
-          {view === 'list' 
+          {view === 'list'
             ? 'Activa/desactiva cuentas, asigna equipos y busca usuarios.'
             : 'Crea nuevas cuentas de usuario (entrenadores, administradores, etc.).'}
         </p>

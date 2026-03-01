@@ -79,7 +79,7 @@ export default function Sidebar({ user, isSidebarOpen, handleLogout }: SidebarPr
                   return null;
                 }
                 const isActiveParent = item.basePath ? pathname.startsWith(item.basePath) : pathname === item.href;
-                
+
                 return (
                 <li key={item.name}>
                   {!item.items ? ( // Changed item.children to item.items

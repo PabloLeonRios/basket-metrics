@@ -38,7 +38,7 @@ export default function CreateSessionForm() {
         if (!isAdmin) {
           playersUrl += `coachId=${user._id}`;
         }
-        
+
         const playersRes = await fetch(playersUrl);
         if (!playersRes.ok) throw new Error('No se pudieron cargar los jugadores.');
 
@@ -127,7 +127,7 @@ export default function CreateSessionForm() {
       const { data: newSession } = await response.json();
       toast.success('Sesión creada. Redirigiendo al tracker...');
       router.push(`/panel/tracker/${newSession._id}`);
-      
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al crear la sesión.');
       setIsSubmitting(false);

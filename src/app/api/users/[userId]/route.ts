@@ -27,7 +27,7 @@ export async function PUT(
     if (!userToUpdate) {
       return NextResponse.json({ success: false, message: 'Usuario no encontrado.' }, { status: 404 });
     }
-    
+
     // Construir el objeto de actualización
     const updateData: { team?: string; isActive?: boolean; role?: string } = {};
     if (teamId !== undefined) updateData.team = teamId === '' ? undefined : teamId;

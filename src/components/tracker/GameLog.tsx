@@ -32,6 +32,9 @@ const formatEventDetails = (event: IGameEvent): string => {
       return 'Falta Personal';
     case 'tapon':
       return 'Tapón';
+    case 'substitution':
+      const subDetails = details as { playerIn: { name: string }, playerOut: { name: string } };
+      return `Sustitución: Entra ${subDetails.playerIn.name} por ${subDetails.playerOut.name}`;
     default:
       return type;
   }
@@ -40,11 +43,11 @@ const formatEventDetails = (event: IGameEvent): string => {
 const getEventRowClass = (event: IGameEvent): string => {
     const baseClass = "p-2 rounded-md text-sm";
     const colorClass = "border-l-4";
-  
+
     switch (event.type) {
       case 'tiro':
       case 'tiro_libre':
-        return event.details.made 
+        return event.details.made
           ? `${baseClass} bg-green-50 dark:bg-green-900/50 ${colorClass} border-green-500`
           : `${baseClass} bg-red-50 dark:bg-red-900/50 ${colorClass} border-red-500`;
       case 'asistencia':
@@ -61,6 +64,8 @@ const getEventRowClass = (event: IGameEvent): string => {
         return event.details.type === 'ofensivo'
           ? `${baseClass} bg-cyan-50 dark:bg-cyan-900/50 ${colorClass} border-cyan-500`
           : `${baseClass} bg-pink-50 dark:bg-pink-900/50 ${colorClass} border-pink-500`;
+      case 'substitution':
+        return `${baseClass} bg-gray-50 dark:bg-gray-700/50 ${colorClass} border-gray-400`;
       default:
         return `${baseClass} bg-white dark:bg-gray-700`;
     }

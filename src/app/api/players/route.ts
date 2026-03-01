@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         { status: 400 },
       );
     }
-    
+
     const teamType = searchParams.get('teamType');
     const userTeamName = searchParams.get('userTeamName');
 
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     const placeholderPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
     console.log('Step 2 Complete: Password hashed.');
-    
+
     console.log('Step 3: Finding coach user...');
     const coachUser = await User.findById(coach).select('team');
     if (!coachUser) {
