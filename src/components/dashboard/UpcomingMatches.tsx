@@ -1,6 +1,10 @@
 'use client';
 
-import { CalendarDaysIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import {
+  CalendarDaysIcon,
+  ClockIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 // Datos estáticos/mock de muestra para la vista previa del dashboard
@@ -54,7 +58,9 @@ export default function UpcomingMatches() {
             className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
           >
             {/* Banner superior indicando local/visitante */}
-            <div className={`absolute top-0 left-0 w-1 h-full ${match.isHome ? 'bg-orange-500' : 'bg-gray-400'}`}></div>
+            <div
+              className={`absolute top-0 left-0 w-1 h-full ${match.isHome ? 'bg-orange-500' : 'bg-gray-400'}`}
+            ></div>
 
             <div className="flex justify-between items-start mb-3 pl-2">
               <div>
@@ -66,8 +72,13 @@ export default function UpcomingMatches() {
 
             <div className="pl-2 space-y-3">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">vs</p>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate" title={match.opponent}>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  vs
+                </p>
+                <h3
+                  className="text-xl font-bold text-gray-900 dark:text-white truncate"
+                  title={match.opponent}
+                >
                   {match.opponent}
                 </h3>
               </div>
@@ -83,7 +94,9 @@ export default function UpcomingMatches() {
                 </div>
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                   <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span className="truncate" title={match.location}>{match.location}</span>
+                  <span className="truncate" title={match.location}>
+                    {match.location}
+                  </span>
                 </div>
               </div>
             </div>

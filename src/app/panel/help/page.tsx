@@ -1,7 +1,5 @@
 import HelpContent from '@/components/help/HelpContent';
 
 export default function HelpPage() {
-  return (
-    <HelpContent />
-  );
+  return <HelpContent />;
 }

@@ -6,7 +6,11 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { toast } from 'react-toastify';
 import { utils, writeFile, read } from 'xlsx';
-import { ArrowDownTrayIcon, DocumentArrowUpIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowDownTrayIcon,
+  DocumentArrowUpIcon,
+  ArrowUpTrayIcon,
+} from '@heroicons/react/24/outline';
 import { IPlayer } from '@/types/definitions';
 
 interface ExcelPlayerRow {
@@ -77,7 +81,9 @@ export default function PlayerImportManager() {
       const rawData = utils.sheet_to_json<ExcelPlayerRow>(worksheet);
 
       if (!rawData || rawData.length === 0) {
-        throw new Error('El archivo está vacío o no tiene el formato correcto.');
+        throw new Error(
+          'El archivo está vacío o no tiene el formato correcto.',
+        );
       }
 
       if (rawData.length > 30) {
@@ -86,11 +92,16 @@ export default function PlayerImportManager() {
 
       const formattedPlayers = rawData.map((row, index) => {
         if (!row.Nombre) {
-          throw new Error(`Falta el nombre del jugador en la fila ${index + 2}`);
+          throw new Error(
+            `Falta el nombre del jugador en la fila ${index + 2}`,
+          );
         }
 
         let isRival = false;
-        if (row['Es Rival'] && row['Es Rival'].toString().toUpperCase() === 'SI') {
+        if (
+          row['Es Rival'] &&
+          row['Es Rival'].toString().toUpperCase() === 'SI'
+        ) {
           isRival = true;
         }
 
@@ -118,7 +129,11 @@ export default function PlayerImportManager() {
       toast.success('Jugadores importados con éxito. Redirigiendo...');
       router.push('/panel/players');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error desconocido al procesar el archivo.');
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : 'Error desconocido al procesar el archivo.',
+      );
     } finally {
       setIsSubmitting(false);
       if (fileInputRef.current) {
@@ -138,11 +153,18 @@ export default function PlayerImportManager() {
     try {
       // Fetch both mine and rivals without limits
       const [mineRes, rivalsRes] = await Promise.all([
-        fetch(`/api/players?coachId=${user._id}&teamType=mine&limit=1000${user.team?.name ? `&userTeamName=${encodeURIComponent(user.team.name)}` : ''}`),
-        fetch(`/api/players?coachId=${user._id}&teamType=rivals&limit=1000${user.team?.name ? `&userTeamName=${encodeURIComponent(user.team.name)}` : ''}`)
+        fetch(
+          `/api/players?coachId=${user._id}&teamType=mine&limit=1000${user.team?.name ? `&userTeamName=${encodeURIComponent(user.team.name)}` : ''}`,
+        ),
+        fetch(
+          `/api/players?coachId=${user._id}&teamType=rivals&limit=1000${user.team?.name ? `&userTeamName=${encodeURIComponent(user.team.name)}` : ''}`,
+        ),
       ]);
 
-      const [mineData, rivalsData] = await Promise.all([mineRes.json(), rivalsRes.json()]);
+      const [mineData, rivalsData] = await Promise.all([
+        mineRes.json(),
+        rivalsRes.json(),
+      ]);
 
       if (!mineData.success || !rivalsData.success) {
         throw new Error('Error al obtener los datos de jugadores.');
@@ -171,7 +193,9 @@ export default function PlayerImportManager() {
       writeFile(workbook, 'todos_los_jugadores.xlsx');
       toast.success('Exportación completada.');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al exportar jugadores.');
+      toast.error(
+        err instanceof Error ? err.message : 'Error al exportar jugadores.',
+      );
     } finally {
       setIsExporting(false);
     }
@@ -180,35 +204,77 @@ export default function PlayerImportManager() {
   return (
     <div className="space-y-8">
       <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-bold mb-4">Paso 1: Descargar Plantilla Base</h2>
+        <h2 className="text-xl font-bold mb-4">
+          Paso 1: Descargar Plantilla Base
+        </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Para importar jugadores correctamente, debes utilizar el archivo de plantilla base.
-          Este archivo contiene las cabeceras exactas (Nombre, Dorsal, Posición, Equipo, Es Rival)
-          y un ejemplo visual de cómo llenarlo.
+          Para importar jugadores correctamente, debes utilizar el archivo de
+          plantilla base. Este archivo contiene las cabeceras exactas (Nombre,
+          Dorsal, Posición, Equipo, Es Rival) y un ejemplo visual de cómo
+          llenarlo.
         </p>
         <div className="overflow-x-auto mb-4 border rounded-lg border-gray-200 dark:border-gray-700">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dorsal</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posición</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipo</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Es Rival</th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Nombre
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Dorsal
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Posición
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Equipo
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Es Rival
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">Michael Jordan</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">23</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Escolta</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">Chicago Bulls</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">NO</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                  Michael Jordan
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  23
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  Escolta
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  Chicago Bulls
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  NO
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <Button onClick={handleDownloadTemplate} variant="secondary" className="flex items-center gap-2">
+        <Button
+          onClick={handleDownloadTemplate}
+          variant="secondary"
+          className="flex items-center gap-2"
+        >
           <ArrowDownTrayIcon className="w-5 h-5" />
           Descargar Plantilla Excel
         </Button>
@@ -217,16 +283,26 @@ export default function PlayerImportManager() {
       <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
         <h2 className="text-xl font-bold mb-4">Paso 2: Subir Archivo</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Una vez hayas completado la plantilla (máximo 30 jugadores), súbela aquí.
-          <strong> Nota:</strong> Los jugadores importados se crearán por defecto en estado &quot;Desactivado&quot;.
+          Una vez hayas completado la plantilla (máximo 30 jugadores), súbela
+          aquí.
+          <strong> Nota:</strong> Los jugadores importados se crearán por
+          defecto en estado &quot;Desactivado&quot;.
         </p>
         <form onSubmit={handleImport} className="space-y-4">
           <div className="flex items-center justify-center w-full">
-            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-800 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
+            <label
+              htmlFor="dropzone-file"
+              className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-800 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700"
+            >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <DocumentArrowUpIcon className="w-10 h-10 mb-3 text-gray-400" />
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Solo archivos .xlsx o .xls</p>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="font-semibold">Haz clic para subir</span> o
+                  arrastra y suelta
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Solo archivos .xlsx o .xls
+                </p>
               </div>
               <input
                 id="dropzone-file"
@@ -256,9 +332,13 @@ export default function PlayerImportManager() {
       </div>
 
       <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md border border-orange-200 dark:border-orange-800">
-        <h2 className="text-xl font-bold mb-4 text-orange-700 dark:text-orange-500">Exportar Todos los Jugadores</h2>
+        <h2 className="text-xl font-bold mb-4 text-orange-700 dark:text-orange-500">
+          Exportar Todos los Jugadores
+        </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Descarga un archivo Excel con <strong>todos los jugadores</strong> asignados a tu cuenta, incluyendo tanto los de tu equipo como los rivales.
+          Descarga un archivo Excel con <strong>todos los jugadores</strong>{' '}
+          asignados a tu cuenta, incluyendo tanto los de tu equipo como los
+          rivales.
         </p>
         <Button
           onClick={handleExportAll}

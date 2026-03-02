@@ -18,9 +18,19 @@ export async function POST(request: Request) {
       onCourtPlayerIds,
       sessionId,
       currentQuarter,
-    }: { allPlayerIds: string[]; onCourtPlayerIds: string[]; sessionId: string; currentQuarter?: number } = await request.json();
+    }: {
+      allPlayerIds: string[];
+      onCourtPlayerIds: string[];
+      sessionId: string;
+      currentQuarter?: number;
+    } = await request.json();
 
-    if (!allPlayerIds || !onCourtPlayerIds || !sessionId || onCourtPlayerIds.length === 0) {
+    if (
+      !allPlayerIds ||
+      !onCourtPlayerIds ||
+      !sessionId ||
+      onCourtPlayerIds.length === 0
+    ) {
       return NextResponse.json(
         { success: false, message: 'Datos incompletos para la sugerencia.' },
         { status: 400 },
@@ -28,11 +38,16 @@ export async function POST(request: Request) {
     }
 
     // 1. Obtener perfiles de todos los jugadores
-    const allPlayers = await Player.find({ _id: { $in: allPlayerIds } }).select('name');
-    const allObjectIds = allPlayerIds.map(id => new mongoose.Types.ObjectId(id));
+    const allPlayers = await Player.find({ _id: { $in: allPlayerIds } }).select(
+      'name',
+    );
+    const allObjectIds = allPlayerIds.map(
+      (id) => new mongoose.Types.ObjectId(id),
+    );
     const careerAverages = await PlayerGameStats.aggregate([
       { $match: { player: { $in: allObjectIds } } },
-      { $group: {
+      {
+        $group: {
           _id: '$player',
           avgPoints: { $avg: '$points' },
           avgAst: { $avg: '$ast' },
@@ -47,28 +62,39 @@ export async function POST(request: Request) {
     ]);
     const playersWithStats = allPlayers.map((player) => {
       const pStats = careerAverages.find((stat) => stat._id.equals(player._id));
-      return { _id: player._id.toString(), name: player.name, careerAverages: pStats || null };
+      return {
+        _id: player._id.toString(),
+        name: player.name,
+        careerAverages: pStats || null,
+      };
     });
     const allProfiles = generatePlayerProfiles(playersWithStats);
 
     // 2. Obtener todos los eventos del partido
-    const gameEvents = await GameEvent.find({ sessionId }).sort({ createdAt: -1 });
+    const gameEvents = await GameEvent.find({ sessionId }).sort({
+      createdAt: -1,
+    });
 
     // 3. Obtener la sugerencia proactiva
     const suggestion = getProactiveSuggestion(
       onCourtPlayerIds,
       allProfiles,
       gameEvents,
-      currentQuarter || 1
+      currentQuarter || 1,
     );
 
     if (!suggestion) {
-        return NextResponse.json({ success: true, data: null, message: 'La IA no tiene sugerencias por el momento.' });
+      return NextResponse.json({
+        success: true,
+        data: null,
+        message: 'La IA no tiene sugerencias por el momento.',
+      });
     }
 
     return NextResponse.json({ success: true, data: suggestion });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
       { success: false, message: 'Error en el servidor', error: errorMessage },
       { status: 500 },

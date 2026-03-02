@@ -128,7 +128,10 @@ export default function AdminTeamManagementPage() {
         <h2 className="text-xl font-bold mb-4">
           {editingTeam ? 'Editando Equipo' : 'Crear Nuevo Equipo'}
         </h2>
-        <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row sm:items-end gap-4">
+        <form
+          onSubmit={handleFormSubmit}
+          className="flex flex-col sm:flex-row sm:items-end gap-4"
+        >
           <div className="flex-grow">
             <label htmlFor="teamName" className={labelStyles}>
               Nombre del Equipo
