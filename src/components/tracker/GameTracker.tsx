@@ -30,6 +30,8 @@ const getActionButtonClass = (eventType: string) => {
         case 'rebote_defensivo': return '!bg-pink-600 hover:!bg-pink-700';
         case 'falta': return '!bg-orange-600 hover:!bg-orange-700';
         case 'tiro_libre': return '!bg-indigo-600 hover:!bg-indigo-700';
+        case 'doble': return '!bg-emerald-600 hover:!bg-emerald-700';
+        case 'triple': return '!bg-green-600 hover:!bg-green-700';
         default: return '!bg-gray-600 hover:!bg-gray-700';
     }
 }
@@ -195,7 +197,23 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
   };
 
   const handleCourtClick = useCallback((x: number, y: number) => { if (!selectedPlayer) { toast.error('Selecciona un jugador en cancha.'); return; } if (!onCourtPlayerIds.has(selectedPlayer.id)) { toast.error('El jugador seleccionado no está en la cancha.'); return; } if (isSessionFinished) { toast.warn('Sesión finalizada.'); return; } setShotValue(isThreePointer(x, y) ? 3 : 2); setShotCoordinates({ x, y }); setShowShotModal(true); }, [selectedPlayer, isSessionFinished, onCourtPlayerIds]);
-  const handleShot = (made: boolean) => { if (!shotCoordinates) return; logEvent('tiro', { made, value: shotValue, x: shotCoordinates.x, y: shotCoordinates.y }); setShowShotModal(false); setShotCoordinates(null); };
+
+  const handleQuickShot = (value: 2 | 3) => {
+    setShotValue(value);
+    setShotCoordinates(null);
+    setShowShotModal(true);
+  };
+
+  const handleShot = (made: boolean) => {
+    const details: Record<string, unknown> = { made, value: shotValue };
+    if (shotCoordinates) {
+        details.x = shotCoordinates.x;
+        details.y = shotCoordinates.y;
+    }
+    logEvent('tiro', details);
+    setShowShotModal(false);
+    setShotCoordinates(null);
+  };
   const handleFreeThrow = (made: boolean) => { logEvent('tiro_libre', { made }); setShowFreeThrowModal(false); };
 
   const calculateStatsForPlayer = useCallback((playerId: string) => {
@@ -316,7 +334,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <h3 className="font-bold text-lg truncate">Acciones Rápidas</h3>
                 <span className="text-blue-500 text-sm font-medium truncate ml-2">{selectedPlayer?.name || '...'}</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs sm:text-sm">
                 <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('asistencia')}>AST</Button>
                 <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('robo')}>ROBO</Button>
                 <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('tapon')}>TAP</Button>
@@ -325,6 +343,8 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <Button onClick={() => logEvent('rebote', { type: 'defensivo' })} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('rebote_defensivo')}>REB-D</Button>
                 <Button onClick={() => logEvent('falta', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('falta')}>FALTA</Button>
                 <Button onClick={() => setShowFreeThrowModal(true)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('tiro_libre')}>LIBRE</Button>
+                <Button onClick={() => handleQuickShot(2)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('doble')}>DOBLE</Button>
+                <Button onClick={() => handleQuickShot(3)} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('triple')}>TRIPLE</Button>
               </div>
             </div>
             <FloatingStats events={gameEvents} />
