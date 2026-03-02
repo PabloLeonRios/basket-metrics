@@ -39,10 +39,23 @@ export default function PanelLayout({ children }: PropsWithChildren) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex relative">
+      {/* Sidebar Backdrop for Mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-gray-900/80 z-40 md:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`flex-shrink-0 ${isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-md h-screen sticky top-0`}>
-        <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 md:sticky md:top-0 h-screen bg-white dark:bg-gray-900 shadow-md transition-all duration-300 ease-in-out flex-shrink-0 ${
+          isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:translate-x-0 md:w-0 overflow-hidden'
+        }`}
+      >
+        <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 px-4 min-w-[16rem]">
           <Link href="/panel" className="flex items-center gap-2 font-bold text-xl text-orange-600">
             <Dribbble className="w-6 h-6 text-orange-500" />
             <span>Basket-Metrics</span>
