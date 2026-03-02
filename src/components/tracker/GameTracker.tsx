@@ -225,6 +225,12 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
 
   return (
     <>
+      {/* Mobile Landscape Prompt */}
+      <div className="md:hidden bg-yellow-100 text-yellow-800 p-3 text-center text-sm font-bold m-4 rounded-md shadow flex items-center justify-center gap-2">
+        <ExclamationTriangleIcon className="h-5 w-5" />
+        Para una mejor experiencia, gira tu dispositivo en horizontal.
+      </div>
+
       <div className="flex flex-col lg:flex-row gap-4 p-4">
         <div className="w-full lg:w-1/4 space-y-4">
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
@@ -310,7 +316,7 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 <h3 className="font-bold text-lg truncate">Acciones Rápidas</h3>
                 <span className="text-blue-500 text-sm font-medium truncate ml-2">{selectedPlayer?.name || '...'}</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm">
                 <Button onClick={() => logEvent('asistencia', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('asistencia')}>AST</Button>
                 <Button onClick={() => logEvent('robo', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('robo')}>ROBO</Button>
                 <Button onClick={() => logEvent('tapon', {})} disabled={!selectedPlayer || !onCourtPlayerIds.has(selectedPlayer.id) || isSessionFinished} className={getActionButtonClass('tapon')}>TAP</Button>
