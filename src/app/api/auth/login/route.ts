@@ -10,9 +10,13 @@ import * as jose from 'jose';
 import { COOKIE_NAME, EXPIRATION_TIME, MAX_AGE_COOKIE } from '@/lib/constants';
 import { getJwtSecretKey } from '@/lib/auth-secret';
 
-
 // Tipo local para informar a TypeScript que esperamos la contraseña aquí
-type UserWithPassword = IUser & Document & { password?: string, failedLoginAttempts: number, lockUntil: Date | null };
+type UserWithPassword = IUser &
+  Document & {
+    password?: string;
+    failedLoginAttempts: number;
+    lockUntil: Date | null;
+  };
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -46,7 +50,11 @@ export async function POST(request: NextRequest) {
     // Check if account is locked
     if (user.lockUntil && user.lockUntil > new Date()) {
       return NextResponse.json(
-        { success: false, message: 'Cuenta bloqueada temporalmente por demasiados intentos fallidos. Inténtalo más tarde.' },
+        {
+          success: false,
+          message:
+            'Cuenta bloqueada temporalmente por demasiados intentos fallidos. Inténtalo más tarde.',
+        },
         { status: 403 },
       );
     }
@@ -64,7 +72,9 @@ export async function POST(request: NextRequest) {
 
     if (!isMatch) {
       const attempts = (user.failedLoginAttempts || 0) + 1;
-      const updateFields: Record<string, unknown> = { failedLoginAttempts: attempts };
+      const updateFields: Record<string, unknown> = {
+        failedLoginAttempts: attempts,
+      };
 
       if (attempts >= 5) {
         // Bloquear por 10 minutos
@@ -81,12 +91,16 @@ export async function POST(request: NextRequest) {
 
     // Reiniciar intentos fallidos al iniciar sesión exitosamente
     if (user.failedLoginAttempts > 0 || user.lockUntil) {
-      await User.findByIdAndUpdate(user._id, { $set: { failedLoginAttempts: 0, lockUntil: null } });
+      await User.findByIdAndUpdate(user._id, {
+        $set: { failedLoginAttempts: 0, lockUntil: null },
+      });
     }
 
     // --- Crear el JWT ---
     // Defensively serialize the team object to prevent errors with corrupted population
-    const teamObject = user.team ? JSON.parse(JSON.stringify(user.team)) : undefined;
+    const teamObject = user.team
+      ? JSON.parse(JSON.stringify(user.team))
+      : undefined;
 
     const secret = getJwtSecretKey();
     const token = await new jose.SignJWT({

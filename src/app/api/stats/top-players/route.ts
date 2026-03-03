@@ -18,8 +18,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Find all players for the given coach to ensure we only consider them
-    const coachPlayers = await Player.find({ coach: coachId, isRival: { $ne: true } }).select('_id');
-    const coachPlayerIds = coachPlayers.map(p => p._id);
+    const coachPlayers = await Player.find({
+      coach: coachId,
+      isRival: { $ne: true },
+    }).select('_id');
+    const coachPlayerIds = coachPlayers.map((p) => p._id);
 
     const topPlayers = await PlayerGameStats.aggregate([
       // Match only stats for players of the specified coach
@@ -64,7 +67,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: topPlayers });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
       { success: false, message: 'Error en el servidor', error: errorMessage },
       { status: 500 },

@@ -13,7 +13,8 @@ const Input: React.FC<InputProps> = ({
   className,
   ...props
 }) => {
-  const baseStyles = 'w-full rounded-lg border focus:outline-none transition-colors duration-150 ease-in-out';
+  const baseStyles =
+    'w-full rounded-lg border focus:outline-none transition-colors duration-150 ease-in-out';
 
   const sizeStyles = {
     sm: 'px-2 py-1 text-sm',
@@ -25,7 +26,9 @@ const Input: React.FC<InputProps> = ({
     ? 'border-red-500 focus:ring-2 focus:ring-red-500'
     : 'border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 
-  const disabledStyles = props.disabled ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : 'bg-white dark:bg-gray-800';
+  const disabledStyles = props.disabled
+    ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+    : 'bg-white dark:bg-gray-800';
 
   return (
     <input

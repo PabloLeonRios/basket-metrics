@@ -7,7 +7,8 @@ export default function Home() {
       <main className="max-w-4xl text-center space-y-8 z-10">
         <div className="space-y-4">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-gray-50">
-            Basket <span className="text-orange-500 drop-shadow-sm">Metrics</span>
+            Basket{' '}
+            <span className="text-orange-500 drop-shadow-sm">Metrics</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Analítica avanzada para entrenadores y jugadores de baloncesto. Toma
@@ -32,19 +33,25 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16">
           <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-100 dark:border-gray-800 hover:scale-105 hover:shadow-xl hover:border-orange-500 transition-all duration-300">
-            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-50">Game Tracker</h3>
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-50">
+              Game Tracker
+            </h3>
             <p className="text-gray-600 dark:text-gray-400">
               Registra eventos en vivo con nuestro tracker interactivo.
             </p>
           </div>
           <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-100 dark:border-gray-800 hover:scale-105 hover:shadow-xl hover:border-orange-500 transition-all duration-300">
-            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-50">Analítica Avanzada</h3>
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-50">
+              Analítica Avanzada
+            </h3>
             <p className="text-gray-600 dark:text-gray-400">
               Visualiza TS%, eFG% y Game Score de tus jugadores.
             </p>
           </div>
           <div className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-100 dark:border-gray-800 hover:scale-105 hover:shadow-xl hover:border-orange-500 transition-all duration-300">
-            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-50">Asistente IA</h3>
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-50">
+              Asistente IA
+            </h3>
             <p className="text-gray-600 dark:text-gray-400">
               Obtén recomendaciones inteligentes para tus quintetos.
             </p>

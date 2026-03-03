@@ -58,7 +58,7 @@ export async function PUT(
     if (
       error instanceof Error &&
       error.name === 'MongoServerError' &&
-      (error as unknown as {code: number}).code === 11000
+      (error as unknown as { code: number }).code === 11000
     ) {
       return NextResponse.json(
         { success: false, message: 'Ya existe un equipo con ese nombre.' },

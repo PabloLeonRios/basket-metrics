@@ -72,7 +72,10 @@ export async function POST(request: Request) {
     const initialProfiles = generatePlayerProfiles(playersWithStats);
 
     // 4. Obtener recomendaciones (plural)
-    const { recommendations, allProfiles } = recommendLineups(initialProfiles, situation);
+    const { recommendations, allProfiles } = recommendLineups(
+      initialProfiles,
+      situation,
+    );
 
     return NextResponse.json(
       { success: true, data: { recommendations, allProfiles } },

@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       error instanceof Error &&
       error.name === 'MongoServerError' &&
       'code' in error &&
-      (error as unknown as {code: number}).code === 11000
+      (error as unknown as { code: number }).code === 11000
     ) {
       return NextResponse.json(
         { success: false, message: 'Ya existe un equipo con ese nombre.' },
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
       error instanceof Error &&
       error.name === 'MongoServerError' &&
       'code' in error &&
-      (error as unknown as {code: number}).code === 11000
+      (error as unknown as { code: number }).code === 11000
     ) {
       return NextResponse.json(
         { success: false, message: 'Ya existe un equipo con ese nombre.' },

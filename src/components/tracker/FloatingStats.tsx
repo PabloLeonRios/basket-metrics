@@ -74,9 +74,25 @@ export default function FloatingStats({ events }: FloatingStatsProps) {
           aria-label="Abrir estadísticas"
         >
           {/* Icono de estadísticas, podrías usar un SVG */}
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 21.945V11C13 10.447 12.553 10 12 10H3.055A9.001 9.001 0 0013 21.945z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 21.945V11C13 10.447 12.553 10 12 10H3.055A9.001 9.001 0 0013 21.945z"
+            />
           </svg>
         </button>
       </div>
@@ -94,8 +110,19 @@ export default function FloatingStats({ events }: FloatingStatsProps) {
             aria-label="Cerrar estadísticas"
           >
             {/* Icono de cerrar, podrías usar un SVG */}
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -104,13 +131,16 @@ export default function FloatingStats({ events }: FloatingStatsProps) {
             <span className="font-semibold">Puntos:</span> {totalStats.points}
           </div>
           <div>
-            <span className="font-semibold">Tiros:</span> {totalStats.shotsMade}/{totalStats.shotsAttempted}
+            <span className="font-semibold">Tiros:</span> {totalStats.shotsMade}
+            /{totalStats.shotsAttempted}
           </div>
           <div>
-            <span className="font-semibold">Reb. Of:</span> {totalStats.offensiveRebounds}
+            <span className="font-semibold">Reb. Of:</span>{' '}
+            {totalStats.offensiveRebounds}
           </div>
           <div>
-            <span className="font-semibold">Reb. Def:</span> {totalStats.defensiveRebounds}
+            <span className="font-semibold">Reb. Def:</span>{' '}
+            {totalStats.defensiveRebounds}
           </div>
           <div>
             <span className="font-semibold">Asist.:</span> {totalStats.assists}

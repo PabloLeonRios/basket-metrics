@@ -12,17 +12,27 @@ export async function middleware(request: NextRequest) {
   // We only check if origin or referer is present to avoid blocking API clients
   // that don't send these headers, but we validate them if they do exist.
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
-    const origin = request.headers.get('origin') || request.headers.get('referer');
+    const origin =
+      request.headers.get('origin') || request.headers.get('referer');
     const host = request.headers.get('host');
 
     if (origin && host) {
       try {
         const originUrl = new URL(origin);
         if (originUrl.host !== host) {
-          return NextResponse.json({ success: false, message: 'Invalid origin (CSRF protection)' }, { status: 403 });
+          return NextResponse.json(
+            { success: false, message: 'Invalid origin (CSRF protection)' },
+            { status: 403 },
+          );
         }
       } catch {
-        return NextResponse.json({ success: false, message: 'Invalid origin format (CSRF protection)' }, { status: 400 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Invalid origin format (CSRF protection)',
+          },
+          { status: 400 },
+        );
       }
     }
   }
@@ -99,7 +109,7 @@ export async function middleware(request: NextRequest) {
       // 4. Panel Route Logic
       if (isPanelRoute) {
         const allowedRoles = [ROLES.COACH, ROLES.PLAYER, ROLES.ADMIN];
-        const userRole = payload.role as typeof ROLES[keyof typeof ROLES];
+        const userRole = payload.role as (typeof ROLES)[keyof typeof ROLES];
         if (!allowedRoles.includes(userRole)) {
           return NextResponse.redirect(new URL('/login', request.url));
         }

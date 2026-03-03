@@ -56,7 +56,9 @@ const Dropdown: React.FC<DropdownProps> = ({
       <Listbox value={finalValue} onChange={onChange} disabled={disabled}>
         <div className="relative mt-1">
           <Listbox.Button className={buttonClasses}>
-            <span className="block truncate text-gray-900 dark:text-gray-50">{displayLabel}</span>
+            <span className="block truncate text-gray-900 dark:text-gray-50">
+              {displayLabel}
+            </span>
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
               <ChevronUpDownIcon
                 className="h-5 w-5 text-gray-400"
@@ -76,7 +78,9 @@ const Dropdown: React.FC<DropdownProps> = ({
                   key={option.value}
                   className={({ active }) =>
                     `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? 'bg-indigo-600 text-white' : 'text-gray-900 dark:text-gray-50'
+                      active
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-900 dark:text-gray-50'
                     }`
                   }
                   value={option.value}
