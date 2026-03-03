@@ -687,6 +687,34 @@ export default function GameTracker({ sessionId }: { sessionId: string }) {
                 {selectedPlayer?.name || '...'}
               </span>
             </div>
+
+            {/* Quick Player Selector for Mobile/Tablet */}
+            <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 mb-3 snap-x">
+              {session.teams.flatMap((team) =>
+                team.players
+                  .filter((player) => onCourtPlayerIds.has(player._id))
+                  .map((player) => (
+                    <button
+                      key={player._id}
+                      onClick={() =>
+                        setSelectedPlayer({
+                          id: player._id,
+                          name: player.name,
+                          teamName: team.name,
+                        })
+                      }
+                      className={`flex-shrink-0 snap-center px-3 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
+                        selectedPlayer?.id === player._id
+                          ? 'bg-blue-600 text-white shadow-inner'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      #{player.dorsal} {player.name.split(' ')[0]}
+                    </button>
+                  ))
+              )}
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs sm:text-sm">
               <Button
                 onClick={() => logEvent('asistencia', {})}
