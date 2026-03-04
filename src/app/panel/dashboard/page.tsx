@@ -12,6 +12,8 @@ import {
   TrendingUp,
   ChevronRight,
   Trophy,
+  Crown,
+  Target,
 } from "lucide-react";
 
 /**
@@ -19,6 +21,11 @@ import {
  *  NOTAS PARA PABLITO (Mongo)
  * ============================
  * DASHBOARD "vendible" (UI fuerte) sin romper el backend futuro.
+ *
+ * Cambio pedido por Pablito:
+ * - "No perder el contexto de tus mejores jugadores"
+ * - Solución: agregar "Factor X / Jugadores destacados" ARRIBA (en el hero),
+ *   visible apenas entrás al panel.
  *
  * MODO DEMO (sin Mongo):
  * - Intenta consumir APIs existentes:
@@ -31,12 +38,8 @@ import {
  *   GET /api/dashboard/coach?teamId&from&to
  *   => { kpis, topPlayers, recentSessions, upcomingGames }
  *
- * - upcomingGames podría venir de:
- *   - games.find({ teamId, date >= today }).sort(date).limit(3)
- *
- * Importante:
- * - Este archivo NO cambia modelos ni lógica de backend.
- * - Solo consume /api/* si está disponible.
+ * - topPlayers idealmente sale de aggregate (Mongo) ordenado por GameScore / TS%.
+ * - Este archivo NO cambia backend, solo consume y renderiza.
  */
 
 type KPI = {
@@ -207,6 +210,117 @@ function GameCard({ g }: { g: UpcomingGame }) {
   );
 }
 
+function clamp(n: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, n));
+}
+function formatNum(v?: number | null, digits = 1) {
+  if (v == null || Number.isNaN(v)) return "—";
+  return v.toFixed(digits);
+}
+function formatPct(v?: number | null) {
+  if (v == null || Number.isNaN(v)) return "—";
+  return `${Math.round(v * 100)}%`;
+}
+
+/**
+ * "Factor X" (pedido por Pablito)
+ * - Visible apenas entrás (arriba del fold).
+ * - No reemplaza el podio grande: lo complementa.
+ */
+function FactorX({ top }: { top: TopPlayer[] }) {
+  const top3 = (top || []).slice(0, 3);
+
+  return (
+    <div className="rounded-3xl border border-gray-200/70 dark:border-gray-800/80 bg-white/70 dark:bg-gray-950/20 backdrop-blur p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className="h-9 w-9 rounded-2xl bg-orange-600/12 border border-orange-500/20 flex items-center justify-center text-orange-700 dark:text-orange-200">
+            <Crown className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-sm font-extrabold text-gray-900 dark:text-gray-50">
+              Jugadores destacados
+            </div>
+            <div className="text-xs text-gray-600 dark:text-gray-300">
+              Tus “factores X” hoy (Game Score + TS%).
+            </div>
+          </div>
+        </div>
+
+        <Link
+          href="/panel/players"
+          className="text-xs font-semibold text-orange-700 dark:text-orange-300 hover:underline whitespace-nowrap"
+        >
+          Ver todos →
+        </Link>
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {top3.map((p, idx) => {
+          const ts = p.ts ?? null;
+          const gs = p.gameScore ?? null;
+          const badge =
+            idx === 0 ? "1" : idx === 1 ? "2" : "3";
+
+          return (
+            <div
+              key={p.id}
+              className="rounded-2xl border border-gray-200/70 dark:border-gray-800/80 bg-white/80 dark:bg-gray-900/60 p-3"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-2xl bg-gray-900 text-white dark:bg-gray-800 flex items-center justify-center font-extrabold text-xs">
+                    {badge}
+                  </div>
+                  <div>
+                    <div className="text-sm font-extrabold text-gray-900 dark:text-gray-50 leading-tight">
+                      {p.name}
+                    </div>
+                    <div className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                      #{p.number ?? "—"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-8 w-8 rounded-2xl border border-gray-200/70 dark:border-gray-800/80 bg-white/70 dark:bg-gray-950/20 flex items-center justify-center text-gray-700 dark:text-gray-200">
+                  <Target className="h-4 w-4" />
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-gray-200/70 dark:border-gray-800/80 bg-white/70 dark:bg-gray-950/20 px-2.5 py-2">
+                  <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                    Game Score
+                  </div>
+                  <div className="text-sm font-extrabold text-gray-900 dark:text-gray-50">
+                    {formatNum(gs, 1)}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-gray-200/70 dark:border-gray-800/80 bg-white/70 dark:bg-gray-950/20 px-2.5 py-2">
+                  <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">
+                    TS%
+                  </div>
+                  <div className="text-sm font-extrabold text-gray-900 dark:text-gray-50">
+                    {formatPct(ts)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-2 h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                <div
+                  className="h-2 rounded-full bg-orange-600"
+                  style={{ width: `${Math.round(clamp(ts ?? 0, 0, 1) * 100)}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const DEMO = useMemo(() => isDemoMode(), []);
 
@@ -221,7 +335,6 @@ export default function DashboardPage() {
     const run = async () => {
       setLoading(true);
 
-      // DEMO Defaults (vendibles)
       const demoKpis: KPI[] = [
         { label: "Jugadores activos", value: "12", hint: "En tu equipo actual" },
         { label: "Sesiones (últimos 7 días)", value: "4", hint: "Entrenamientos + partidos" },
@@ -250,7 +363,6 @@ export default function DashboardPage() {
       try {
         let apiUsed = false;
 
-        // 1) Intentar /api/stats (best-effort)
         const statsRes = await fetch("/api/stats", { cache: "no-store" }).catch(() => null);
 
         if (statsRes && statsRes.ok) {
@@ -281,7 +393,7 @@ export default function DashboardPage() {
 
             setTopPlayers(
               Array.isArray(maybeTop)
-                ? maybeTop.slice(0, 6).map((p: any, idx: number) => ({
+                ? maybeTop.slice(0, 10).map((p: any, idx: number) => ({
                     id: String(p?._id ?? p?.id ?? p?.playerId ?? `p-${idx}`),
                     name: String(p?.name ?? p?.fullName ?? "Jugador"),
                     number: p?.number ?? p?.jerseyNumber ?? null,
@@ -318,7 +430,6 @@ export default function DashboardPage() {
           }
         }
 
-        // 2) Fallback: /api/players para tener top básico
         if (!apiUsed) {
           const playersRes = await fetch("/api/players", { cache: "no-store" }).catch(() => null);
 
@@ -329,7 +440,7 @@ export default function DashboardPage() {
             if (Array.isArray(list) && list.length) {
               apiUsed = true;
 
-              const top = list.slice(0, 6).map((p: any, idx: number) => ({
+              const top = list.slice(0, 10).map((p: any, idx: number) => ({
                 id: String(p?._id ?? p?.id ?? `p-${idx}`),
                 name: String(p?.name ?? p?.fullName ?? "Jugador"),
                 number: p?.number ?? p?.jerseyNumber ?? null,
@@ -364,9 +475,22 @@ export default function DashboardPage() {
         }
       } catch {
         setDataSource("DEMO_FALLBACK");
-        setKpis(demoKpis);
-        setTopPlayers(demoTop);
-        setRecentSessions(demoSessions);
+        setKpis([
+          { label: "Jugadores activos", value: "12", hint: "En tu equipo actual" },
+          { label: "Sesiones (últimos 7 días)", value: "4", hint: "Entrenamientos + partidos" },
+          { label: "Game Score promedio", value: "9.6", hint: "Rendimiento global" },
+          { label: "TS% promedio", value: "54%", hint: "Eficiencia de tiro" },
+        ]);
+        setTopPlayers([
+          { id: "p1", name: "Marcelo Riestra", number: 12, gameScore: 10.1, points: 11.8, ts: 0.56 },
+          { id: "p2", name: "Agustín Biglieri", number: 7, gameScore: 10.0, points: 11.9, ts: 0.55 },
+          { id: "p3", name: "Juan Manuel Rodríguez", number: 15, gameScore: 7.5, points: 7.3, ts: 0.49 },
+        ]);
+        setRecentSessions([
+          { id: "s1", title: "Entrenamiento - Táctica", dateLabel: "Hace 2 días", status: "Cerrada" },
+          { id: "s2", title: "Partido vs. Rival", dateLabel: "Hace 4 días", status: "Cerrada" },
+          { id: "s3", title: "Lanzamientos + FT", dateLabel: "Hace 6 días", status: "Cerrada" },
+        ]);
         setUpcoming([
           { id: "g1", local: true, vs: "Águilas BC", when: "15 Nov 2024", time: "20:00", venue: "Pabellón Principal" },
           { id: "g2", local: false, vs: "Toros FC", when: "22 Nov 2024", time: "18:30", venue: "Cancha Visitante" },
@@ -382,56 +506,62 @@ export default function DashboardPage() {
 
   return (
     <div className="relative">
-      {/* Fondo "vendible" (profundo pero limpio) */}
+      {/* Fondo premium */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-500/12 blur-3xl" />
         <div className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-orange-500/10 blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(249,115,22,0.08),transparent_42%),radial-gradient(circle_at_70%_60%,rgba(249,115,22,0.06),transparent_45%)]" />
       </div>
 
-      {/* Contenedor consistente */}
       <div className="relative mx-auto max-w-6xl space-y-6">
-        {/* HERO */}
+        {/* HERO + FACTOR X (pedido por Pablito) */}
         <Surface className="overflow-hidden">
           <div className="p-6 md:p-7">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-                  Dashboard
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+              <div className="flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    Dashboard
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge>{DEMO ? "DEMO" : "REAL"}</Badge>
+                    <Badge>{dataSource === "API" ? "Datos API" : "Datos Demo"}</Badge>
+                  </div>
                 </div>
+
                 <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
                   Panel de Entrenador
                 </h1>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 max-w-2xl">
                   Rendimiento, eficiencia y foco de trabajo en una sola vista.
                 </p>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link
+                    href="/panel/players"
+                    className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition"
+                  >
+                    Ver jugadores
+                  </Link>
+                  <Link
+                    href="/panel/sessions"
+                    className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition dark:bg-gray-800"
+                  >
+                    Gestionar sesiones
+                  </Link>
+                  <Link
+                    href="/panel/assistant"
+                    className="inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/60 px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition"
+                  >
+                    Asistente IA
+                  </Link>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Badge>{DEMO ? "DEMO" : "REAL"}</Badge>
-                <Badge>{dataSource === "API" ? "Datos API" : "Datos Demo"}</Badge>
+              {/* FACTOR X visible apenas entrás */}
+              <div className="w-full lg:max-w-[520px]">
+                <FactorX top={topPlayers} />
               </div>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link
-                href="/panel/players"
-                className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 transition"
-              >
-                Ver jugadores
-              </Link>
-              <Link
-                href="/panel/sessions"
-                className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition dark:bg-gray-800"
-              >
-                Gestionar sesiones
-              </Link>
-              <Link
-                href="/panel/assistant"
-                className="inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/60 px-4 py-2.5 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition"
-              >
-                Asistente IA
-              </Link>
             </div>
           </div>
         </Surface>
@@ -463,7 +593,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Acciones rápidas (vende) */}
+        {/* Acciones rápidas */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <QuickAction
             href="/panel/players"
@@ -487,14 +617,13 @@ export default function DashboardPage() {
 
         {/* GRID PRINCIPAL */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* TOP (podio) */}
+          {/* Podio grande */}
           <div className="xl:col-span-2">
             <TopPlayersPodium players={topPlayers} hrefAll="/panel/players" />
           </div>
 
-          {/* Columna derecha */}
+          {/* Sesiones */}
           <div className="space-y-6">
-            {/* SESIONES RECIENTES */}
             <Surface>
               <div className="p-6 border-b border-gray-200/70 dark:border-gray-800/80">
                 <h2 className="text-xl font-extrabold text-gray-900 dark:text-gray-50">
@@ -549,7 +678,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Próximas 3 fechas (bloque vendible tipo referencia) */}
+        {/* Próximas 3 fechas */}
         <Surface>
           <div className="p-6 border-b border-gray-200/70 dark:border-gray-800/80 flex items-center justify-between gap-4">
             <div>
