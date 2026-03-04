@@ -1,66 +1,40 @@
-// src/lib/dbConnect.ts
 import mongoose from "mongoose";
 
-/**
- * ============================
- *  NOTAS PARA PABLITO (Mongo)
- * ============================
- *
- * Este archivo maneja la conexión a MongoDB.
- *
- * IMPORTANTE:
- * Cuando NEXT_PUBLIC_DEMO_MODE = "1"
- * el sistema NO intenta conectarse a Mongo.
- *
- * Esto permite que Vercel compile el proyecto
- * aunque no exista MONGODB_URI.
- */
-
-const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "1";
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-/**
- * Cache global de conexión
- */
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
 }
 
-async function dbConnect() {
-  /**
-   * Si estamos en modo demo
-   * NO conectamos a Mongo
-   */
-  if (DEMO_MODE) {
-    console.log("⚠ DEMO MODE: MongoDB deshabilitado");
-    return null;
-  }
+const globalForMongoose = global as typeof globalThis & {
+  mongoose?: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
+};
 
+const cached =
+  globalForMongoose.mongoose ??
+  (globalForMongoose.mongoose = { conn: null, promise: null });
+
+function isDemoMode() {
+  // En server también podés leer NEXT_PUBLIC_* (aunque sea "public")
+  return process.env.DEMO_MODE === "1" || process.env.NEXT_PUBLIC_DEMO_MODE === "1";
+}
+
+export default async function dbConnect() {
+  // ✅ DEMO: no rompe builds, no exige Mongo
+  if (isDemoMode()) return null;
+
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  // ✅ Prod/real: ahí sí exigimos Mongo
   if (!MONGODB_URI) {
-    throw new Error(
-      "Por favor define la variable de entorno MONGODB_URI"
-    );
+    throw new Error("Por favor, define la variable de entorno MONGODB_URI");
   }
 
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI).then((m) => m);
   }
 
   cached.conn = await cached.promise;
   return cached.conn;
 }
-
-export default dbConnect;
