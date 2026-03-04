@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { IPlayer } from '@/types/definitions';
@@ -14,11 +14,109 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
+/**
+ * ============================
+ *  NOTAS PARA PABLITO (Mongo)
+ * ============================
+ * ESPEJO DEMO (sin Mongo/API):
+ * - Este componente en PROD consume /api/players y /api/players/:id (PUT)
+ * - En DEMO queremos ver la misma UI funcionando sin backend.
+ *
+ * Implementación DEMO:
+ * - Se usa localStorage para persistir datos demo entre refresh:
+ *   key: "basket_demo_players"
+ * - Respeta: tabs (mine/rivals), filtros (inactivos, rivales), search, paginado.
+ * - Acciones: editar y activar/desactivar actualizan localStorage.
+ *
+ * PROD/REAL:
+ * - DEMO apagado => se mantiene fetch original a /api/players.
+ */
+
+const LS_PLAYERS_KEY = 'basket_demo_players';
+
+const DEMO_PLAYERS_SEED: IPlayer[] = [
+  {
+    _id: 'p1',
+    name: 'Marcelo Riestra',
+    dorsal: 12,
+    position: 'Escolta',
+    team: 'Mi Equipo',
+    isActive: true,
+    isRival: false,
+  } as any,
+  {
+    _id: 'p2',
+    name: 'Agustín Biglieri',
+    dorsal: 7,
+    position: 'Base',
+    team: 'Mi Equipo',
+    isActive: true,
+    isRival: false,
+  } as any,
+  {
+    _id: 'p3',
+    name: 'Juan Manuel Rodríguez',
+    dorsal: 15,
+    position: 'Alero',
+    team: 'Mi Equipo',
+    isActive: true,
+    isRival: false,
+  } as any,
+  {
+    _id: 'p4',
+    name: 'Tomás Fernández',
+    dorsal: 4,
+    position: 'Pívot',
+    team: 'Mi Equipo',
+    isActive: false,
+    isRival: false,
+  } as any,
+  {
+    _id: 'r1',
+    name: 'Rival 1',
+    dorsal: 9,
+    position: 'Base',
+    team: 'Águilas BC',
+    isActive: true,
+    isRival: true,
+  } as any,
+  {
+    _id: 'r2',
+    name: 'Rival 2',
+    dorsal: 22,
+    position: 'Alero',
+    team: 'Toros FC',
+    isActive: true,
+    isRival: true,
+  } as any,
+];
+
+function safeLoadPlayers(): IPlayer[] {
+  try {
+    const raw = localStorage.getItem(LS_PLAYERS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as IPlayer[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function safeSavePlayers(players: IPlayer[]) {
+  try {
+    localStorage.setItem(LS_PLAYERS_KEY, JSON.stringify(players));
+  } catch {
+    // ignore
+  }
+}
+
 export default function PlayerManager() {
   const { user, loading: authLoading } = useAuth();
   const [players, setPlayers] = useState<IPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const DEMO_MODE = useMemo(() => process.env.NEXT_PUBLIC_DEMO_MODE === '1', []);
 
   // Pagination and Search states
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,36 +196,85 @@ export default function PlayerManager() {
     setCurrentPage(1);
   }, [activeTab]);
 
+  // DEMO init: seed players once
+  useEffect(() => {
+    if (!DEMO_MODE) return;
+    const existing = safeLoadPlayers();
+    if (existing.length === 0) {
+      safeSavePlayers(DEMO_PLAYERS_SEED);
+    }
+  }, [DEMO_MODE]);
+
   useEffect(() => {
     async function fetchPlayers() {
-      // The guard `if (!authLoading && user)` is now outside.
       try {
+        setError(null);
         setLoading(true);
+
+        // ========== DEMO MODE ==========
+        if (DEMO_MODE) {
+          const all = safeLoadPlayers();
+
+          // filtros
+          let filtered = [...all];
+
+          // tab mine/rivals (teamType)
+          if (activeTab === 'mine') {
+            filtered = filtered.filter((p) => !p.isRival);
+          } else {
+            filtered = filtered.filter((p) => !!p.isRival);
+          }
+
+          // showInactive
+          if (showInactive) {
+            filtered = filtered.filter((p) => p.isActive === false);
+          }
+
+          // showRivals (extra filter)
+          if (showRivals) {
+            filtered = filtered.filter((p) => !!p.isRival);
+          }
+
+          // search
+          if (debouncedSearchTerm) {
+            const term = debouncedSearchTerm.toLowerCase().trim();
+            filtered = filtered.filter((p) => {
+              const nameMatch = (p.name || '').toLowerCase().includes(term);
+              const dorsalMatch = String(p.dorsal || '').includes(term);
+              return nameMatch || dorsalMatch;
+            });
+          }
+
+          // paginado
+          const total = filtered.length;
+          const pages = Math.max(1, Math.ceil(total / playersPerPage));
+          setTotalPages(pages);
+
+          const start = (currentPage - 1) * playersPerPage;
+          const pageItems = filtered.slice(start, start + playersPerPage);
+
+          setPlayers(pageItems);
+          return;
+        }
+
+        // ========== REAL MODE ==========
         let url = `/api/players?page=${currentPage}&limit=${playersPerPage}`;
 
-        // If the user is not an admin, they must be a coach. Fetch their players.
         if (user?.role !== 'admin') {
           url += `&coachId=${user!._id}`;
         }
-        // Admins can see all players, so we don't add coachId for them.
 
-        if (showInactive) {
-          url += '&status=inactive';
-        }
-        if (showRivals) {
-          url += '&showRivals=true';
-        }
-        if (debouncedSearchTerm) {
-          url += `&search=${debouncedSearchTerm}`;
-        }
+        if (showInactive) url += '&status=inactive';
+        if (showRivals) url += '&showRivals=true';
+        if (debouncedSearchTerm) url += `&search=${debouncedSearchTerm}`;
+
         url += `&teamType=${activeTab}`;
         if (user?.team?.name) {
           url += `&userTeamName=${encodeURIComponent(user.team.name)}`;
         }
 
         const response = await fetch(url);
-        if (!response.ok)
-          throw new Error('No se pudieron cargar los jugadores.');
+        if (!response.ok) throw new Error('No se pudieron cargar los jugadores.');
 
         const { data, totalPages: apiTotalPages } = await response.json();
         setPlayers(data);
@@ -138,11 +285,17 @@ export default function PlayerManager() {
         setLoading(false);
       }
     }
-    // Only fetch if authentication is resolved and we have a user.
-    if (!authLoading && user) {
-      fetchPlayers();
+
+    // En REAL: solo si auth resuelta y hay user
+    if (!DEMO_MODE) {
+      if (!authLoading && user) fetchPlayers();
+      return;
     }
+
+    // En DEMO: no dependemos del user
+    fetchPlayers();
   }, [
+    DEMO_MODE,
     user,
     authLoading,
     currentPage,
@@ -158,13 +311,33 @@ export default function PlayerManager() {
     if (!editingPlayer) return;
 
     try {
-      const updatedData = {
+      const updatedData: any = {
         name: editName,
-        dorsal: Number(editDorsal),
+        dorsal: editDorsal ? Number(editDorsal) : undefined,
         position: editPosition,
         team: editTeam,
         isRival: editIsRival,
       };
+
+      // DEMO: update localStorage
+      if (DEMO_MODE) {
+        const all = safeLoadPlayers();
+        const next = all.map((p) =>
+          p._id === editingPlayer._id ? { ...p, ...updatedData } : p,
+        );
+        safeSavePlayers(next);
+
+        toast.success('Jugador actualizado (DEMO).');
+        setPlayers(
+          players.map((p) =>
+            p._id === editingPlayer._id ? { ...p, ...updatedData } : p,
+          ),
+        );
+        setEditingPlayer(null);
+        return;
+      }
+
+      // REAL: update API
       const response = await fetch(`/api/players/${editingPlayer._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -191,23 +364,37 @@ export default function PlayerManager() {
       )
     )
       return;
+
     try {
-      const updatedData = { isActive: !player.isActive };
+      const updatedData: any = { isActive: !player.isActive };
+
+      // DEMO
+      if (DEMO_MODE) {
+        const all = safeLoadPlayers();
+        const next = all.map((p) =>
+          p._id === player._id ? { ...p, ...updatedData } : p,
+        );
+        safeSavePlayers(next);
+
+        toast.info(`Jugador ${player.isActive ? 'desactivado' : 'activado'} (DEMO).`);
+        setPlayers(players.filter((p) => p._id !== player._id));
+        setEditingPlayer(null);
+        return;
+      }
+
+      // REAL
       const response = await fetch(`/api/players/${player._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
       });
-      if (!response.ok)
-        throw new Error('No se pudo cambiar el estado del jugador.');
+      if (!response.ok) throw new Error('No se pudo cambiar el estado del jugador.');
 
       toast.info(`Jugador ${player.isActive ? 'desactivado' : 'activado'}.`);
-      setPlayers(players.filter((p) => p._id !== player._id)); // Remove from current list
+      setPlayers(players.filter((p) => p._id !== player._id));
       setEditingPlayer(null);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'Error al cambiar estado.',
-      );
+      toast.error(err instanceof Error ? err.message : 'Error al cambiar estado.');
     }
   };
 
@@ -313,6 +500,7 @@ export default function PlayerManager() {
               : 'No hay jugadores en esta lista.'}
           </p>
         )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {players.map((player) => (
             <div
@@ -363,6 +551,7 @@ export default function PlayerManager() {
             </div>
           ))}
         </div>
+
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center space-x-4 mt-8">
@@ -444,9 +633,7 @@ export default function PlayerManager() {
                   type="text"
                   value={editTeam}
                   onChange={(e) => setEditTeam(e.target.value)}
-                  placeholder={
-                    editIsRival ? 'Ej: Equipo Rival' : 'Ej: Mi Equipo'
-                  }
+                  placeholder={editIsRival ? 'Ej: Equipo Rival' : 'Ej: Mi Equipo'}
                 />
               </div>
               <div className="py-2">
