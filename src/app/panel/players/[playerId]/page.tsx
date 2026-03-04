@@ -17,7 +17,7 @@ async function getPlayerName(playerId: string) {
 export default async function PlayerProfilePage({
   params,
 }: {
-  params: { playerId: string };
+  params: Promise<{ playerId: string }>;
 }) {
   const { playerId } = await params;
   const playerName = await getPlayerName(playerId);

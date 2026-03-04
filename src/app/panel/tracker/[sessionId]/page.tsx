@@ -6,7 +6,7 @@ import GameTracker from '@/components/tracker/GameTracker';
 export default async function TrackerPage({
   params,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
 

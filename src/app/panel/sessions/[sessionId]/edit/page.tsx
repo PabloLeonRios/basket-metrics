@@ -4,7 +4,7 @@ import EditSessionForm from '@/components/sessions/EditSessionForm';
 export default async function EditSessionPage({
   params,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
 

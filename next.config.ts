@@ -1,4 +1,11 @@
 import type { NextConfig } from 'next';
+import withSerwistInit from '@serwist/next';
+
+const withSerwist = withSerwistInit({
+  swSrc: 'src/app/sw.ts',
+  swDest: 'public/sw.js',
+  disable: process.env.NODE_ENV === 'development',
+});
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -7,6 +14,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: process.env.NEXT_PUBLIC_ALLOWED_DEV_ORIGINS
     ? process.env.NEXT_PUBLIC_ALLOWED_DEV_ORIGINS.split(',')
     : [],
+  turbopack: {}, // Suppress turbopack warning
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

@@ -4,7 +4,7 @@ import Dashboard from '@/components/dashboard/Dashboard';
 export default async function DashboardPage({
   params,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
   return (
