@@ -1,4 +1,3 @@
-// src/hooks/useAuth.ts
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,24 +13,6 @@ export interface AuthUser {
   createdAt: string;
   updatedAt: string;
 }
-
-/**
- * ==========================================
- * NOTAS PARA PABLITO (BYPASS LOGIN TEMPORAL)
- * ==========================================
- *
- * Este hook permite entrar sin auth real cuando:
- * NEXT_PUBLIC_BYPASS_LOGIN === 'true'
- *
- * Uso:
- * - demos
- * - rediseño frontend
- * - pruebas en Vercel sin depender del backend/auth real
- *
- * Cuando se quite la demo:
- * - poner NEXT_PUBLIC_BYPASS_LOGIN=false
- * - o borrar esta lógica
- */
 
 const BYPASS_LOGIN = process.env.NEXT_PUBLIC_BYPASS_LOGIN === 'true';
 
