@@ -1,12 +1,18 @@
-// src/lib/auth.ts
-import * as jose from 'jose';
-import { getJwtSecretKey } from '@/lib/auth-secret';
-import { AuthUser } from '@/hooks/useAuth';
+// src/hooks/useAuth.ts
+'use client';
 
-interface VerifyAuthResult {
-  success: boolean;
-  payload?: AuthUser;
-  message?: string;
+import { useState, useEffect } from 'react';
+import { ITeam } from '@/types/definitions';
+
+export interface AuthUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: 'entrenador' | 'jugador' | 'admin';
+  isActive: boolean;
+  team?: ITeam & { logoUrl?: string };
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -14,11 +20,17 @@ interface VerifyAuthResult {
  * NOTAS PARA PABLITO (BYPASS LOGIN TEMPORAL)
  * ==========================================
  *
- * verifyAuth devuelve un usuario demo cuando:
+ * Este hook permite entrar sin auth real cuando:
  * NEXT_PUBLIC_BYPASS_LOGIN === 'true'
  *
- * Esto permite que rutas API protegidas sigan respondiendo
- * en entorno demo/preview/producción temporal sin JWT real.
+ * Uso:
+ * - demos
+ * - rediseño frontend
+ * - pruebas en Vercel sin depender del backend/auth real
+ *
+ * Cuando se quite la demo:
+ * - poner NEXT_PUBLIC_BYPASS_LOGIN=false
+ * - o borrar esta lógica
  */
 
 const BYPASS_LOGIN = process.env.NEXT_PUBLIC_BYPASS_LOGIN === 'true';
@@ -38,46 +50,53 @@ const DEV_USER: AuthUser = {
   updatedAt: new Date().toISOString(),
 };
 
-export async function verifyAuth(
-  token: string | undefined,
-): Promise<VerifyAuthResult> {
-  if (BYPASS_LOGIN) {
-    return {
-      success: true,
-      payload: DEV_USER,
-    };
-  }
+export function useAuth() {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!token) {
-    return {
-      success: false,
-      message: 'No autorizado: Sin token.',
-    };
-  }
+  useEffect(() => {
+    if (BYPASS_LOGIN) {
+      setUser(DEV_USER);
+      setLoading(false);
+      return;
+    }
 
-  try {
-    const secret = getJwtSecretKey();
-    const { payload } = await jose.jwtVerify(token, secret);
+    async function fetchUser() {
+      try {
+        const response = await fetch('/api/auth/me');
 
-    const authPayload: AuthUser = {
-      _id: (payload._id as string) || (payload.id as string),
-      name: payload.name as string,
-      email: payload.email as string,
-      role: payload.role as AuthUser['role'],
-      isActive: payload.isActive as boolean,
-      team: payload.team as AuthUser['team'],
-      createdAt: payload.createdAt as string,
-      updatedAt: payload.updatedAt as string,
-    };
+        if (response.ok) {
+          const { data } = await response.json();
 
-    return {
-      success: true,
-      payload: authPayload,
-    };
-  } catch {
-    return {
-      success: false,
-      message: 'No autorizado: Token inválido o expirado.',
-    };
-  }
+          setUser({
+            _id: data._id,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            isActive: data.isActive,
+            team: data.team,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        setError('Error al cargar la sesión.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
+
+  return {
+    user,
+    loading,
+    error,
+    isAuthenticated: !!user,
+  };
 }
