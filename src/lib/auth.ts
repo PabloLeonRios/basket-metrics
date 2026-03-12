@@ -1,4 +1,4 @@
-﻿// src/lib/auth.ts
+// src/lib/auth.ts
 import * as jose from 'jose';
 import { getJwtSecretKey } from '@/lib/auth-secret';
 import { AuthUser } from '@/hooks/useAuth';
@@ -11,31 +11,26 @@ interface VerifyAuthResult {
 
 /**
  * ==========================================
- * NOTAS PARA PABLITO (DEV MODE / AUTH)
+ * NOTAS PARA PABLITO (BYPASS LOGIN TEMPORAL)
  * ==========================================
  *
- * Pablo está trabajando en el rediseño visual del frontend y necesita
- * navegar localmente sin depender del flujo real de login/JWT.
+ * verifyAuth devuelve un usuario demo cuando:
+ * NEXT_PUBLIC_BYPASS_LOGIN === 'true'
  *
- * DEVELOPMENT:
- * - verifyAuth devuelve un usuario falso.
- *
- * PRODUCCIÓN:
- * - verifyAuth valida JWT normalmente.
- *
- * IMPORTANTE:
- * - Este archivo DEBE exportar verifyAuth porque lo usan
- *   rutas API como /api/teams y /api/users.
+ * Esto permite que rutas API protegidas sigan respondiendo
+ * en entorno demo/preview/producción temporal sin JWT real.
  */
 
+const BYPASS_LOGIN = process.env.NEXT_PUBLIC_BYPASS_LOGIN === 'true';
+
 const DEV_USER: AuthUser = {
-  _id: 'dev-pablo',
+  _id: 'demo-entrenador',
   name: 'Pablo Dev',
-  email: 'dev@basketmetrics.com',
+  email: 'demo@basketmetrics.com',
   role: 'entrenador',
   isActive: true,
   team: {
-    _id: 'dev-team',
+    _id: 'demo-team',
     name: 'Dev Team',
     logoUrl: '',
   } as AuthUser['team'],
@@ -46,7 +41,7 @@ const DEV_USER: AuthUser = {
 export async function verifyAuth(
   token: string | undefined,
 ): Promise<VerifyAuthResult> {
-  if (process.env.NODE_ENV === 'development') {
+  if (BYPASS_LOGIN) {
     return {
       success: true,
       payload: DEV_USER,
