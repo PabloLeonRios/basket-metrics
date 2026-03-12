@@ -1,4 +1,4 @@
-﻿// src/hooks/useAuth.ts
+// src/hooks/useAuth.ts
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,29 +17,32 @@ export interface AuthUser {
 
 /**
  * ==========================================
- * NOTAS PARA PABLITO (DEV MODE / useAuth)
+ * NOTAS PARA PABLITO (BYPASS LOGIN TEMPORAL)
  * ==========================================
  *
- * Pablo está trabajando en el rediseño visual del frontend.
- * En desarrollo este hook devuelve un usuario falso para evitar
- * depender del login real.
+ * Este hook permite entrar sin auth real cuando:
+ * NEXT_PUBLIC_BYPASS_LOGIN === 'true'
  *
- * DEVELOPMENT:
- * - devuelve DEV_USER
- * - no llama a /api/auth/me
+ * Uso:
+ * - demos
+ * - rediseño frontend
+ * - pruebas en Vercel sin depender del backend/auth real
  *
- * PRODUCCIÓN:
- * - sigue usando el flujo real
+ * Cuando se quite la demo:
+ * - poner NEXT_PUBLIC_BYPASS_LOGIN=false
+ * - o borrar esta lógica
  */
 
+const BYPASS_LOGIN = process.env.NEXT_PUBLIC_BYPASS_LOGIN === 'true';
+
 const DEV_USER: AuthUser = {
-  _id: 'dev-pablo',
+  _id: 'demo-entrenador',
   name: 'Pablo Dev',
-  email: 'dev@basketmetrics.com',
+  email: 'demo@basketmetrics.com',
   role: 'entrenador',
   isActive: true,
   team: {
-    _id: 'dev-team',
+    _id: 'demo-team',
     name: 'Dev Team',
     logoUrl: '',
   } as AuthUser['team'],
@@ -53,7 +56,7 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (BYPASS_LOGIN) {
       setUser(DEV_USER);
       setLoading(false);
       return;
