@@ -1,4 +1,3 @@
-// src/app/login/page.tsx
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
@@ -7,44 +6,31 @@ import Link from 'next/link';
 import { ROLES } from '@/lib/constants';
 import { useAuth } from '@/hooks/useAuth';
 
-/**
- * ==========================================
- * NOTAS PARA PABLITO (DEV MODE / LOGIN)
- * ==========================================
- *
- * Para desarrollo frontend se permite bypass del login.
- * Cuando NODE_ENV === development redirigimos directo
- * al panel para poder trabajar la UI sin autenticación.
- *
- * En producción el flujo de login sigue intacto.
- */
+const BYPASS_LOGIN = process.env.NEXT_PUBLIC_BYPASS_LOGIN === 'true';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { user } = useAuth();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  /**
-   * Bypass total del login en desarrollo
-   */
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (BYPASS_LOGIN) {
       router.replace('/panel');
       return;
     }
 
-    if (user) {
+    if (!authLoading && user) {
       if (user.role === ROLES.ADMIN) {
         router.replace('/panel/admin/users');
       } else {
         router.replace('/panel');
       }
     }
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -69,7 +55,6 @@ export default function LoginPage() {
       } else {
         router.push('/panel');
       }
-
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Ocurrió un error inesperado.',
@@ -79,11 +64,21 @@ export default function LoginPage() {
     }
   };
 
-  const inputStyles =
-    'w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-shadow';
+  if (BYPASS_LOGIN) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-gray-700">Redirigiendo al panel...</p>
+      </div>
+    );
+  }
 
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-gray-700">Cargando sesión...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -94,29 +89,27 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className={labelStyles}>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
             </label>
             <input
               type="email"
-              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={inputStyles}
+              className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="password" className={labelStyles}>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Contraseña
             </label>
             <input
               type="password"
-              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={inputStyles}
+              className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
             />
           </div>
@@ -126,7 +119,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors shadow-md disabled:bg-gray-400"
+            className="w-full px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-colors shadow-md disabled:bg-gray-400"
           >
             {loading ? 'Iniciando...' : 'Iniciar Sesión'}
           </button>
