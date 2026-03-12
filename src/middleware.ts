@@ -6,41 +6,27 @@ import { COOKIE_NAME, ROLES } from '@/lib/constants';
 
 /**
  * ==========================================
- * NOTAS PARA PABLITO (DEV MODE / MIDDLEWARE)
+ * NOTAS PARA PABLITO (BYPASS LOGIN TEMPORAL)
  * ==========================================
  *
- * Pablo está trabajando en el rediseño visual del frontend localmente.
- * Para poder entrar al panel sin depender del flujo real de login/JWT,
- * en entorno de desarrollo dejamos pasar las rutas protegidas.
+ * Si NEXT_PUBLIC_BYPASS_LOGIN === 'true', se libera el acceso
+ * a rutas protegidas para demo/rediseño.
  *
- * DEVELOPMENT:
- * - No exige cookie/token para /panel, /admin y /api/admin
- * - Permite trabajar el frontend sin bloqueo de autenticación
- *
- * PRODUCCIÓN:
- * - Todo sigue exactamente igual
- * - Se mantiene validación por cookie + JWT + roles
- *
- * IMPORTANTE:
- * Este bypass solo aplica cuando NODE_ENV === 'development'.
+ * Esto es temporal. Para volver al comportamiento real:
+ * - poner la variable en false
+ * - redeployar
  */
+
+const BYPASS_LOGIN = process.env.NEXT_PUBLIC_BYPASS_LOGIN === 'true';
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const { pathname } = request.nextUrl;
 
-  /**
-   * ==========================================
-   * BYPASS TOTAL DE AUTH EN DESARROLLO
-   * ==========================================
-   */
-  if (process.env.NODE_ENV === 'development') {
+  if (BYPASS_LOGIN) {
     return NextResponse.next();
   }
 
-  // 0. CSRF Protection for state-changing methods
-  // We only check if origin or referer is present to avoid blocking API clients
-  // that don't send these headers, but we validate them if they do exist.
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
     const origin =
       request.headers.get('origin') || request.headers.get('referer');
@@ -67,7 +53,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 1. Rate Limiting
   const isRateLimitedRoute =
     pathname.startsWith('/api/auth/login') ||
     pathname.startsWith('/api/auth/register') ||
@@ -93,7 +78,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Protected Routes Logic
   const isPanelRoute = pathname.startsWith('/panel');
   const isAdminRoute = pathname.startsWith('/admin');
   const isApiAdminRoute = pathname.startsWith('/api/admin');
@@ -113,7 +97,6 @@ export async function middleware(request: NextRequest) {
       const secret = getJwtSecretKey();
       const { payload } = await jose.jwtVerify(token, secret);
 
-      // 3. Admin Route Logic
       if (isAdminRoute || isApiAdminRoute) {
         if (payload.role !== ROLES.ADMIN) {
           if (pathname.startsWith('/api')) {
@@ -128,7 +111,6 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL('/panel', request.url));
         }
 
-        // Redirect /admin to /panel/admin/users
         if (pathname === '/admin') {
           return NextResponse.redirect(
             new URL('/panel/admin/users', request.url),
@@ -136,7 +118,6 @@ export async function middleware(request: NextRequest) {
         }
       }
 
-      // 4. Panel Route Logic
       if (isPanelRoute) {
         const allowedRoles = [ROLES.COACH, ROLES.PLAYER, ROLES.ADMIN];
         const userRole = payload.role as (typeof ROLES)[keyof typeof ROLES];
